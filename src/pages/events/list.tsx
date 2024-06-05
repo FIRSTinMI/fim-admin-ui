@@ -79,7 +79,7 @@ function EventsList() {
 
   const getEvents = useMemo(() => 
     Effect.tryPromise(async () => {
-      const res = await supabase.from("events").select("id,key,code,start_time,end_time,status,truck_routes(id,name)").eq('season_id', selectedSeason).returns<Event[]>();
+      const res = await supabase.from("events").select("id,key,code,name,start_time,end_time,status,truck_routes(id,name)").eq('season_id', selectedSeason).returns<Event[]>();
       if (res.error) return Failure({
         error: new Error(res.error.message)
       });
