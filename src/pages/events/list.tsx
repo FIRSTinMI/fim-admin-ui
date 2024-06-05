@@ -38,7 +38,15 @@ const tableColumns: GridColDef<Event[][number]>[] = [
   { field: 'key', headerName: 'Event Key', width: 150 },
   { field: 'code', headerName: 'Event Code', width: 150 },
   { field: 'name', headerName: 'Name', flex: 1, minWidth: 150 },
-  { field: 'truck_route', headerName: 'Route', renderCell: (params) => (<Button variant="text" component={Link} to={`/routes/${params.row.truck_routes.id}`}>{params.row.truck_routes.name}</Button>) },
+  {
+    field: 'truck_route',
+    headerName: 'Route',
+    renderCell: (params) => (
+      params.row.truck_routes?.id
+        ? <Button variant="text" component={Link} to={`/routes/${params.row.truck_routes.id}`}>{params.row.truck_routes.name}</Button>
+        : <></>
+      )
+  },
   { field: 'start_time', headerName: 'Start', valueFormatter: formatDate },
   { field: 'end_time', headerName: 'End', valueFormatter: formatDate },
   { field: 'status', headerName: 'Status' },
