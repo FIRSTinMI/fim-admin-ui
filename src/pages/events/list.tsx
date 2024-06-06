@@ -1,49 +1,31 @@
-import { Effect } from "effect";
-import { useState, useContext, useMemo, useEffect } from "react";
-import { SupabaseContext } from "../../supabaseContext";
-import { FormControl, InputLabel, Select, MenuItem, Button } from "@mui/material";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { FormControl, InputLabel, Select, MenuItem, Button, Link, Alert } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { format } from "date-fns";
-import { RemoteData, Loading, Failure, Success, isLoading, getData } from "../../shared/RemoteData";
+import { Link as RouterLink } from "react-router-dom";
+import { EventSlim, getEventsForSeason } from "../../data/supabase/events";
+import { useSupaQuery } from "../../useSupaQuery";
+import { getSeasons } from "../../data/supabase/seasons";
+import { Loading } from "../../shared/Loading";
 
-type Season = {
-  id: number,
-  name: string,
-  levels: {
-    name: string
-  }
-};
-
-type Event = {
-  id: string,
-  key: string,
-  start_time: Date,
-  end_time: Date,
-  status: string,
-  truck_routes: {
-    id: number,
-    name: string
-  }
-};
-
-function EventManageButton({ event }: { event: Event }) {
+function EventManageButton({ event }: { event: EventSlim }) {
   return (
-    <Button component={Link} to={`${event.id}`}>Manage</Button>
+    <Button component={RouterLink} to={`${event.id}`}>Manage</Button>
   )
 }
 
 const formatDate = (date: Date) => format(date, "PP");
-const tableColumns: GridColDef<Event[][number]>[] = [
+const tableColumns: GridColDef<EventSlim[][number]>[] = [
   { field: 'key', headerName: 'Event Key', width: 150 },
   { field: 'code', headerName: 'Event Code', width: 150 },
   { field: 'name', headerName: 'Name', flex: 1, minWidth: 150 },
   {
-    field: 'truck_route',
+    field: 'truck_routes.name',
+    valueGetter: (_, row) => row.truck_routes?.name,
     headerName: 'Route',
     renderCell: (params) => (
       params.row.truck_routes?.id
-        ? <Button variant="text" component={Link} to={`/routes/${params.row.truck_routes.id}`}>{params.row.truck_routes.name}</Button>
+        ? <Link component={RouterLink} to={`/routes/${params.row.truck_routes.id}`}>{params.row.truck_routes?.name}</Link>
         : <></>
       )
   },
@@ -61,55 +43,39 @@ const tableColumns: GridColDef<Event[][number]>[] = [
 ];
 
 function EventsList() {
-  const supabase = useContext(SupabaseContext);
-
-  const [seasons, setSeasons] = useState<RemoteData<Season[]>>(Loading());
-  const [events, setEvents] = useState<RemoteData<Event[]>>(Loading());
   const [selectedSeason, setSelectedSeason] = useState<number | null>(null);
 
-  const getSeasons = useMemo(() => 
-    Effect.tryPromise(async () => {
-      const res = await supabase.from("seasons").select("*,levels(*)").returns<Season[]>();
-      if (res.error) return Failure({
-        error: new Error(res.error.message)
-      });
-      return Success({ data: res.data });
-    })
-  , [supabase]);
+  const getEventsQuery = useSupaQuery({
+    queryKey: ['getEventsForSeason', selectedSeason],
+    queryFn: async (client) => {
+      if (!selectedSeason) return [];
+      return getEventsForSeason(client, selectedSeason);
+    }
+  });
 
-  const getEvents = useMemo(() => 
-    Effect.tryPromise(async () => {
-      const res = await supabase.from("events").select("id,key,code,name,start_time,end_time,status,truck_routes(id,name)").eq('season_id', selectedSeason).returns<Event[]>();
-      if (res.error) return Failure({
-        error: new Error(res.error.message)
-      });
-      return Success({ data: res.data });
-    })
-  , [selectedSeason, supabase]);
+  const getSeasonsQuery = useSupaQuery({
+    queryKey: ['getSeasons'],
+    queryFn: async (client) => {
+      return getSeasons(client);
+    }
+  });
 
   useEffect(() => {
-    setSeasons(Loading());
-    (async () => {
-      setSeasons(await Effect.runPromise(getSeasons));
-    })();
     const selected = localStorage.getItem('fim-admin-selected-season');
     if (selected) {
       setSelectedSeason(Number(selected));
     }
-  }, [getSeasons]);
+  }, []);
 
   useEffect(() => {
     if (!selectedSeason) return;
     localStorage.setItem('fim-admin-selected-season', selectedSeason.toString());
-    setEvents(Loading());
-    (async () => {
-      setEvents(await Effect.runPromise(getEvents));
-    })();
-  }, [getEvents, selectedSeason]);
+  }, [selectedSeason]);
+
   return (
     <>
-      {isLoading(seasons) && <p>Loading...</p>}
-      {!isLoading(seasons) && <FormControl fullWidth sx={{ mb: 2 }}>
+      {getSeasonsQuery.isLoading && <Loading />}
+      {getSeasonsQuery.isFetched && <FormControl fullWidth sx={{ mb: 2 }}>
         <InputLabel id="seasonLabel">Season</InputLabel>
         <Select
           labelId="seasonLabel"
@@ -117,23 +83,36 @@ function EventsList() {
           label="Season"
           onChange={(e) => setSelectedSeason(e.target.value as (number | null))}
         >
-          {getData(seasons).map(s => <MenuItem key={s.id} value={s.id}>{s.name} ({s.levels.name})</MenuItem>)}
+          {(getSeasonsQuery.data ?? []).map(s => <MenuItem key={s.id} value={s.id}>{s.name} ({s.levels.name})</MenuItem>)}
         </Select>
       </FormControl>}
 
-      {!isLoading(events) && <DataGrid
-        autoHeight
-        columns={tableColumns}
-        rows={getData(events)}
-        initialState={{
-          sorting: {
-            sortModel: [{
-              field: 'start_time',
-              sort: 'desc'
-            }]
-          }
-        }}
-       />}
+      {!selectedSeason && <Alert severity="info">
+          Select a season to view events
+        </Alert>}
+
+      {selectedSeason && <>
+        {getEventsQuery.isLoading && <Loading />}
+        {getEventsQuery.isError && <Alert severity="error">Failed to get events</Alert>}
+        {getEventsQuery.isSuccess && <DataGrid
+          autoHeight
+          columns={tableColumns}
+          rows={getEventsQuery.data}
+          initialState={{
+            pagination: {
+              paginationModel: {
+                pageSize: 100
+              }
+            },
+            sorting: {
+              sortModel: [{
+                field: 'start_time',
+                sort: 'desc'
+              }]
+            }
+          }}
+        />}
+      </>}
     </>
   );
 }

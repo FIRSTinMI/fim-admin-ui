@@ -3,10 +3,21 @@ import { SupabaseClient, createClient } from "@supabase/supabase-js";
 import { FunctionComponent, ReactNode, createContext, useEffect, useState } from "react";
 import { createSearchParams, useLocation, useNavigate } from "react-router-dom";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const SupabaseContext = createContext<SupabaseClient<any, "public", any>>({} as unknown as SupabaseClient<any, "public", any>); // TODO: Atone for sins
+export interface Database {
+  public: {
+    Tables: {
+      a: number
+    },
+    Views: object,
+    Functions: object
+  }
+}
 
-const _supabaseClient = createClient(
+export type FimSupabaseClient = SupabaseClient<Database, "public", never>;
+
+export const SupabaseContext = createContext<FimSupabaseClient>(undefined as unknown as FimSupabaseClient);
+
+const _supabaseClient = createClient<Database>(
   import.meta.env['PUBLIC_SUPA_BASE_URL'],
   import.meta.env['PUBLIC_SUPA_KEY']
 );

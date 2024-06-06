@@ -16,8 +16,11 @@ import { SupabaseContextProvider } from './supabaseContext';
 import NotFound from './pages/not-found';
 import React from 'react';
 import Users from './pages/users';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import TruckRoutes from './pages/routes';
 
 const menuWidth: number = 240; //px
+const queryClient = new QueryClient();
 
 const routes = (
   <Routes>
@@ -25,6 +28,7 @@ const routes = (
     <Route index path="/auth" element={<Auth />} />
     <Route path="/events/*" element={<Events />} />
     <Route path="/users/*" element={<Users />} />
+    <Route path="/routes/*" element={<TruckRoutes />} />
     <Route path="*" element={<NotFound />} />
   </Routes>
 );
@@ -54,24 +58,25 @@ function App() {
         <Box sx={{ display: 'flex' }}>
           <CssBaseline />
           <SupabaseContextProvider>
-            <AppBar isOpen={menuOpen} toggleMenu={toggleMenu} />
-            <AppMenu isOpen={menuOpen} menuWidth={menuWidth} toggleMenu={toggleMenu} />
-            <Box component="main" sx={{
-              backgroundColor: (theme) =>
-                theme.palette.mode === 'light'
-                  ? theme.palette.grey[100]
-                  : theme.palette.grey[900],
-              flexGrow: 1,
-              height: '100vh',
-              overflow: 'auto',
-              pt: 2,
-              px: 1 
-            }}>
-              <Toolbar />
-              {/* <Button variant="contained">Test Button</Button> */}
-              
-              {routes}
-            </Box>
+            <QueryClientProvider client={queryClient}>
+              <AppBar isOpen={menuOpen} toggleMenu={toggleMenu} />
+              <AppMenu isOpen={menuOpen} menuWidth={menuWidth} toggleMenu={toggleMenu} />
+              <Box component="main" sx={{
+                backgroundColor: (theme) =>
+                  theme.palette.mode === 'light'
+                    ? theme.palette.grey[100]
+                    : theme.palette.grey[900],
+                flexGrow: 1,
+                height: '100vh',
+                overflow: 'auto',
+                pt: 2,
+                px: 1 
+              }}>
+                <Toolbar />
+                {/* <Button variant="contained">Test Button</Button> */}
+                {routes}
+              </Box>
+            </QueryClientProvider>
           </SupabaseContextProvider>
         </Box>
       </BrowserRouter>

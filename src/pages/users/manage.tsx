@@ -1,11 +1,12 @@
-import { FormEvent, useCallback, useContext, useEffect, useState } from "react";
-import { SupabaseContext } from "../../supabaseContext";
+import { FormEvent, useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Failure, Loading, RemoteData, getData, isLoading } from "../../shared/RemoteData";
-import { UpdateUser, User, getUserById, updateUser } from "../../data/admin-api";
-import { Effect } from "effect";
+import { UpdateUser, getUserById, updateUser } from "../../data/admin-api";
 import { Box, Button, Checkbox, FormControl, FormControlLabel, FormGroup, Paper, TextField } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
+import { useSupaQuery } from "../../useSupaQuery";
+import { Loading } from "../../shared/Loading";
+import { useSupaMutation } from "../../useSupaMutation";
+import { useQueryClient } from "@tanstack/react-query";
 
 type FormData = {
   name?: string,
@@ -23,34 +24,43 @@ const globalRoles = [
 ];
 
 function UsersManage() {
-  const supabase = useContext(SupabaseContext);
   const params = useParams();
+  const queryClient = useQueryClient();
 
-  const [user, setUser] = useState<RemoteData<User>>(Loading());
-  const [formData, setFormData] = useState<FormData>();
-  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [formData, setFormData] = useState<FormData | undefined>(undefined);
+
+  const getUserQuery = useSupaQuery({
+    queryKey: ['user', params['id']],
+    queryFn: (client) => {
+      const id = params['id'];
+      if (!id) return Promise.resolve(null);
+      return getUserById(client, id);
+    }
+  });
+
+  const updateUserMutation = useSupaMutation({
+    mutationFn: (client, formData: FormData) => {
+      const id = params['id'];
+      if (!id) return Promise.resolve(null);
+
+      return updateUser(client, {
+        id: id,
+        name: formData.name,
+        globalRoles: formData.globalRoles ? Array.from(formData.globalRoles) : []
+      } as UpdateUser);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['user', params['id']] });
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+    }
+  });
 
   useEffect(() => {
-    setUser(Loading());
-    const id = params["id"];
-    if (!id) {
-      setUser(Failure({ error: new Error("No user ID") }));
-    } else {
-      (async () => {
-        const user = await Effect.runPromise(getUserById(id, (await supabase.auth.getSession()).data.session?.access_token ?? ''));
-        setUser(user);
-        try {
-          const data = getData(user);
-          setFormData({
-            name: data.name,
-            globalRoles: new Set(data.globalRoles)
-          });
-        } catch (_) {
-          // Pass
-        }
-      })();
-    }
-  }, [supabase.auth, params]);
+    setFormData({
+      name: getUserQuery.data?.name,
+      globalRoles: new Set(getUserQuery.data?.globalRoles)
+    });
+  }, [getUserQuery.data]);
 
   const handleRoleChange = useCallback((role: string, e: FormEvent) => {
     const newRoles = formData?.globalRoles ?? new Set();
@@ -68,23 +78,16 @@ function UsersManage() {
 
   const handleSubmit = useCallback((e: FormEvent) => {
     e.preventDefault();
-    setIsSaving(true);
-    (async () => {
-      await Effect.runPromise(updateUser({
-       tempToken: (await supabase.auth.getSession()).data.session?.access_token ?? '',
-       id: getData(user).id,
-       name: formData?.name,
-       globalRoles: Array.from(formData?.globalRoles ?? [])
-      } as UpdateUser));
-      setIsSaving(false);
-    })();
-  }, [formData, user, supabase.auth]);
+    if (!formData) return;
+    console.log('hs', formData);
+    updateUserMutation.mutate(formData);
+  }, [formData, updateUserMutation]);
 
-  if (isLoading(user)) return (<>Loading...</>)
-  const data = getData(user);
+  if (getUserQuery.isLoading || !formData?.name) return (<Loading />);
+  const data = getUserQuery.data;
 
   return (<>
-    <h3>Edit {data.email}</h3>
+    <h3>Edit {data?.email}</h3>
     <Paper sx={{ p: 2 }}>
       <form onSubmit={handleSubmit}>
         <FormControl>
@@ -105,7 +108,7 @@ function UsersManage() {
         </FormGroup>
 
         <Box sx={{ mt: 2 }}>
-          {isSaving ? <LoadingButton loading /> : <Button variant="contained" type="submit">Save</Button>}
+          {updateUserMutation.isPending ? <LoadingButton loading /> : <Button variant="contained" type="submit">Save</Button>}
         </Box>
       </form>
     </Paper>

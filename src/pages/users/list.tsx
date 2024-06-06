@@ -1,12 +1,10 @@
-import { Effect } from "effect";
-import { useState, useContext, useEffect, useCallback } from "react";
-import { SupabaseContext } from "../../supabaseContext";
-import { FormControl, Button, TextField, InputAdornment, Box, CircularProgress } from "@mui/material";
+import { useState, useCallback } from "react";
+import { FormControl, Button, TextField, InputAdornment, Box, CircularProgress, Alert } from "@mui/material";
 import { Link } from "react-router-dom";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { RemoteData, Loading, isLoading, getData } from "../../shared/RemoteData";
 import { User, getUsers } from "../../data/admin-api";
 import { Search } from "@mui/icons-material";
+import { useSupaQuery } from "../../useSupaQuery";
 
 function UserManageButton({ user }: { user: User }) {
   return (
@@ -35,23 +33,17 @@ const tableColumns: GridColDef<User[][number]>[] = [
 ];
 
 function UsersList() {
-  const supabase = useContext(SupabaseContext);
   const [search, setSearch] = useState<string>("");
-  const [users, setUsers] = useState<RemoteData<User[]>>(Loading());
+  const [inputValue, setInputValue] = useState<string>("");
 
-  useEffect(() => {
-    setUsers(Loading());
-    (async () => {
-      setUsers(await Effect.runPromise(getUsers("", (await supabase.auth.getSession()).data.session?.access_token ?? '')));
-    })();
-  }, [supabase.auth]);
+  const query = useSupaQuery({
+    queryKey: ['users', search],
+    queryFn: async (client) => await getUsers(client, search)
+  });
 
   const handleSearch = useCallback(() => {
-    setUsers(Loading());
-    (async () => {
-      setUsers(await Effect.runPromise(getUsers(search, (await supabase.auth.getSession()).data.session?.access_token ?? '')));
-    })();
-  }, [search, supabase.auth]);
+    setSearch(inputValue)
+  }, [inputValue]);
 
   return (
     <>
@@ -59,7 +51,7 @@ function UsersList() {
         <FormControl fullWidth sx={{ mb: 2 }}>
           <TextField
             label="Search"
-            onChange={(e) => setSearch((e.target as HTMLInputElement).value)}
+            onChange={(e) => setInputValue((e.target as HTMLInputElement).value)}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -70,14 +62,21 @@ function UsersList() {
           />
         </FormControl>
       </form>
-      {isLoading(users) && <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+      
+      {query.isLoading && <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
         <CircularProgress sx={{ mr: 2 }} /> Loading...
       </Box>}
 
-      {!isLoading(users) && <DataGrid
+      {query.isError && <Alert severity="error">
+          Unable to get user information.
+        </Alert>}
+
+      {query.isSuccess && <DataGrid
         autoHeight
         columns={tableColumns}
-        rows={getData(users)}
+        rows={query.data}
+        pageSizeOptions={[20]}
+        hideFooterPagination={true}
         initialState={{
           sorting: {
             sortModel: [{
