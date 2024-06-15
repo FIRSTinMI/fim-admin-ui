@@ -1,6 +1,6 @@
-import { AppBarProps as MuiAppBarProps, Button, IconButton, AppBar as MuiAppBar, Toolbar, Typography, styled, Menu, MenuItem } from "@mui/material";
+import { AppBarProps as MuiAppBarProps, Button, IconButton, AppBar as MuiAppBar, Toolbar, Typography, styled, Menu, MenuItem, Snackbar, Alert, AlertColor } from "@mui/material";
 import MenuIcon from '@mui/icons-material/Menu';
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useCallback } from "react";
 import { SupabaseContext } from "../supabaseContext";
 import { Session } from "@supabase/supabase-js";
 import { Link, useNavigate } from "react-router-dom";
@@ -26,9 +26,16 @@ const StyledAppBar = styled(MuiAppBar, {
   }),
 }));
 
+type SnackbarContent = {
+  severity: AlertColor,
+  message: string
+};
+
 function AppBar({ isOpen, toggleMenu }: AppBarProps) {
   const [session, setSession] = useState<Session | null>(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
+  const [snackbarText, setSnackbarText] = useState<SnackbarContent | null>(null);
   const supabase = useContext(SupabaseContext);
   const navigate = useNavigate();
 
@@ -48,16 +55,49 @@ function AppBar({ isOpen, toggleMenu }: AppBarProps) {
 
   const openUserMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
+    if (event.shiftKey) setShowAdvanced(true);
   };
 
   const closeUserMenu = () => {
     setAnchorEl(null);
+    setShowAdvanced(false);
+    setSnackbarText(null);
   };
 
   const logOut = async () => {
     await supabase.auth.signOut();
     navigate('/auth');
   };
+
+  const copyToken = useCallback(async () => {
+    const token = (await supabase.auth.getSession()).data.session?.access_token;
+    if (token) {
+      try {
+        await navigator.clipboard.writeText(token);
+      } catch {
+        setSnackbarText({
+          severity: 'error',
+          message: 'Unable to set clipboard'
+        });
+        return;
+      }
+    } else {
+      setSnackbarText({
+        severity: 'error',
+        message: 'Unable to get token'
+      });
+      return;
+    }
+
+    setSnackbarText({
+      severity: 'success',
+      message: 'Access token copied!'
+    });
+  }, [supabase.auth]);
+
+  const closeSnackbar = useCallback(() => {
+    setSnackbarText(null);
+  }, []);
 
   return (
     <>
@@ -94,9 +134,18 @@ function AppBar({ isOpen, toggleMenu }: AppBarProps) {
                 onClose={closeUserMenu}
               >
                 <MenuItem onClick={logOut}>Log out</MenuItem>
+                {showAdvanced && <MenuItem onClick={copyToken}>Copy Access Token</MenuItem>}
               </Menu>
           </>}
           {!session && <Button component={Link} to="/auth" color="inherit">Not Logged In</Button>}
+          <Snackbar
+            open={snackbarText !== null}
+            onClose={closeSnackbar}
+          >
+            <Alert severity={snackbarText?.severity} sx={{width: '100%'}} onClose={closeSnackbar}>
+              {snackbarText?.message}
+            </Alert>
+          </Snackbar>
         </Toolbar>
       </StyledAppBar>
     </>
