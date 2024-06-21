@@ -2,7 +2,7 @@ import { Button, Box, CircularProgress } from "@mui/material";
 import { Link } from "react-router-dom";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { TruckRoute, getTruckRoutes } from "../../data/supabase/truckRoutes";
-import { useSupaQuery } from "../../useSupaQuery";
+import { useSupaQuery } from "src/hooks/useSupaQuery";
 
 function RouteManageButton({ route }: { route: TruckRoute }) {
   return (

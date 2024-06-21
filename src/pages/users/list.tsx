@@ -1,10 +1,10 @@
 import { useState, useCallback } from "react";
-import { FormControl, Button, TextField, InputAdornment, Box, CircularProgress, Alert } from "@mui/material";
 import { Link } from "react-router-dom";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { User, getUsers } from "../../data/admin-api";
+import { FormControl, Button, TextField, InputAdornment, Box, CircularProgress, Alert } from "@mui/material";
 import { Search } from "@mui/icons-material";
-import { useSupaQuery } from "../../useSupaQuery";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { User, getUsers } from "src/data/admin-api/users";
+import { useSupaQuery } from "src/hooks/useSupaQuery";
 
 function UserManageButton({ user }: { user: User }) {
   return (
@@ -16,11 +16,11 @@ const tableColumns: GridColDef<User[][number]>[] = [
   { field: 'name', headerName: 'Name', minWidth: 300, flex: 1 },
   { field: 'email', headerName: 'Email', flex: 1 },
   {
-    field: 'globalRoles',
-    headerName: 'Roles',
+    field: 'globalPermissions',
+    headerName: 'Permissions',
     width: 300,
     flex: 1,
-    renderCell: (params) => (params.row.globalRoles.join(', '))
+    renderCell: (params) => (params.row.globalPermissions.join(', '))
   },
   { 
     field: 'actions',

@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
-import { useSupaQuery } from "../../useSupaQuery";
-import { getEvent } from "../../data/supabase/events";
-import { Loading } from "../../shared/Loading";
+import { useSupaQuery } from "src/hooks/useSupaQuery";
+import { getEvent } from "src/data/supabase/events";
+import { Loading } from "src/shared/Loading";
 import { Alert } from "@mui/material";
 
 function EventsManage() {

@@ -99,9 +99,10 @@ function AppMenu({ isOpen, menuWidth, toggleMenu }: AppMenuProps) {
       if (session) {
         setMenuItems(allMenuItems.filter(i => {
           if (!i.requiredRole) return true;
-          if (!session.user?.app_metadata || !session.user.app_metadata['globalRoles']) return false;
-          if (session.user.app_metadata['globalRoles'].includes('Superuser')) return true;
-          return session.user.app_metadata['globalRoles'].includes(i.requiredRole);
+          const permissions = session.user?.app_metadata ? session.user?.app_metadata['globalPermissions'] : null;
+          if (!permissions) return false;
+          if (permissions.includes('Superuser')) return true;
+          return permissions.includes(i.requiredRole);
         }));
       } else {
         setMenuItems([]);
@@ -109,7 +110,7 @@ function AppMenu({ isOpen, menuWidth, toggleMenu }: AppMenuProps) {
     });
 
     return () => {subscription.data.subscription.unsubscribe()}
-  }, [supabase, menuItems]);
+  }, [supabase]);
 
   return (
     <StyledDrawer variant="permanent" isOpen={isOpen} menuWidth={menuWidth}>

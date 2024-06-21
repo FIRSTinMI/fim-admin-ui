@@ -1,6 +1,6 @@
 import { QueryKey, UseQueryOptions, useQuery } from "@tanstack/react-query";
 import { useContext } from "react";
-import { FimSupabaseClient, SupabaseContext } from "./supabaseContext";
+import { FimSupabaseClient, SupabaseContext } from "src/supabaseContext";
 
 type UseSupaQueryOptions<TQueryFnData, TError, TData, TQueryKey extends QueryKey>
   = Omit<UseQueryOptions<TQueryFnData, TError, TData, TQueryKey>, 'queryFn'> & {

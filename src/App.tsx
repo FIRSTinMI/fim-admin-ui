@@ -18,13 +18,15 @@ import React from 'react';
 import Users from './pages/users';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import TruckRoutes from './pages/routes';
+import useIsAuthenticated from './hooks/useIsAuthenticated';
+import { Loading } from './shared/Loading';
 
 const menuWidth: number = 240; //px
 const queryClient = new QueryClient();
 
 const routes = (
   <Routes>
-    <Route index path="/" element={<Navigate to="/events" />} />
+    <Route index path="/" element={<RootPage />} />
     <Route index path="/auth" element={<Auth />} />
     <Route path="/events/*" element={<Events />} />
     <Route path="/users/*" element={<Users />} />
@@ -32,6 +34,14 @@ const routes = (
     <Route path="*" element={<NotFound />} />
   </Routes>
 );
+
+function RootPage() {
+  const isAuthed = useIsAuthenticated();
+
+  if (isAuthed === null) return (<Loading />);
+  if (isAuthed === true) return (<Navigate to="/events" />);
+  else return (<Navigate to="/auth" />);
+}
 
 function App() {
   

@@ -3,10 +3,10 @@ import { FormControl, InputLabel, Select, MenuItem, Button, Link, Alert } from "
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { format } from "date-fns";
 import { Link as RouterLink } from "react-router-dom";
-import { EventSlim, getEventsForSeason } from "../../data/supabase/events";
-import { useSupaQuery } from "../../useSupaQuery";
-import { getSeasons } from "../../data/supabase/seasons";
-import { Loading } from "../../shared/Loading";
+import { EventSlim, getEventsForSeason } from "src/data/supabase/events";
+import { useSupaQuery } from "src/hooks/useSupaQuery";
+import { getSeasons } from "src/data/supabase/seasons";
+import { Loading } from "src/shared/Loading";
 
 function EventManageButton({ event }: { event: EventSlim }) {
   return (
@@ -79,7 +79,7 @@ function EventsList() {
         <InputLabel id="seasonLabel">Season</InputLabel>
         <Select
           labelId="seasonLabel"
-          value={selectedSeason ?? ''}
+          value={getSeasonsQuery.data?.some(s => s.id == selectedSeason) ? selectedSeason : ''}
           label="Season"
           onChange={(e) => setSelectedSeason(e.target.value as (number | null))}
         >

@@ -1,19 +1,19 @@
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { UpdateUser, getUserById, updateUser } from "../../data/admin-api";
+import { UpdateUser, getUserById, updateUser } from "src/data/admin-api/users";
 import { Box, Button, Checkbox, FormControl, FormControlLabel, FormGroup, Paper, TextField } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
-import { useSupaQuery } from "../../useSupaQuery";
-import { Loading } from "../../shared/Loading";
-import { useSupaMutation } from "../../useSupaMutation";
+import { useSupaQuery } from "src/hooks/useSupaQuery";
+import { Loading } from "src/shared/Loading";
+import { useSupaMutation } from "src/hooks/useSupaMutation";
 import { useQueryClient } from "@tanstack/react-query";
 
 type FormData = {
   name?: string,
-  globalRoles?: Set<string>
+  globalPermissions?: Set<string>
 }
 
-const globalRoles = [
+const globalPermissions = [
   "Superuser",
   "Events_Create",
   "Events_Manage",
@@ -46,7 +46,7 @@ function UsersManage() {
       return updateUser(client, {
         id: id,
         name: formData.name,
-        globalRoles: formData.globalRoles ? Array.from(formData.globalRoles) : []
+        globalPermissions: formData.globalPermissions ? Array.from(formData.globalPermissions) : []
       } as UpdateUser);
     },
     onSettled: () => {
@@ -58,20 +58,20 @@ function UsersManage() {
   useEffect(() => {
     setFormData({
       name: getUserQuery.data?.name,
-      globalRoles: new Set(getUserQuery.data?.globalRoles)
+      globalPermissions: new Set(getUserQuery.data?.globalPermissions)
     });
   }, [getUserQuery.data]);
 
-  const handleRoleChange = useCallback((role: string, e: FormEvent) => {
-    const newRoles = formData?.globalRoles ?? new Set();
+  const handlePermissionChange = useCallback((permission: string, e: FormEvent) => {
+    const newPermissions = formData?.globalPermissions ?? new Set();
     const target = (e.target as HTMLInputElement);
     if (target.checked) {
-      newRoles.add(role);
+      newPermissions.add(permission);
     } else {
-      newRoles.delete(role);
+      newPermissions.delete(permission);
     }
     setFormData({
-      globalRoles: newRoles,
+      globalPermissions: newPermissions,
       ...formData
     });
   }, [formData]);
@@ -101,9 +101,9 @@ function UsersManage() {
         </FormControl>
         <h4>Global Roles</h4>
         <FormGroup>
-        {globalRoles.map(role => 
-          <FormControlLabel label={role} key={role} control={
-            <Checkbox checked={formData?.globalRoles?.has(role)} onChange={e => handleRoleChange(role, e)} />
+        {globalPermissions.map(permission => 
+          <FormControlLabel label={permission} key={permission} control={
+            <Checkbox checked={formData?.globalPermissions?.has(permission)} onChange={e => handlePermissionChange(permission, e)} />
           } />)}
         </FormGroup>
 

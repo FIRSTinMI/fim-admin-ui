@@ -1,6 +1,6 @@
 import { UseMutationOptions, useMutation } from "@tanstack/react-query";
 import { useContext } from "react";
-import { FimSupabaseClient, SupabaseContext } from "./supabaseContext";
+import { FimSupabaseClient, SupabaseContext } from "src/supabaseContext";
 
 type UseSupaMutationOptions<TData, TError, TVariables, TContext>
   = Omit<UseMutationOptions<TData, TError, TVariables, TContext>, 'mutationFn'> & {

@@ -4,7 +4,7 @@ export type User = {
   id: string,
   name: string,
   email: string,
-  globalRoles: string[]
+  globalPermissions: string[]
 };
 
 export const getUsers = async (client: FimSupabaseClient, searchTerm: string): Promise<User[]> => {
@@ -26,7 +26,7 @@ export const getUserById = async (client: FimSupabaseClient, id: string): Promis
 export type UpdateUser = {
   readonly id: string,
   readonly name?: string,
-  readonly globalRoles?: string[]
+  readonly globalPermissions?: string[]
 }
 
 export const updateUser = async (client: FimSupabaseClient, req: UpdateUser) => {
@@ -34,7 +34,7 @@ export const updateUser = async (client: FimSupabaseClient, req: UpdateUser) => 
     method: "PUT",
     body: JSON.stringify({
       name: req.name,
-      newRoles: req.globalRoles
+      newPermissions: req.globalPermissions
     }),
     headers: {
       "Content-Type": "application/json",

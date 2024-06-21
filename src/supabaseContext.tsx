@@ -35,7 +35,8 @@ export const SupabaseContextProvider: FunctionComponent<{children: ReactNode}> =
   useEffect(() => {
     if (!location.pathname.startsWith('/auth')) {
       (async () => {
-        if (!(await supabaseClient?.auth.getSession())?.data) {
+        const session = (await supabaseClient?.auth.getSession())?.data
+        if (!session) {
           const params = createSearchParams({ returnUrl: location.pathname });
           navigate(`/auth?${params.toString()}`);
         }
@@ -48,7 +49,7 @@ export const SupabaseContextProvider: FunctionComponent<{children: ReactNode}> =
   </Box>);
   return (
     <SupabaseContext.Provider value={supabaseClient}>
-      {props.children}
+      {supabaseClient && props.children}
     </SupabaseContext.Provider>
   );
 }
