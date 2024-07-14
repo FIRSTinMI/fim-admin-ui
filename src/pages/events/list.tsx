@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FormControl, InputLabel, Select, MenuItem, Button, Link, Alert } from "@mui/material";
+import { FormControl, InputLabel, Select, MenuItem, Button, Link, Alert, Box } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { format } from "date-fns";
 import { Link as RouterLink } from "react-router-dom";
@@ -7,6 +7,8 @@ import { EventSlim, getEventsForSeason } from "src/data/supabase/events";
 import { useSupaQuery } from "src/hooks/useSupaQuery";
 import { getSeasons } from "src/data/supabase/seasons";
 import { Loading } from "src/shared/Loading";
+import AddIcon from "@mui/icons-material/Add";
+import useHasGlobalPermission from "src/hooks/useHasGlobalPermission";
 
 function EventManageButton({ event }: { event: EventSlim }) {
   return (
@@ -18,14 +20,16 @@ const formatDate = (date: Date) => format(date, "PP");
 const tableColumns: GridColDef<EventSlim[][number]>[] = [
   { field: 'key', headerName: 'Event Key', width: 150 },
   { field: 'code', headerName: 'Event Code', width: 150 },
-  { field: 'name', headerName: 'Name', flex: 1, minWidth: 150 },
+  { field: 'name', headerName: 'Name', flex: 1, minWidth: 150, renderCell: (params) => (
+    <Link component={RouterLink} to={params.row.id}>{params.value}</Link>
+  ) },
   {
     field: 'truck_routes.name',
     valueGetter: (_, row) => row.truck_routes?.name,
     headerName: 'Route',
     renderCell: (params) => (
       params.row.truck_routes?.id
-        ? <Link component={RouterLink} to={`/routes/${params.row.truck_routes.id}`}>{params.row.truck_routes?.name}</Link>
+        ? <Link component={RouterLink} to={`/routes/${params.row.truck_routes.id}`}>{params.value}</Link>
         : <></>
       )
   },
@@ -44,6 +48,7 @@ const tableColumns: GridColDef<EventSlim[][number]>[] = [
 
 function EventsList() {
   const [selectedSeason, setSelectedSeason] = useState<number | null>(null);
+  const hasCreatePermission = useHasGlobalPermission("Events_Create");
 
   const getEventsQuery = useSupaQuery({
     queryKey: ['getEventsForSeason', selectedSeason],
@@ -72,20 +77,30 @@ function EventsList() {
     localStorage.setItem('fim-admin-selected-season', selectedSeason.toString());
   }, [selectedSeason]);
 
+  if (getSeasonsQuery.isLoading) return (<Loading />);
+  if (getSeasonsQuery.isError) return (<Alert severity="error">Unable to get seasons!</Alert>);
+
   return (
     <>
-      {getSeasonsQuery.isLoading && <Loading />}
-      {getSeasonsQuery.isFetched && <FormControl fullWidth sx={{ mb: 2 }}>
-        <InputLabel id="seasonLabel">Season</InputLabel>
-        <Select
-          labelId="seasonLabel"
-          value={getSeasonsQuery.data?.some(s => s.id == selectedSeason) ? selectedSeason : ''}
-          label="Season"
-          onChange={(e) => setSelectedSeason(e.target.value as (number | null))}
-        >
-          {(getSeasonsQuery.data ?? []).map(s => <MenuItem key={s.id} value={s.id}>{s.name} ({s.levels.name})</MenuItem>)}
-        </Select>
-      </FormControl>}
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 1 }}>
+        <FormControl fullWidth>
+          <InputLabel id="seasonLabel">Season</InputLabel>
+          <Select
+            labelId="seasonLabel"
+            value={getSeasonsQuery.data?.some(s => s.id == selectedSeason) ? selectedSeason : ''}
+            label="Season"
+            onChange={(e) => setSelectedSeason(e.target.value as (number | null))}
+          >
+            {(getSeasonsQuery.data ?? []).map(s => <MenuItem key={s.id} value={s.id}>{s.name} ({s.levels.name})</MenuItem>)}
+          </Select>
+        </FormControl>
+        {hasCreatePermission && 
+          <span>
+            <Button startIcon={<AddIcon />} component={RouterLink} to="create">Create</Button>
+          </span>
+        }
+      </Box>
+      
 
       {!selectedSeason && <Alert severity="info">
           Select a season to view events

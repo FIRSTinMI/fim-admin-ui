@@ -6,7 +6,7 @@ import { Typography } from "@mui/material";
 function Users() {
   return (
     <>
-      <Typography variant="h3" sx={{ mb: 3 }}>Users</Typography>
+      <Typography variant="h2" sx={{ mb: 3 }}>Users</Typography>
 
       <Routes>
         <Route index path="/" element={<UsersList />} />

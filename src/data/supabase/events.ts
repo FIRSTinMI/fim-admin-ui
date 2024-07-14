@@ -1,3 +1,4 @@
+import { parseISO } from "date-fns/parseISO";
 import { FimSupabaseClient } from "../../supabaseContext";
 
 export type EventSlim = {
@@ -40,5 +41,17 @@ export const getEvent = async (client: FimSupabaseClient, eventId: string): Prom
 
   if (error) throw new Error(error.message);
 
-  return data;
+  return {
+    id: data.id,
+    key: data.key,
+    code: data.code,
+    name: data.name,
+    start_time: parseISO(data.start_time as unknown as string),
+    end_time: parseISO(data.end_time as unknown as string),
+    status: data.status,
+    truck_routes: data.truck_routes ? {
+      id: data.truck_routes.id,
+      name: data.truck_routes.name
+    } : undefined
+  } as Event;
 }

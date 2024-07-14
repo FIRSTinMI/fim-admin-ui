@@ -17,9 +17,11 @@ import NotFound from './pages/not-found';
 import React from 'react';
 import Users from './pages/users';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import TruckRoutes from './pages/routes';
 import useIsAuthenticated from './hooks/useIsAuthenticated';
 import { Loading } from './shared/Loading';
+import ErrorBoundary from './shared/ErrorBoundary';
 
 const menuWidth: number = 240; //px
 const queryClient = new QueryClient();
@@ -58,6 +60,19 @@ function App() {
         palette: {
           mode: prefersDarkMode ? 'dark' : 'light',
         },
+        typography: (palette) => ({
+          h2: {
+            paddingBottom: 8,
+            borderBottom: `1px solid ${palette.action.selected}`,
+            fontSize: 48
+          },
+          h3: {
+            fontSize: 34
+          },
+          h4: {
+            fontSize: 24
+          }
+        })
       }),
     [prefersDarkMode],
   );
@@ -84,8 +99,11 @@ function App() {
               }}>
                 <Toolbar />
                 {/* <Button variant="contained">Test Button</Button> */}
-                {routes}
+                <ErrorBoundary>
+                  {routes}
+                </ErrorBoundary>
               </Box>
+              <ReactQueryDevtools />
             </QueryClientProvider>
           </SupabaseContextProvider>
         </Box>

@@ -66,6 +66,7 @@ function AppBar({ isOpen, toggleMenu }: AppBarProps) {
 
   const logOut = async () => {
     await supabase.auth.signOut();
+    closeUserMenu();
     navigate('/auth');
   };
 

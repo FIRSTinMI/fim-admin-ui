@@ -1,10 +1,10 @@
-import { Divider, Drawer, DrawerProps, IconButton, List, Toolbar, Tooltip, styled } from "@mui/material";
+import { Divider, Drawer, DrawerProps, IconButton, List, Toolbar, Tooltip, styled, useMediaQuery, useTheme } from "@mui/material";
 
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import EventIcon from '@mui/icons-material/Event';
-import WarningIcon from '@mui/icons-material/Warning';
+//import WarningIcon from '@mui/icons-material/Warning';
 import PersonIcon from '@mui/icons-material/Person';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping'
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
@@ -35,10 +35,10 @@ const allMenuItems: MenuItem[] = [
     title: 'Routes',
     url: '/routes',
     icon: <LocalShippingIcon />
-  }, {
-    title: 'Alerts',
-    url: '/alerts',
-    icon: <WarningIcon />
+  // }, {
+  //   title: 'Alerts',
+  //   url: '/alerts',
+  //   icon: <WarningIcon />
   }, {
     title: 'Users',
     url: '/users',
@@ -70,7 +70,7 @@ const StyledDrawer = styled(Drawer, { shouldForwardProp: (prop) => prop !== 'isO
           easing: theme.transitions.easing.sharp,
           duration: theme.transitions.duration.leavingScreen,
         }),
-        width: theme.spacing(0), //theme.spacing(7),
+        // width: theme.spacing(0), //theme.spacing(7),
         [theme.breakpoints.up('sm')]: {
           width: theme.spacing(7),
         },
@@ -82,6 +82,8 @@ const StyledDrawer = styled(Drawer, { shouldForwardProp: (prop) => prop !== 'isO
 function AppMenu({ isOpen, menuWidth, toggleMenu }: AppMenuProps) {
   const location = useLocation();
   const supabase = useContext(SupabaseContext);
+  const theme = useTheme();
+  const mobileMatches = useMediaQuery(theme.breakpoints.up('sm'));
 
   const tooltippedIcon = useCallback(({title, children}: {title: string, children: JSX.Element}) => {
     if (!isOpen) {
@@ -113,7 +115,7 @@ function AppMenu({ isOpen, menuWidth, toggleMenu }: AppMenuProps) {
   }, [supabase]);
 
   return (
-    <StyledDrawer variant="permanent" isOpen={isOpen} menuWidth={menuWidth}>
+    <StyledDrawer variant={mobileMatches ? 'permanent' : 'temporary'} isOpen={isOpen} menuWidth={menuWidth} open={isOpen} onClose={toggleMenu}>
       <Toolbar
         sx={{
           display: 'flex',

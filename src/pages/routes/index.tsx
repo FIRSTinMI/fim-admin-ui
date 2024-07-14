@@ -6,7 +6,7 @@ import { Typography } from "@mui/material";
 function TruckRoutes() {
   return (
     <>
-      <Typography variant="h3" sx={{ mb: 3 }}>Truck Routes</Typography>
+      <Typography variant="h2" sx={{ mb: 3 }}>Truck Routes</Typography>
 
       <Routes>
         <Route index path="/" element={<TruckRoutesList />} />

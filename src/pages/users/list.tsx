@@ -6,6 +6,11 @@ import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { User, getUsers } from "src/data/admin-api/users";
 import { useSupaQuery } from "src/hooks/useSupaQuery";
 
+function formatPermissions(permissions: string[]) {
+  if (permissions.length > 2) return `(${permissions.length} permissions)`;
+  return permissions.join(', ');
+}
+
 function UserManageButton({ user }: { user: User }) {
   return (
     <Button component={Link} to={`${user.id}`}>Manage</Button>
@@ -13,14 +18,14 @@ function UserManageButton({ user }: { user: User }) {
 }
 
 const tableColumns: GridColDef<User[][number]>[] = [
-  { field: 'name', headerName: 'Name', minWidth: 300, flex: 1 },
+  { field: 'name', headerName: 'Name', flex: 1 },
   { field: 'email', headerName: 'Email', flex: 1 },
   {
     field: 'globalPermissions',
     headerName: 'Permissions',
     width: 300,
     flex: 1,
-    renderCell: (params) => (params.row.globalPermissions.join(', '))
+    renderCell: (params) => formatPermissions(params.value)
   },
   { 
     field: 'actions',
