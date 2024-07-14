@@ -22,16 +22,20 @@ function Step1({ setResult }: { setResult: (r: CreateEventsResponse | null) => v
     mutationFn: (client, req: SyncSourceRequest) => createEventsFromSyncSource(client, req)
   });
 
-  const form = useForm<SyncSourceRequest>({
+  const form = useForm<{ eventCodesUserInput?: string } & SyncSourceRequest>({
     defaultValues: {
       overrideExisting: false,
       seasonId: 0,
       dataSource: 'FrcEvents',
       districtCode: null,
+      eventCodesUserInput: '',
       eventCodes: []
     },
     onSubmit: async (form) => {
-      await createMutation.mutateAsync(form.value, {
+      const value = form.value;
+      value.eventCodes = value.eventCodesUserInput?.split(/[\s,]/).map(c => c.trim()).filter(c => c !== '') ?? [];
+      value.eventCodesUserInput = undefined;
+      await createMutation.mutateAsync(value, {
         onSuccess: (data) => setResult(data)
       });
     },
@@ -107,15 +111,15 @@ function Step1({ setResult }: { setResult: (r: CreateEventsResponse | null) => v
         </FormControl>
         <Typography variant="body2" sx={{ textWrap: "nowrap", mt: 2 }}>- or -</Typography>
         <FormControl fullWidth>
-          <form.Field name="eventCodes">{
+          <form.Field name="eventCodesUserInput">{
             ({ state, handleChange, handleBlur }) => (
               <TextField
                 label="Event Codes"
                 multiline
                 autoComplete="off"
                 variant="outlined"
-                value={state.value?.join('\n')}
-                onChange={(e) => handleChange(e.target.value.split('\n').map(c => c.trim()))}
+                value={state.value}
+                onChange={(e) => handleChange(e.target.value)}
                 onBlur={handleBlur}
               />
             )}
