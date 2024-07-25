@@ -16,7 +16,12 @@ export type EventSlim = {
 };
 
 export type Event = EventSlim & {
-  todo: string
+  event_notes?: {
+    id: number,
+    content: string,
+    created_by: string,
+    created_at: Date
+  }[]
 };
 
 export const getEventsForSeason = async (client: FimSupabaseClient, seasonId: number): Promise<EventSlim[]> => {
@@ -35,7 +40,7 @@ export const getEventsForSeason = async (client: FimSupabaseClient, seasonId: nu
 export const getEvent = async (client: FimSupabaseClient, eventId: string): Promise<Event> => {
   const { data, error } = await client
     .from("events")
-    .select("*,truck_routes(id,name)")
+    .select("*,truck_routes(id,name),event_notes(*)")
     .eq('id', eventId)
     .single<Event>();
 
@@ -52,6 +57,12 @@ export const getEvent = async (client: FimSupabaseClient, eventId: string): Prom
     truck_routes: data.truck_routes ? {
       id: data.truck_routes.id,
       name: data.truck_routes.name
-    } : undefined
+    } : undefined,
+    event_notes: data.event_notes ? data.event_notes.map(n => ({
+      id: n.id,
+      content: n.content,
+      created_by: n.created_by,
+      created_at: n.created_at
+    })) : undefined
   } as Event;
 }
