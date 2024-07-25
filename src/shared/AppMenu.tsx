@@ -1,13 +1,11 @@
-import { Divider, Drawer, DrawerProps, IconButton, List, Toolbar, Tooltip, styled, useMediaQuery, useTheme } from "@mui/material";
+import { Drawer, DrawerProps, List, Tooltip, styled, useMediaQuery, useTheme } from "@mui/material";
 
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import EventIcon from '@mui/icons-material/Event';
-//import WarningIcon from '@mui/icons-material/Warning';
 import PersonIcon from '@mui/icons-material/Person';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping'
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import { Link, useLocation } from "react-router-dom";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { SupabaseContext } from "../supabaseContext";
@@ -116,20 +114,7 @@ function AppMenu({ isOpen, menuWidth, toggleMenu }: AppMenuProps) {
 
   return (
     <StyledDrawer variant={mobileMatches ? 'permanent' : 'temporary'} isOpen={isOpen} menuWidth={menuWidth} open={isOpen} onClose={toggleMenu}>
-      <Toolbar
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'flex-end',
-          px: [1],
-        }}
-      >
-        <IconButton onClick={toggleMenu} aria-label={`${isOpen ? "Collapse" : "Expand"} Main Navigation`}>
-          <ChevronLeftIcon />
-        </IconButton>
-      </Toolbar>
-      <Divider />
-      <List component="nav">
+      <List component="nav" sx={{ mt: 8 }}>
         {menuItems.map(item => (
           <ListItemButton key={item.url} component={Link} to={item.url} selected={location.pathname.startsWith(item.url)}>
             <ListItemIcon>

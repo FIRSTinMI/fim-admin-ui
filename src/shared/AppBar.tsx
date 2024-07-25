@@ -102,7 +102,7 @@ function AppBar({ isOpen, toggleMenu }: AppBarProps) {
 
   return (
     <>
-      <StyledAppBar isOpen={isOpen} position="absolute">
+      <StyledAppBar isOpen={isOpen} position="fixed">
         <Toolbar>
           <IconButton
             size="large"
