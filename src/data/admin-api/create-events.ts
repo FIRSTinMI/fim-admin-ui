@@ -1,5 +1,6 @@
 import { FimSupabaseClient } from "src/supabaseContext";
 import { EventSlim } from "../supabase/events";
+import { parseISO } from "date-fns";
 
 export type SyncSourceRequest = {
   overrideExisting: boolean,
@@ -26,5 +27,13 @@ export const createEventsFromSyncSource = async (client: FimSupabaseClient, requ
       Authorization: `Bearer ${(await client.auth.getSession()).data.session?.access_token}`,
       'Content-Type': 'application/json'
     }
-  }).then(resp => resp.json());
+  }).then(async resp => {
+    const json = (await resp.json()) as CreateEventsResponse;
+    json.upsertedEvents = json.upsertedEvents.map(e => {
+      e.start_time = parseISO(e.start_time as unknown as string);
+      e.end_time = parseISO(e.end_time as unknown as string);
+      return e;
+    });
+    return json;
+  });
 }
