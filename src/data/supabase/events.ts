@@ -9,7 +9,7 @@ export type EventSlim = {
   name: string,
   start_time: Date,
   end_time: Date,
-  timezone: string,
+  time_zone: string,
   status: string,
   truck_routes?: {
     id: number,
@@ -59,7 +59,7 @@ const mapDbToEvent = (db: Event): Event => {
     name: db.name,
     start_time: parseISO(db.start_time as unknown as string),
     end_time: parseISO(db.end_time as unknown as string),
-    timezone: db.timezone,
+    time_zone: db.time_zone,
     status: db.status,
     truck_routes: db.truck_routes ? {
       id: db.truck_routes.id,

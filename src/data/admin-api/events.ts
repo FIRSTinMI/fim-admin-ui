@@ -43,5 +43,9 @@ export const updateEventInfo = async (client: FimSupabaseClient, req: UpdateEven
       "Content-Type": "application/json",
       Authorization: `Bearer ${(await client.auth.getSession()).data.session?.access_token}`
     }
-  }).then(resp => resp.json());
+  }).then(async resp => {
+    if (resp.status === 401 || resp.status === 403) throw new Error("You do not have permission to perform this action.");
+    if (!resp.ok) throw new Error(`An error occurred while saving the event: ${resp.statusText}`);
+    return await resp.json();
+  });
 }

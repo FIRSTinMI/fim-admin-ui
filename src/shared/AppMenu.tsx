@@ -124,7 +124,7 @@ function AppMenu({ isOpen, menuWidth, toggleMenu }: AppMenuProps) {
           px: [1],
         }}
       >
-        <IconButton onClick={toggleMenu}>
+        <IconButton onClick={toggleMenu} aria-label={`${isOpen ? "Collapse" : "Expand"} Main Navigation`}>
           <ChevronLeftIcon />
         </IconButton>
       </Toolbar>

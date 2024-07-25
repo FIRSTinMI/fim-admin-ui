@@ -108,7 +108,7 @@ function AppBar({ isOpen, toggleMenu }: AppBarProps) {
             size="large"
             edge="start"
             color="inherit"
-            aria-label="menu"
+            aria-label={`${isOpen ? "Collapse" : "Expand"} Main Navigation`}
             sx={{ mr: 2 }}
             onClick={toggleMenu}
           >
