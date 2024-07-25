@@ -33,8 +33,8 @@ const tableColumns: GridColDef<EventSlim[][number]>[] = [
         : <></>
       )
   },
-  { field: 'start_time', headerName: 'Start', valueFormatter: formatDate },
-  { field: 'end_time', headerName: 'End', valueFormatter: formatDate },
+  { field: 'start_time', headerName: 'Start', width: 110, valueFormatter: formatDate },
+  { field: 'end_time', headerName: 'End', width: 110, valueFormatter: formatDate },
   { field: 'status', headerName: 'Status' },
   { 
     field: 'actions',
