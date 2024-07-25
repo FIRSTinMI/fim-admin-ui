@@ -136,7 +136,7 @@ function EventsManageOverview() {
                 <Typography sx={{ pb: 2 }}>{n.content}</Typography>
                 <Typography variant="body1" display="flex" flexWrap="wrap" alignItems="center" justifyContent="flex-end" gap={1}>
                   {/* <Box display="flex" alignItems="center" gap={0.5}><Person fontSize="inherit" titleAccess="Added by" /> <span>(Unknown user)</span></Box> */}
-                  <Box display="flex" alignItems="center" gap={0.5}><AccessTime fontSize="inherit" titleAccess="Added at" />{formatRelative(n.created_at, new Date())}</Box>
+                  <Box component="span" display="flex" alignItems="center" gap={0.5}><AccessTime fontSize="inherit" titleAccess="Added at" />{formatRelative(n.created_at, new Date())}</Box>
                 </Typography>
               </Card>
             ))}

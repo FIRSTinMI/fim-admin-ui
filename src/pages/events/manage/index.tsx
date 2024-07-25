@@ -14,7 +14,11 @@ const routes = [{
 }, {
   path: "/teams",
   label: "Teams",
-  element: (<EventsManageOverview />)
+  element: (<p>Not yet implemented.</p>)
+}, {
+  path: "/staff",
+  label: "Staff",
+  element: (<p>Not yet implemented.</p>)
 }]
 
 function useRouteMatch(patterns: readonly string[]) {
@@ -23,7 +27,6 @@ function useRouteMatch(patterns: readonly string[]) {
   for (let i = 0; i < patterns.length; i += 1) {
     const pattern = patterns[i];
     const resolvedPath = resolvePath(`..${pattern}`, pathname);
-    console.log('rp', pattern, resolvedPath)
     const possibleMatch = matchPath(resolvedPath.pathname, pathname);
     if (possibleMatch !== null) {
       return pattern;
@@ -35,10 +38,9 @@ function useRouteMatch(patterns: readonly string[]) {
 
 function EventsManage() {
   const match = useRouteMatch(routes.map(r => r.path));
-  console.log(match);
-  
+
   return (<>
-    <Tabs value={match} sx={{ mb: 2 }}>
+    <Tabs value={match ?? routes[0].path} sx={{ mb: 2 }}>
       {routes.map(route => (<Tab key={route.path} value={route.path} label={route.label} component={Link} to={`.${route.path}`} />))}
     </Tabs>
     <Routes>

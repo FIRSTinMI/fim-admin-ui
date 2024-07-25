@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { FormControl, InputLabel, Select, MenuItem, Button, Link, Alert, Box } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { format } from "date-fns";
+import format from "date-fns/format";
 import { Link as RouterLink } from "react-router-dom";
 import { EventSlim, getEventsForSeason } from "src/data/supabase/events";
 import { useSupaQuery } from "src/hooks/useSupaQuery";

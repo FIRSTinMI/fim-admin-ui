@@ -1,5 +1,6 @@
-import { parseISO } from "date-fns/parseISO";
+import parseISO from "date-fns/parseISO";
 import { FimSupabaseClient } from "../../supabaseContext";
+import { useSupaQuery } from "src/hooks/useSupaQuery";
 
 export type EventSlim = {
   id: string
@@ -8,6 +9,7 @@ export type EventSlim = {
   name: string,
   start_time: Date,
   end_time: Date,
+  timezone: string,
   status: string,
   truck_routes?: {
     id: number,
@@ -34,7 +36,7 @@ export const getEventsForSeason = async (client: FimSupabaseClient, seasonId: nu
 
   if (data === null) return [];
 
-  return data;
+  return data.map(e => mapDbToEvent(e));
 }
 
 export const getEvent = async (client: FimSupabaseClient, eventId: string): Promise<Event> => {
@@ -46,23 +48,35 @@ export const getEvent = async (client: FimSupabaseClient, eventId: string): Prom
 
   if (error) throw new Error(error.message);
 
+  return mapDbToEvent(data);
+}
+
+const mapDbToEvent = (db: Event): Event => {
   return {
-    id: data.id,
-    key: data.key,
-    code: data.code,
-    name: data.name,
-    start_time: parseISO(data.start_time as unknown as string),
-    end_time: parseISO(data.end_time as unknown as string),
-    status: data.status,
-    truck_routes: data.truck_routes ? {
-      id: data.truck_routes.id,
-      name: data.truck_routes.name
+    id: db.id,
+    key: db.key,
+    code: db.code,
+    name: db.name,
+    start_time: parseISO(db.start_time as unknown as string),
+    end_time: parseISO(db.end_time as unknown as string),
+    timezone: db.timezone,
+    status: db.status,
+    truck_routes: db.truck_routes ? {
+      id: db.truck_routes.id,
+      name: db.truck_routes.name
     } : undefined,
-    event_notes: data.event_notes ? data.event_notes.map(n => ({
+    event_notes: db.event_notes ? db.event_notes.map(n => ({
       id: n.id,
       content: n.content,
       created_by: n.created_by,
-      created_at: n.created_at
+      created_at: parseISO(n.created_at as unknown as string)
     })) : undefined
   } as Event;
 }
+
+export const getEventQueryKey = (eventId: string) => ['event', eventId] as [string, ...unknown[]];
+export const useGetEventQuery = (eventId: string, refetch: boolean = true) => useSupaQuery({
+  queryKey: getEventQueryKey(eventId),
+  queryFn: (client) => getEvent(client, eventId),
+  refetchOnWindowFocus: refetch
+});
