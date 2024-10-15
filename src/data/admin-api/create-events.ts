@@ -29,11 +29,16 @@ export const createEventsFromSyncSource = async (client: FimSupabaseClient, requ
     }
   }).then(async resp => {
     const json = (await resp.json()) as CreateEventsResponse;
-    json.upsertedEvents = json.upsertedEvents.map(e => {
-      e.start_time = parseISO(e.start_time as unknown as string);
-      e.end_time = parseISO(e.end_time as unknown as string);
-      return e;
-    });
+    json.upsertedEvents = json.upsertedEvents.map<EventSlim>((e: any) => ({
+      id: e.id,
+      key: e.key,
+      code: e.code,
+      name: e.name,
+      start_time: parseISO(e.startTime),
+      end_time: parseISO(e.endTime),
+      time_zone: e.timeZone,
+      status: e.status
+    } as EventSlim));
     return json;
   });
 }

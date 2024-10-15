@@ -1,14 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo, JSXElementConstructor } from "react";
 import { FormControl, InputLabel, Select, MenuItem, Button, Link, Alert, Box } from "@mui/material";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { DataGrid, GridColDef, useGridApiRef } from "@mui/x-data-grid";
 import format from "date-fns/format";
 import { Link as RouterLink } from "react-router-dom";
-import { EventSlim, getEventsForSeason } from "src/data/supabase/events";
-import { useSupaQuery } from "src/hooks/useSupaQuery";
-import { getSeasons } from "src/data/supabase/seasons";
+import { EventSlim, useGetEventsForSeason } from "src/data/supabase/events";
+import { useGetSeasons } from "src/data/supabase/seasons";
 import { Loading } from "src/shared/Loading";
 import AddIcon from "@mui/icons-material/Add";
 import useHasGlobalPermission from "src/hooks/useHasGlobalPermission";
+import { GlobalPermission } from "src/data/globalPermission";
+import DataTableFilterToolbar from "src/shared/DataTableFilterToolbar.tsx";
+import { eventStatusToShortDescription } from "src/data/eventStatus.ts";
 
 function EventManageButton({ event }: { event: EventSlim }) {
   return (
@@ -17,7 +19,8 @@ function EventManageButton({ event }: { event: EventSlim }) {
 }
 
 const formatDate = (date: Date) => format(date, "PP");
-const tableColumns: GridColDef<EventSlim[][number]>[] = [
+
+let tableColumns: GridColDef<EventSlim[][number]>[] = [
   { field: 'key', headerName: 'Event Key', width: 150 },
   { field: 'code', headerName: 'Event Code', width: 150 },
   { field: 'name', headerName: 'Name', flex: 1, minWidth: 150, renderCell: (params) => (
@@ -31,11 +34,11 @@ const tableColumns: GridColDef<EventSlim[][number]>[] = [
       params.row.truck_routes?.id
         ? <Link component={RouterLink} to={`/routes/${params.row.truck_routes.id}`}>{params.value}</Link>
         : <></>
-      )
+      ),
   },
   { field: 'start_time', headerName: 'Start', width: 110, valueFormatter: formatDate },
   { field: 'end_time', headerName: 'End', width: 110, valueFormatter: formatDate },
-  { field: 'status', headerName: 'Status' },
+  { field: 'status', headerName: 'Status', valueFormatter: eventStatusToShortDescription },
   { 
     field: 'actions',
     sortable: false,
@@ -47,23 +50,13 @@ const tableColumns: GridColDef<EventSlim[][number]>[] = [
 ];
 
 function EventsList() {
+  const grid = useGridApiRef();
   const [selectedSeason, setSelectedSeason] = useState<number | null>(null);
-  const hasCreatePermission = useHasGlobalPermission("Events_Create");
+  const hasCreatePermission = useHasGlobalPermission([GlobalPermission.Events_Create]);
+  const [showKeys, setShowKeys] = useState(false);
 
-  const getEventsQuery = useSupaQuery({
-    queryKey: ['getEventsForSeason', selectedSeason],
-    queryFn: async (client) => {
-      if (!selectedSeason) return [];
-      return getEventsForSeason(client, selectedSeason);
-    }
-  });
-
-  const getSeasonsQuery = useSupaQuery({
-    queryKey: ['getSeasons'],
-    queryFn: async (client) => {
-      return getSeasons(client);
-    }
-  });
+  const getEventsQuery = useGetEventsForSeason(selectedSeason);
+  const getSeasonsQuery = useGetSeasons();
 
   useEffect(() => {
     const selected = localStorage.getItem('fim-admin-selected-season');
@@ -76,6 +69,32 @@ function EventsList() {
     if (!selectedSeason) return;
     localStorage.setItem('fim-admin-selected-season', selectedSeason.toString());
   }, [selectedSeason]);
+  
+  useEffect(() => {
+    const keyCol = tableColumns.findIndex(c => c.field === "key");
+    if (keyCol >= 0) {
+      tableColumns[keyCol].renderCell = showKeys ? undefined : (params) => "•".repeat(params.value.length);
+    }
+    if (grid.current?.updateColumns) {
+      grid.current.updateColumns(tableColumns);
+    }
+  }, [grid?.current, showKeys]);
+  
+  const showHideKeys = useCallback(() => {
+    if (showKeys) {
+      setShowKeys(false);
+    } else {
+      setShowKeys(true);
+    }
+  }, [showKeys, setShowKeys]);
+  
+  const tableToolbar = useMemo((): JSXElementConstructor<any> => {
+    return () => (
+      <DataTableFilterToolbar>
+        <Button variant="text" onClick={showHideKeys}>{showKeys ? "Hide" : "Show"} Keys</Button>
+      </DataTableFilterToolbar>
+    );
+  }, [showKeys, showHideKeys]);
 
   if (getSeasonsQuery.isLoading) return (<Loading />);
   if (getSeasonsQuery.isError) return (<Alert severity="error">Unable to get seasons!</Alert>);
@@ -100,7 +119,6 @@ function EventsList() {
           </span>
         }
       </Box>
-      
 
       {!selectedSeason && <Alert severity="info">
           Select a season to view events
@@ -109,24 +127,27 @@ function EventsList() {
       {selectedSeason && <>
         {getEventsQuery.isLoading && <Loading />}
         {getEventsQuery.isError && <Alert severity="error">Failed to get events</Alert>}
-        {getEventsQuery.isSuccess && <DataGrid
-          autoHeight
-          columns={tableColumns}
-          rows={getEventsQuery.data}
-          initialState={{
-            pagination: {
-              paginationModel: {
-                pageSize: 100
+        {getEventsQuery.isSuccess && <Box>
+          <DataGrid
+            apiRef={grid}
+            columns={tableColumns}
+            rows={getEventsQuery.data}
+            slots={{ toolbar: tableToolbar }}
+            initialState={{
+              pagination: {
+                paginationModel: {
+                  pageSize: 100
+                }
+              },
+              sorting: {
+                sortModel: [{
+                  field: 'start_time',
+                  sort: 'asc'
+                }]
               }
-            },
-            sorting: {
-              sortModel: [{
-                field: 'start_time',
-                sort: 'desc'
-              }]
-            }
-          }}
-        />}
+            }}
+          />
+        </Box>}
       </>}
     </>
   );

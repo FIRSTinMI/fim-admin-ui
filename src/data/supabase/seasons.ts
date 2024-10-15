@@ -1,4 +1,5 @@
 import { FimSupabaseClient } from "../../supabaseContext";
+import {useSupaQuery} from "src/hooks/useSupaQuery.ts";
 
 export type Season = {
   id: number,
@@ -19,3 +20,8 @@ export const getSeasons = async (client: FimSupabaseClient) => {
 
   return data;
 }
+
+export const useGetSeasons = () => useSupaQuery({
+  queryKey: ["getSeasons"],
+  queryFn: (client) => getSeasons(client)
+});

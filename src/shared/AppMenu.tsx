@@ -1,14 +1,18 @@
-import { Drawer, DrawerProps, List, Tooltip, styled, useMediaQuery, useTheme } from "@mui/material";
+import {Drawer, DrawerProps, List, styled, Tooltip, useMediaQuery, useTheme} from "@mui/material";
 
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import EventIcon from '@mui/icons-material/Event';
 import PersonIcon from '@mui/icons-material/Person';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping'
-import { Link, useLocation } from "react-router-dom";
-import { useCallback, useContext, useEffect, useState } from "react";
-import { SupabaseContext } from "../supabaseContext";
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import DevicesIcon from '@mui/icons-material/Devices';
+import WarningIcon from '@mui/icons-material/Warning';
+import {Link, useLocation} from "react-router-dom";
+import {JSX, useCallback, useContext, useEffect, useState} from "react";
+import {SupabaseContext} from "../supabaseContext";
+import {GlobalPermission} from "src/data/globalPermission.ts";
+import useHasGlobalPermission from "src/hooks/useHasGlobalPermission.ts";
 
 type AppMenuProps = {
   isOpen: boolean;
@@ -19,7 +23,7 @@ type AppMenuProps = {
 type MenuItem = {
   title: string,
   url: string,
-  requiredRole?: string,
+  requiredRole?: GlobalPermission[],
   icon: JSX.Element
 };
 
@@ -27,20 +31,26 @@ const allMenuItems: MenuItem[] = [
   {
     title: 'Events',
     url: '/events',
-    requiredRole: 'Events_View',
+    requiredRole: [GlobalPermission.Events_View],
     icon: <EventIcon />
   }, {
     title: 'Routes',
     url: '/routes',
     icon: <LocalShippingIcon />
-  // }, {
-  //   title: 'Alerts',
-  //   url: '/alerts',
-  //   icon: <WarningIcon />
+  }, {
+    title: 'Alerts',
+    url: '/alerts',
+    requiredRole: [GlobalPermission.Equipment_Manage],
+    icon: <WarningIcon />
+  }, {
+    title: 'Equipment',
+    url: '/equipment',
+    requiredRole: [GlobalPermission.Equipment_Note, GlobalPermission.Equipment_Manage],
+    icon: <DevicesIcon />
   }, {
     title: 'Users',
     url: '/users',
-    requiredRole: 'Superuser',
+    requiredRole: [GlobalPermission.Superuser],
     icon: <PersonIcon />
   }
 ];
@@ -77,8 +87,23 @@ const StyledDrawer = styled(Drawer, { shouldForwardProp: (prop) => prop !== 'isO
   }),
 );
 
-function AppMenu({ isOpen, menuWidth, toggleMenu }: AppMenuProps) {
+function MenuItem({ item, icon }: { item: MenuItem, icon: JSX.Element }) {
+  const hasPermission = useHasGlobalPermission(item.requiredRole ?? []);
   const location = useLocation();
+  
+  if (!hasPermission) return;
+  
+  return (
+    <ListItemButton component={Link} to={item.url} selected={location.pathname.startsWith(item.url)}>
+      <ListItemIcon>
+        {icon}
+      </ListItemIcon>
+      <ListItemText primary={item.title} />
+    </ListItemButton>
+  );
+}
+
+function AppMenu({ isOpen, menuWidth, toggleMenu }: AppMenuProps) {
   const supabase = useContext(SupabaseContext);
   const theme = useTheme();
   const mobileMatches = useMediaQuery(theme.breakpoints.up('sm'));
@@ -97,13 +122,7 @@ function AppMenu({ isOpen, menuWidth, toggleMenu }: AppMenuProps) {
   useEffect(() => {
     const subscription = supabase.auth.onAuthStateChange((_, session) => {
       if (session) {
-        setMenuItems(allMenuItems.filter(i => {
-          if (!i.requiredRole) return true;
-          const permissions = session.user?.app_metadata ? session.user?.app_metadata['globalPermissions'] : null;
-          if (!permissions) return false;
-          if (permissions.includes('Superuser')) return true;
-          return permissions.includes(i.requiredRole);
-        }));
+        setMenuItems(allMenuItems);
       } else {
         setMenuItems([]);
       }
@@ -116,15 +135,10 @@ function AppMenu({ isOpen, menuWidth, toggleMenu }: AppMenuProps) {
     <StyledDrawer variant={mobileMatches ? 'permanent' : 'temporary'} isOpen={isOpen} menuWidth={menuWidth} open={isOpen} onClose={toggleMenu}>
       <List component="nav" sx={{ mt: 8 }}>
         {menuItems.map(item => (
-          <ListItemButton key={item.url} component={Link} to={item.url} selected={location.pathname.startsWith(item.url)}>
-            <ListItemIcon>
-              {tooltippedIcon({
-                title: item.title,
-                children: item.icon
-              })}
-            </ListItemIcon>
-            <ListItemText primary={item.title} />
-          </ListItemButton>
+          <MenuItem key={item.url} item={item} icon={tooltippedIcon({
+            title: item.title,
+            children: item.icon
+          })} />
         ))}
         {/* <Divider sx={{ my: 1 }} /> */}
         {secondaryListItems}

@@ -5,9 +5,8 @@ import { format } from "date-fns";
 import { useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import { createEventsFromSyncSource, CreateEventsResponse, DataSource, SyncSourceRequest } from "src/data/admin-api/create-events";
-import { getSeasons, Season } from "src/data/supabase/seasons";
+import { Season, useGetSeasons } from "src/data/supabase/seasons";
 import { useSupaMutation } from "src/hooks/useSupaMutation";
-import { useSupaQuery } from "src/hooks/useSupaQuery";
 import { LoadingButton } from "@mui/lab";
 
 
@@ -41,10 +40,7 @@ function Step1({ setResult }: { setResult: (r: CreateEventsResponse | null) => v
     },
   });
 
-  const seasons = useSupaQuery({
-    queryKey: ['getSeasons'],
-    queryFn: (client) => getSeasons(client)
-  });
+  const seasons = useGetSeasons();
 
   const [validDataSources, setValidDataSources] = useState<DataSource[]>([]);
 
@@ -155,8 +151,8 @@ const step2TableColumns: GridColDef<CreateEventsResponse['upsertedEvents'][numbe
   { field: 'name', headerName: 'Name', flex: 1, minWidth: 150, renderCell: (params) => (
     <Link component={RouterLink} to={`/events/${params.row.id}`} target="_blank">{params.value}</Link>
   ) },
-  { field: 'startTime', headerName: 'Start', width: 110, valueFormatter: formatDate },
-  { field: 'endTime', headerName: 'End', width: 110, valueFormatter: formatDate },
+  { field: 'start_time', headerName: 'Start', width: 110, valueFormatter: formatDate },
+  { field: 'end_time', headerName: 'End', width: 110, valueFormatter: formatDate },
   { field: 'status', headerName: 'Status' }
 ];
 
@@ -185,7 +181,7 @@ function Step2({ result }: { result: CreateEventsResponse }) {
         sorting: {
           sortModel: [{
             field: 'start_time',
-            sort: 'desc'
+            sort: 'asc'
           }]
         }
       }} slots={{
@@ -217,18 +213,6 @@ function EventsCreate() {
     }} />}
 
     {step == 2 && <Step2 result={result!} />}
-
-    {/* <Form>
-      <FormControl fullWidth>
-        <TextField
-          label="Name"
-          autoComplete="off"
-          variant="outlined"
-          value={formData?.name}
-          onChange={(e) => setFormData({...formData, name: (e.target as HTMLInputElement).value})}
-        />
-      </FormControl>
-    </Form> */}
   </>);
 }
 

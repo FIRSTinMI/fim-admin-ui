@@ -1,18 +1,21 @@
 import { AccessTime } from "@mui/icons-material";
-// import Person from "@mui/icons-material/Person";
 import { LoadingButton } from "@mui/lab";
 import { Box, Button, Card, Collapse, Divider, FormControl, Paper, TextField, Typography } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
 import { compareDesc, formatDistanceToNow, formatRelative, isFuture, isPast } from "date-fns";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { createEventNote, CreateEventNoteRequest } from "src/data/admin-api/events";
-import { Event, getEvent } from "src/data/supabase/events";
+import { EventPermission } from "src/data/eventPermission";
+import { eventStatusToShortDescription } from "src/data/eventStatus";
+import { GlobalPermission } from "src/data/globalPermission";
+import { Event, useGetEvent } from "src/data/supabase/events";
+import useHasEventPermission from "src/hooks/useHasEventPermission";
 import { useSupaMutation } from "src/hooks/useSupaMutation";
-import { useSupaQuery } from "src/hooks/useSupaQuery";
 import { Loading } from "src/shared/Loading";
 import { FimSupabaseClient } from "src/supabaseContext";
+import RichTextEditor from "src/shared/RichTextEditor.tsx";
 
 function EventTiming({ event }: { event: Event }) {
   if (isFuture(event.start_time)) {
@@ -24,13 +27,6 @@ function EventTiming({ event }: { event: Event }) {
   return (<>Ongoing!</>);
 }
 
-function EventStatus({ event }: { event: Event }) {
-  const status = useMemo(() => {
-    return event.status.replace(/([a-z])([A-Z])/g, '$1 $2');
-  }, [event.status]);
-  return (<>{status}</>)
-}
-
 function CreateEventNote({ event }: { event: Event }) {
   const [showPostButton, setShowPostButton] = useState<boolean>(false);
   const queryClient = useQueryClient();
@@ -38,7 +34,7 @@ function CreateEventNote({ event }: { event: Event }) {
     mutationFn: (client: FimSupabaseClient, req: CreateEventNoteRequest) => createEventNote(client, req),
     onSettled: () => {
       queryClient.invalidateQueries({
-        queryKey: ['events', event.id],
+        queryKey: ['event', event.id],
         refetchType: 'active'
       });
     }
@@ -72,6 +68,7 @@ function CreateEventNote({ event }: { event: Event }) {
       <FormControl fullWidth>
         <form.Field name="content">{
           ({ state, handleChange, handleBlur }) => (
+            // <RichTextEditor />
             <TextField multiline label="Add Note" sx={{ width: '100%' }}
               value={state.value ?? ''}
               onChange={(e) => handleChange(e.target.value)}
@@ -93,10 +90,8 @@ function CreateEventNote({ event }: { event: Event }) {
 
 function EventsManageOverview() {
   const { id } = useParams();
-  const eventQuery = useSupaQuery({
-    queryKey: ['events', id!],
-    queryFn: (client) => getEvent(client, id!)
-  });
+  const eventQuery = useGetEvent(id);
+  const canAddNote = useHasEventPermission(id!, [GlobalPermission.Events_Note], [EventPermission.Event_Note]);
 
   return (<Paper sx={{ width: '100%', p: 2 }}>
     {eventQuery.isPending && <Loading />}
@@ -111,7 +106,7 @@ function EventsManageOverview() {
               Event Timing
             </Card>
             <Card sx={{ p: 1, textAlign: 'center', minWidth: '15em' }} elevation={6}>
-              <Typography variant="h5"><EventStatus event={event} /></Typography>
+              <Typography variant="h5">{eventStatusToShortDescription(event.status)}</Typography>
               Status
             </Card>
             <Card sx={{ p: 1, textAlign: 'center', minWidth: '15em' }} elevation={6}>
@@ -127,10 +122,11 @@ function EventsManageOverview() {
           <Typography variant="h5" sx={{ pt: 2 }}>Notes</Typography>
           <Typography variant="body1" sx={{ pb: 2 }}><em>These notes are visible to anyone who is involved with the event, do not share anything sensitive here.</em></Typography>
           <Box display="flex" flexDirection="column" gap={2}>
-            {/* TODO: Lock this behind a permission check */}
-            <Card sx={{ width: '100%', p: 2 }} elevation={4}>
-              <CreateEventNote event={event} />
-            </Card>
+            {canAddNote && (
+              <Card sx={{ width: '100%', p: 2 }} elevation={4}>
+                <CreateEventNote event={event} />
+              </Card>
+            )}
             {event.event_notes?.sort((a, b) => compareDesc(a.created_at, b.created_at)).map(n => (
               <Card sx={{ width: '100%', p: 2 }} elevation={4} key={n.id}>
                 <Typography sx={{ pb: 2 }}>{n.content}</Typography>

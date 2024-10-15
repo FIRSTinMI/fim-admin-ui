@@ -1,6 +1,7 @@
 import parseISO from "date-fns/parseISO";
 import { FimSupabaseClient } from "../../supabaseContext";
 import { useSupaQuery } from "src/hooks/useSupaQuery";
+import { EventStatus } from "../eventStatus";
 
 export type EventSlim = {
   id: string
@@ -10,7 +11,7 @@ export type EventSlim = {
   start_time: Date,
   end_time: Date,
   time_zone: string,
-  status: string,
+  status: EventStatus,
   truck_routes?: {
     id: number,
     name: string
@@ -39,6 +40,14 @@ export const getEventsForSeason = async (client: FimSupabaseClient, seasonId: nu
   return data.map(e => mapDbToEvent(e));
 }
 
+export const useGetEventsForSeason = (seasonId: number | null) => useSupaQuery({
+  queryKey: ["getEventsForSeason", seasonId],
+  queryFn: async (client) => {
+    if (!seasonId) throw new Error("No season ID provided");
+    return await getEventsForSeason(client, seasonId)
+  }
+});
+
 export const getEvent = async (client: FimSupabaseClient, eventId: string): Promise<Event> => {
   const { data, error } = await client
     .from("events")
@@ -49,7 +58,15 @@ export const getEvent = async (client: FimSupabaseClient, eventId: string): Prom
   if (error) throw new Error(error.message);
 
   return mapDbToEvent(data);
-}
+};
+
+export const useGetEvent = (eventId: string | null | undefined) => useSupaQuery({
+  queryKey: ["getEvent", eventId],
+  queryFn: async (client) => {
+    if (eventId === null || eventId === undefined) throw new Error("No event ID provided");
+    return await getEvent(client, eventId);
+  }
+});
 
 const mapDbToEvent = (db: Event): Event => {
   return {

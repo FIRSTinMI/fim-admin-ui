@@ -22,6 +22,8 @@ import TruckRoutes from './pages/routes';
 import useIsAuthenticated from './hooks/useIsAuthenticated';
 import { Loading } from './shared/Loading';
 import ErrorBoundary from './shared/ErrorBoundary';
+import EquipmentRoutes from './pages/equipment';
+import AlertRoutes from "src/pages/alerts";
 
 const menuWidth: number = 240; //px
 const queryClient = new QueryClient();
@@ -32,7 +34,9 @@ const routes = (
     <Route index path="/auth" element={<Auth />} />
     <Route path="/events/*" element={<Events />} />
     <Route path="/users/*" element={<Users />} />
+    <Route path="/alerts/*" element={<AlertRoutes />} />
     <Route path="/routes/*" element={<TruckRoutes />} />
+    <Route path="/equipment/*" element={<EquipmentRoutes />} />
     <Route path="*" element={<NotFound />} />
   </Routes>
 );
@@ -41,7 +45,7 @@ function RootPage() {
   const isAuthed = useIsAuthenticated();
 
   if (isAuthed === null) return (<Loading />);
-  if (isAuthed === true) return (<Navigate to="/events" />);
+  if (isAuthed) return (<Navigate to="/events" />);
   else return (<Navigate to="/auth" />);
 }
 
