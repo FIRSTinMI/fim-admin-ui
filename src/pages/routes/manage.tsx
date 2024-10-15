@@ -2,10 +2,11 @@ import { useParams } from "react-router-dom";
 import useHasGlobalPermission from "src/hooks/useHasGlobalPermission";
 import { getUpcomingEventsForRoute } from "src/data/supabase/truckRoutes";
 import { useSupaQuery } from "src/hooks/useSupaQuery";
+import { GlobalPermission } from "src/data/globalPermission.ts";
 
 function TruckRoutesManage() {
   const params = useParams();
-  const hasEventsView = useHasGlobalPermission("Events_View");
+  const hasEventsView = useHasGlobalPermission([GlobalPermission.Events_View]);
 
   const eventsQuery = useSupaQuery({
     queryKey: ['routeEvents', params['id']],

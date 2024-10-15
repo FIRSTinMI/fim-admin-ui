@@ -15,7 +15,6 @@ import useHasEventPermission from "src/hooks/useHasEventPermission";
 import { useSupaMutation } from "src/hooks/useSupaMutation";
 import { Loading } from "src/shared/Loading";
 import { FimSupabaseClient } from "src/supabaseContext";
-import RichTextEditor from "src/shared/RichTextEditor.tsx";
 
 function EventTiming({ event }: { event: Event }) {
   if (isFuture(event.start_time)) {

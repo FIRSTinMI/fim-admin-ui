@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes } from "react-router-dom";
 import { Typography } from "@mui/material";
 
 function AlertRoutes() {
