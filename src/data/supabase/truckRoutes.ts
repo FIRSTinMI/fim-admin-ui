@@ -1,6 +1,9 @@
 import { formatISO } from "date-fns";
 import { FimSupabaseClient } from "../../supabaseContext";
-import { Event } from "./events";
+import { Event, mapDbToEvent } from "./events";
+import { useSupaQuery } from "src/hooks/useSupaQuery.ts";
+import useHasGlobalPermission from "src/hooks/useHasGlobalPermission.ts";
+import { GlobalPermission } from "src/data/globalPermission.ts";
 
 export type TruckRoute = {
   id: number,
@@ -10,14 +13,42 @@ export type TruckRoute = {
 export const getTruckRoutes = async (client: FimSupabaseClient) => {
   const { data, error } = await client
     .from("truck_routes")
-    .select<string, TruckRoute>("*,id,name");
+    .select("id,name");
 
   if (error) throw new Error(error.message);
 
-  if (data === null) return [];
+  if (data === null) return [] as TruckRoute[];
 
-  return data;
-}
+  return data.map(mapDbToTruckRoute);
+};
+
+export const useGetTruckRoutes = () => useSupaQuery({
+  queryKey: ['getTruckRoutes'],
+  queryFn: async (client) => {
+    return await getTruckRoutes(client);
+  }
+});
+
+export const getTruckRoute = async (client: FimSupabaseClient, id: number) => {
+  const { data, error } = await client
+    .from("truck_routes")
+    .select("id,name")
+    .eq('id', id)
+    .single();
+
+  if (error) throw new Error(error.message);
+
+  if (data === null) return null;
+
+  return mapDbToTruckRoute(data);
+};
+
+export const useGetTruckRoute = (id: number) => useSupaQuery({
+  queryKey: ['getTruckRoute', id],
+  queryFn: async (client) => {
+    return await getTruckRoute(client, id);
+  }
+});
 
 export const getUpcomingEventsForRoute = async(client: FimSupabaseClient, routeId: number) => {
   const { data, error } = await client
@@ -30,5 +61,21 @@ export const getUpcomingEventsForRoute = async(client: FimSupabaseClient, routeI
 
     if (data === null) return [];
 
-    return data;
+    return data.map(mapDbToEvent);
 }
+
+export const useGetUpcomingEventsForRoute = (routeId: number) => {
+  const hasPermission = useHasGlobalPermission([GlobalPermission.Events_View]);
+  return useSupaQuery({
+    queryKey: ['getUpcomingEventsForRoute', routeId],
+    queryFn: async (client) => {
+      return await getUpcomingEventsForRoute(client, routeId);
+    },
+    enabled: hasPermission
+  });
+}
+
+export const mapDbToTruckRoute = (dbRoute: any) => ({
+  id: dbRoute.id,
+  name: dbRoute.name
+} as TruckRoute);

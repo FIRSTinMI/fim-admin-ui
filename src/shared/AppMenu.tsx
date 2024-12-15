@@ -1,4 +1,4 @@
-import {Drawer, DrawerProps, List, styled, Tooltip, useMediaQuery, useTheme} from "@mui/material";
+import { Drawer, DrawerProps, List, styled, Tooltip, useMediaQuery, useTheme } from "@mui/material";
 
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
@@ -8,10 +8,10 @@ import PersonIcon from '@mui/icons-material/Person';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import DevicesIcon from '@mui/icons-material/Devices';
 import WarningIcon from '@mui/icons-material/Warning';
-import {Link, useLocation} from "react-router-dom";
-import {JSX, useCallback, useContext, useEffect, useState} from "react";
-import {SupabaseContext} from "../supabaseContext";
-import {GlobalPermission} from "src/data/globalPermission.ts";
+import { Link, useLocation } from "react-router-dom";
+import { JSX, useCallback, useContext, useEffect, useState } from "react";
+import { SupabaseContext } from "../supabaseContext";
+import { GlobalPermission } from "src/data/globalPermission.ts";
 import useHasGlobalPermission from "src/hooks/useHasGlobalPermission.ts";
 
 type AppMenuProps = {
@@ -36,6 +36,7 @@ const allMenuItems: MenuItem[] = [
   }, {
     title: 'Routes',
     url: '/routes',
+    requiredRole: [GlobalPermission.Equipment_View],
     icon: <LocalShippingIcon />
   }, {
     title: 'Alerts',
@@ -45,7 +46,7 @@ const allMenuItems: MenuItem[] = [
   }, {
     title: 'Equipment',
     url: '/equipment',
-    requiredRole: [GlobalPermission.Equipment_Note, GlobalPermission.Equipment_Manage],
+    requiredRole: [GlobalPermission.Equipment_Note, GlobalPermission.Equipment_View],
     icon: <DevicesIcon />
   }, {
     title: 'Users',

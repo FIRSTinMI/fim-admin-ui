@@ -37,7 +37,7 @@ export const getEventsForSeason = async (client: FimSupabaseClient, seasonId: nu
 
   if (data === null) return [];
 
-  return data.map(e => mapDbToEvent(e));
+  return data.map(mapDbToEvent);
 }
 
 export const useGetEventsForSeason = (seasonId: number | null) => useSupaQuery({
@@ -68,7 +68,7 @@ export const useGetEvent = (eventId: string | null | undefined) => useSupaQuery(
   }
 });
 
-const mapDbToEvent = (db: Event): Event => {
+export const mapDbToEvent = (db: Event): Event => {
   return {
     id: db.id,
     key: db.key,

@@ -1,6 +1,22 @@
 import { useState, useEffect, useCallback, useMemo, JSXElementConstructor } from "react";
-import { FormControl, InputLabel, Select, MenuItem, Button, Link, Alert, Box } from "@mui/material";
-import { DataGrid, GridColDef, useGridApiRef } from "@mui/x-data-grid";
+import {
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Button,
+  Link,
+  Alert,
+  Box,
+  Divider,
+  Typography, styled
+} from "@mui/material";
+import {
+  DataGrid,
+  GridColDef,
+  GridFilterModel,
+  useGridApiRef
+} from "@mui/x-data-grid";
 import format from "date-fns/format";
 import { Link as RouterLink } from "react-router-dom";
 import { EventSlim, useGetEventsForSeason } from "src/data/supabase/events";
@@ -11,6 +27,8 @@ import useHasGlobalPermission from "src/hooks/useHasGlobalPermission";
 import { GlobalPermission } from "src/data/globalPermission";
 import DataTableFilterToolbar from "src/shared/DataTableFilterToolbar.tsx";
 import { eventStatusToShortDescription } from "src/data/eventStatus.ts";
+import { isWithinInterval } from "date-fns";
+import StyledGridOverlay from "src/shared/StyledGridOverlay.tsx";
 
 function EventManageButton({ event }: { event: EventSlim }) {
   return (
@@ -18,7 +36,15 @@ function EventManageButton({ event }: { event: EventSlim }) {
   )
 }
 
-const formatDate = (date: Date) => format(date, "PP");
+const WrappedDataGrid = styled('div')`
+  max-width: 100%;
+  overflow-x: scroll;
+  .MuiDataGrid-virtualScroller {
+    overflow-x: hidden;
+  }
+`;
+
+export const formatEventDate = (date: Date) => format(date, "PP");
 
 let tableColumns: GridColDef<EventSlim[][number]>[] = [
   { field: 'key', headerName: 'Event Key', width: 150 },
@@ -36,8 +62,15 @@ let tableColumns: GridColDef<EventSlim[][number]>[] = [
         : <></>
       ),
   },
-  { field: 'start_time', headerName: 'Start', width: 110, valueFormatter: formatDate },
-  { field: 'end_time', headerName: 'End', width: 110, valueFormatter: formatDate },
+  { field: 'start_time', headerName: 'Start', width: 110, valueFormatter: formatEventDate, type: "dateTime" },
+  { field: 'end_time', headerName: 'End', width: 110, valueFormatter: formatEventDate, type: "dateTime" },
+  {
+    field: 'is_current',
+    headerName: 'Is Current?',
+    valueGetter: (_, row) =>
+      isWithinInterval(new Date(), { start: row.start_time, end: row.end_time }),
+    valueFormatter: (value) => (value === true ? 'Yes' : 'No')
+  },
   { field: 'status', headerName: 'Status', valueFormatter: eventStatusToShortDescription },
   { 
     field: 'actions',
@@ -45,7 +78,31 @@ let tableColumns: GridColDef<EventSlim[][number]>[] = [
     filterable: false,
     hideable: false,
     headerName: 'Actions',
+    // getActions: (params: GridRowParams) => [
+    //   <GridActionsCellItem
+    //     label="Manage"
+    //     //icon={params.row.is_discarded ? <Restore /> : <Delete />}
+    //     component={RouterLink}
+    //     to={`${params.row.id}`}
+    //     // onClick={async () => await setIsDiscardedMutation.mutateAsync({
+    //     //   matchId: params.row.id,
+    //     //   eventId: eventId!,
+    //     //   isDiscarded: !params.row.is_discarded
+    //     // })}
+    //     showInMenu />
+    // ],
     renderCell: (params) => (<EventManageButton event={params.row} />)
+  }
+];
+
+const presetFilters: { label: string, filterModel: GridFilterModel }[] = [
+  {
+    label: 'All',
+    filterModel: { items: [] }
+  },
+  {
+    label: 'Current Events',
+    filterModel: { items: [{field: 'is_current', operator: 'equals', value: "true"}] }
   }
 ];
 
@@ -91,7 +148,18 @@ function EventsList() {
   const tableToolbar = useMemo((): JSXElementConstructor<any> => {
     return () => (
       <DataTableFilterToolbar>
-        <Button variant="text" onClick={showHideKeys}>{showKeys ? "Hide" : "Show"} Keys</Button>
+        <>
+          <Button variant="text" onClick={showHideKeys}>{showKeys ? "Hide" : "Show"} Keys</Button>
+          <Divider orientation="vertical" variant="middle" flexItem sx={{ml: 1, mr: 2}} />
+          
+          <Typography sx={{alignSelf: "center"}}>Quick filters:</Typography> 
+          {presetFilters.map(filter => (
+            <Button key={filter.label} variant="text" onClick={() => grid.current.setFilterModel(filter.filterModel)}>
+              {filter.label}
+            </Button>
+          ))}
+          <div style={{flexGrow: 1}} />
+        </>
       </DataTableFilterToolbar>
     );
   }, [showKeys, showHideKeys]);
@@ -100,8 +168,8 @@ function EventsList() {
   if (getSeasonsQuery.isError) return (<Alert severity="error">Unable to get seasons!</Alert>);
 
   return (
-    <>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 1 }}>
+    <Box sx={{maxWidth: '100%'}}>
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 1, maxWidth: '100%' }}>
         <FormControl fullWidth>
           <InputLabel id="seasonLabel">Season</InputLabel>
           <Select
@@ -127,12 +195,20 @@ function EventsList() {
       {selectedSeason && <>
         {getEventsQuery.isLoading && <Loading />}
         {getEventsQuery.isError && <Alert severity="error">Failed to get events</Alert>}
-        {getEventsQuery.isSuccess && <Box>
+        {getEventsQuery.isSuccess && <WrappedDataGrid sx={{ display: 'flex', flexDirection: 'column', minHeight: '400px', pb: '2em', maxWidth: '100%' }}>
           <DataGrid
             apiRef={grid}
             columns={tableColumns}
             rows={getEventsQuery.data}
-            slots={{ toolbar: tableToolbar }}
+            slots={{
+              toolbar: tableToolbar,
+              noRowsOverlay: () => (
+                <StyledGridOverlay>No events exist for this season.</StyledGridOverlay>
+              ),
+              noResultsOverlay: () => (
+                <StyledGridOverlay>No events were found that match your filter settings.</StyledGridOverlay>
+              )
+            }}
             initialState={{
               pagination: {
                 paginationModel: {
@@ -144,12 +220,17 @@ function EventsList() {
                   field: 'start_time',
                   sort: 'asc'
                 }]
+              },
+              columns: {
+                columnVisibilityModel: {
+                  is_current: false
+                }
               }
             }}
           />
-        </Box>}
+        </WrappedDataGrid>}
       </>}
-    </>
+    </Box>
   );
 }
 

@@ -1,17 +1,19 @@
-import { Button, Box, CircularProgress } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Button, Box, CircularProgress, Link } from "@mui/material";
+import { Link as RouterLink } from "react-router-dom";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { TruckRoute, getTruckRoutes } from "../../data/supabase/truckRoutes";
-import { useSupaQuery } from "src/hooks/useSupaQuery";
+import { TruckRoute, useGetTruckRoutes } from "../../data/supabase/truckRoutes";
 
 function RouteManageButton({ route }: { route: TruckRoute }) {
   return (
-    <Button component={Link} to={`${route.id}`}>Manage</Button>
+    <Button component={RouterLink} to={`${route.id}`}>Manage</Button>
   )
 }
 
 const tableColumns: GridColDef<TruckRoute[][number]>[] = [
-  { field: 'name', headerName: 'Name', minWidth: 300, flex: 1 },
+  { field: 'name', headerName: 'Name', minWidth: 300, flex: 1, renderCell: (params) => (
+      <Link component={RouterLink} to={`/routes/${params.row.id}`}>{params.row.name}</Link>
+    )
+  },
   { 
     field: 'actions',
     sortable: false,
@@ -23,10 +25,7 @@ const tableColumns: GridColDef<TruckRoute[][number]>[] = [
 ];
 
 function TruckRoutesList() {
-  const query = useSupaQuery({
-    queryKey: ['truckRoutes'],
-    queryFn: async (client) => await getTruckRoutes(client)
-  });
+  const query = useGetTruckRoutes();
 
   return (
     <>
