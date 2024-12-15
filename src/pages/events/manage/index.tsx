@@ -22,11 +22,11 @@ const routes = [{
   path: "/matches",
   label: "Matches",
   element: (<EventsManageMatches />)
-}, {
-  path: "/teams",
-  label: "Teams",
-  element: (<p>Not yet implemented.</p>)
-}//, {
+}// , {
+//   path: "/teams",
+//   label: "Teams",
+//   element: (<p>Not yet implemented.</p>)
+// }, {
 //   path: "/staff",
 //   label: "Staff",
 //   element: (<EventsManageStaff />),
@@ -53,7 +53,7 @@ function useRouteMatch(patterns: readonly string[]) {
 function EventTab({ eventId, path, label, eventPermission, globalPermission }: { value: string, eventId: string, path: string, label: string, eventPermission?: EventPermission, globalPermission?: GlobalPermission }) {
   const hasPermission = useHasEventPermission(eventId, globalPermission ? [globalPermission] : [], eventPermission ? [eventPermission] : []);
   if (hasPermission) {
-    return (<Tab label={label} component={Link} to={`.${path}`} />);
+    return (<Tab label={label} component={Link} to={`..${path}`} />);
   } else {
     return (<></>);
   }

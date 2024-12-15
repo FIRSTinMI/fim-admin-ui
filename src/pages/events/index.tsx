@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import EventsList from "./list";
 import EventsManage from "./manage";
 import EventsCreate from "./create";
@@ -12,7 +12,10 @@ function Events() {
       <Routes>
         <Route index path="/" element={<EventsList />} />
         <Route path="/create" element={<EventsCreate />} />
-        <Route path="/:id/*" element={<EventsManage />} />
+        <Route path="/:id">
+          <Route path="" element={<Navigate to={"./overview"} replace />} />
+          <Route path="*" element={<EventsManage />} />
+        </Route>
       </Routes>
     </>
   )

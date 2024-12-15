@@ -13,7 +13,8 @@ export type TruckRoute = {
 export const getTruckRoutes = async (client: FimSupabaseClient) => {
   const { data, error } = await client
     .from("truck_routes")
-    .select("id,name");
+    .select("id,name")
+    .order("name");
 
   if (error) throw new Error(error.message);
 
