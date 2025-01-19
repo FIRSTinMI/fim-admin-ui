@@ -22,7 +22,6 @@ import { GlobalPermission } from "src/data/globalPermission.ts";
 import { EventPermission } from "src/data/eventPermission.ts";
 import { useSupaMutation } from "src/hooks/useSupaMutation.ts";
 import { updateEventTeam, UpdateEventTeamRequest } from "src/data/admin-api/events.ts";
-import { useQueryClient } from "@tanstack/react-query";
 import { Cancel, Edit, Save } from "@mui/icons-material";
 
 const DATA_REFRESH_SEC = 60;
@@ -43,14 +42,8 @@ const EventsManageMatches = () => {
   });
   const statuses = useGetEventTeamStatuses();
   const canManageTeams = useHasEventPermission(eventId!, [GlobalPermission.Events_Manage], [EventPermission.Event_ManageTeams]);
-  const queryClient = useQueryClient();
   const updateTeamMutation = useSupaMutation({
-    mutationFn: (client, req: UpdateEventTeamRequest) => updateEventTeam(client, req),
-    onSettled: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ['getEventTeams', eventId]
-      });
-    }
+    mutationFn: (client, req: UpdateEventTeamRequest) => updateEventTeam(client, req)
   });
   const apiRef = useGridApiRef();
   
