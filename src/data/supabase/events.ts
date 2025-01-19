@@ -27,6 +27,19 @@ export type Event = EventSlim & {
   }[]
 };
 
+export type EventTeamStatus = {
+  id: string,
+  name: string,
+  ordinal: number
+};
+
+export type EventTeam = {
+  id: number,
+  teamNumber: number,
+  notes: string | null,
+  status: EventTeamStatus['id']
+};
+
 export const getEventsForSeason = async (client: FimSupabaseClient, seasonId: number): Promise<EventSlim[]> => {
   const { data, error } = await client
     .from("events")
@@ -68,6 +81,44 @@ export const useGetEvent = (eventId: string | null | undefined) => useSupaQuery(
   }
 });
 
+export const getEventTeams = async (client: FimSupabaseClient, eventId: string): Promise<EventTeam[]> => {
+  const { data, error } = await client
+    .from("event_teams")
+    .select<string, EventTeam>("id,team_number,notes,status_id")
+    .eq('event_id', eventId);
+
+  if (error) throw new Error(error.message);
+
+  return data.map(mapDbToEventTeam);
+};
+
+export const useGetEventTeams = (eventId: string | null | undefined, options: {enabled?: () => boolean, refetchInterval?: number} = {}) => useSupaQuery({
+  ...options,
+  queryKey: ["getEventTeams", eventId],
+  queryFn: async (client) => {
+    if (eventId === null || eventId === undefined) throw new Error("No event ID provided");
+    return await getEventTeams(client, eventId);
+  }
+});
+
+export const getEventTeamStatuses = async (client: FimSupabaseClient): Promise<EventTeamStatus[]> => {
+  const { data, error } = await client
+    .from("event_team_statuses")
+    .select<string, EventTeamStatus>("id,name,ordinal")
+    .order("ordinal", { ascending: true });
+
+  if (error) throw new Error(error.message);
+
+  return data;
+};
+
+export const useGetEventTeamStatuses = () => useSupaQuery({
+  queryKey: ["eventTeamStatuses"],
+  queryFn: async (client) => {
+    return await getEventTeamStatuses(client);
+  }
+});
+
 export const mapDbToEvent = (db: Event): Event => {
   return {
     id: db.id,
@@ -90,6 +141,15 @@ export const mapDbToEvent = (db: Event): Event => {
     })) : undefined
   } as Event;
 }
+
+export const mapDbToEventTeam = (db: any): EventTeam => {
+  return {
+    id: db.id,
+    notes: db.notes,
+    status: db.status_id,
+    teamNumber: db.team_number
+  };
+};
 
 export const getEventQueryKey = (eventId: string) => ['event', eventId] as [string, ...unknown[]];
 export const useGetEventQuery = (eventId: string, refetch: boolean = true) => useSupaQuery({

@@ -7,6 +7,7 @@ import { EventPermission } from "src/data/eventPermission";
 import useHasEventPermission from "src/hooks/useHasEventPermission";
 //import EventsManageStaff from "src/pages/events/manage/staff.tsx";
 import EventsManageMatches from "src/pages/events/manage/matches.tsx";
+import EventsManageTeams from "src/pages/events/manage/teams.tsx";
 
 const routes = [{
   path: "/overview",
@@ -22,11 +23,11 @@ const routes = [{
   path: "/matches",
   label: "Matches",
   element: (<EventsManageMatches />)
+} , {
+  path: "/teams",
+  label: "Teams",
+  element: (<EventsManageTeams />)
 }// , {
-//   path: "/teams",
-//   label: "Teams",
-//   element: (<p>Not yet implemented.</p>)
-// }, {
 //   path: "/staff",
 //   label: "Staff",
 //   element: (<EventsManageStaff />),
