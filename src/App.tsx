@@ -24,6 +24,7 @@ import { Loading } from './shared/Loading';
 import ErrorBoundary from './shared/ErrorBoundary';
 import EquipmentRoutes from './pages/equipment';
 import AlertRoutes from "src/pages/alerts";
+import { SnackbarProvider } from "notistack";
 
 const menuWidth: number = 240; //px
 const queryClient = new QueryClient();
@@ -83,6 +84,7 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
+      <SnackbarProvider />
       <BrowserRouter>
         <Box sx={{ display: 'flex' }}>
           <CssBaseline />
