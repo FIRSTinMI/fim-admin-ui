@@ -41,6 +41,7 @@ export const getEquipmentOfType = async <TConfig = DefaultConfiguration>(client:
     .from("equipment")
     .select("id,name,teamviewer_id,slack_user_id,truck_routes(id,name),equipment_types(id,name),configuration")
     .eq('equipment_type_id', typeId)
+    .order('name', {ascending: true})
     .returns<any[]>();
 
   if (error?.code === "PGRST116") return [];

@@ -14,7 +14,7 @@ import {
   useGridApiRef
 } from "@mui/x-data-grid";
 import { Alert, Box, Button, Typography } from "@mui/material";
-import { JSXElementConstructor, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import DataTableFilterToolbar from "src/shared/DataTableFilterToolbar.tsx";
 import { EventTeam, useGetEventTeams, useGetEventTeamStatuses } from "src/data/supabase/events.ts";
 import useHasEventPermission from "src/hooks/useHasEventPermission.ts";
@@ -23,6 +23,7 @@ import { EventPermission } from "src/data/eventPermission.ts";
 import { useSupaMutation } from "src/hooks/useSupaMutation.ts";
 import { updateEventTeam, UpdateEventTeamRequest } from "src/data/admin-api/events.ts";
 import { Cancel, Edit, Save } from "@mui/icons-material";
+import { enqueueSnackbar } from "notistack";
 
 const DATA_REFRESH_SEC = 60;
 
@@ -33,11 +34,13 @@ const presetFilters: { label: string, filterModel: GridFilterModel }[] = [
   }
 ];
 
-const EventsManageMatches = () => {
+const EventsManageTeams = () => {
   const { id: eventId } = useParams();
   const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
+  const shouldRefetch = useMemo(() => !Object.values(rowModesModel).some(() => true) //r.mode == GridRowModes.Edit
+  , [rowModesModel]);
   const teams = useGetEventTeams(eventId!, {
-    enabled: () => !Object.values(rowModesModel).some(r => r.mode == GridRowModes.Edit),
+    enabled: () => shouldRefetch,
     refetchInterval: DATA_REFRESH_SEC * 1_000
   });
   const statuses = useGetEventTeamStatuses();
@@ -47,24 +50,24 @@ const EventsManageMatches = () => {
   });
   const apiRef = useGridApiRef();
   
-  const handleEditClick = (id: GridRowId) => () => {
+  const handleEditClick = useCallback((id: GridRowId) => () => {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
-  };
+  }, [setRowModesModel, rowModesModel]);
 
-  const handleSaveClick = (id: GridRowId) => () => {
+  const handleSaveClick = useCallback((id: GridRowId) => () => {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
-  };
+  }, [setRowModesModel, rowModesModel]);
 
-  const handleCancelClick = (id: GridRowId) => () => {
+  const handleCancelClick = useCallback((id: GridRowId) => () => {
     setRowModesModel({
       ...rowModesModel,
       [id]: { mode: GridRowModes.View, ignoreModifications: true },
     });
-  };
+  }, [setRowModesModel, rowModesModel]);
 
-  const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
+  const handleRowModesModelChange = useCallback((newRowModesModel: GridRowModesModel) => {
     setRowModesModel(newRowModesModel);
-  };
+  }, [setRowModesModel]);
   
   const columnConfig: GridColDef[] = useMemo<GridColDef<(EventTeam & {isLoading: boolean | undefined})[][number]>[]>(() => ([
     {
@@ -82,7 +85,7 @@ const EventsManageMatches = () => {
       getOptionValue: (val: any) => val.id,
       editable: canManageTeams,
       renderEditCell: params => (
-        params.row.isLoading ? <GridSkeletonCell /> : <GridEditSingleSelectCell {...params} />
+        params.row.isLoading ? <GridSkeletonCell style={{borderTop: 'none'}} /> : <GridEditSingleSelectCell {...params} />
       )
     },
     {
@@ -92,7 +95,7 @@ const EventsManageMatches = () => {
       flex: 1,
       editable: canManageTeams,
       renderEditCell: params => (
-        params.row.isLoading ? <GridSkeletonCell /> : <GridEditInputCell {...params} />
+        params.row.isLoading ? <GridSkeletonCell style={{borderTop: 'none'}} /> : <GridEditInputCell {...params} />
       )
     },
     {
@@ -137,7 +140,7 @@ const EventsManageMatches = () => {
     },
   ]), [statuses.data, canManageTeams, rowModesModel]);
 
-  const tableToolbar = useMemo((): JSXElementConstructor<any> => {
+  const tableToolbar = useMemo(() => {
     return () => (
       <DataTableFilterToolbar>
         <div>
@@ -151,17 +154,16 @@ const EventsManageMatches = () => {
       </DataTableFilterToolbar>
     );
   }, [apiRef.current]);
-
-  if (teams.isLoading || statuses.isLoading) return (<Loading />);
+  if (teams.isPending || statuses.isPending) return (<Loading />);
 
   if (teams.isError) return (<Alert severity="error">Failed to get teams</Alert>);
 
   if (teams.isSuccess) return (
     <Box sx={{paddingBottom: 5}}>
       <Typography sx={{textAlign: 'center', paddingBottom: 2}}>
-        {Object.values(rowModesModel).some(r => r.mode == GridRowModes.Edit)
-          ? "Automatic refresh disabled while editing"
-          : `Data automatically refreshes every ${DATA_REFRESH_SEC} seconds`}
+        {shouldRefetch
+          ? `Data automatically refreshes every ${DATA_REFRESH_SEC} seconds`
+          : "Automatic refresh disabled while editing"}
       </Typography>
       <DataGrid
         apiRef={apiRef}
@@ -180,14 +182,29 @@ const EventsManageMatches = () => {
             notes: newRow.notes !== '' ? newRow.notes : null,
             status: newRow.status
           });
-
+          console.log('finished mutating');
+          
           return {
             ...newRow,
             isLoading: false,
           };
           
         }}
-        onProcessRowUpdateError={(err) => {console.error(err)}}
+        onProcessRowUpdateError={async (err) => {
+          // If an update fails, we'll just bail out of edit mode and refresh the whole dataset to ensure consistency
+          console.error(err);
+          enqueueSnackbar("Failed to update team", {
+            variant: 'error'
+          });
+          setRowModesModel(rows => {
+            for (let key in rows) {
+              rows[key] = {mode: GridRowModes.View, ignoreModifications: true}
+            }
+            
+            return rows;
+          });
+          await teams.refetch();
+        }}
         initialState={{
           pagination: {
             paginationModel: {
@@ -206,4 +223,4 @@ const EventsManageMatches = () => {
   );
 };
 
-export default EventsManageMatches;
+export default EventsManageTeams;
