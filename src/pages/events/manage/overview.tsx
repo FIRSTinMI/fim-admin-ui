@@ -33,7 +33,7 @@ function CreateEventNote({ event }: { event: Event }) {
     mutationFn: (client: FimSupabaseClient, req: CreateEventNoteRequest) => createEventNote(client, req),
     onSettled: () => {
       queryClient.invalidateQueries({
-        queryKey: ['event', event.id],
+        queryKey: ['getEvent', event.id],
         refetchType: 'active'
       });
     }
@@ -128,7 +128,7 @@ function EventsManageOverview() {
             )}
             {event.event_notes?.sort((a, b) => compareDesc(a.created_at, b.created_at)).map(n => (
               <Card sx={{ width: '100%', p: 2 }} elevation={4} key={n.id}>
-                <Typography sx={{ pb: 2 }}>{n.content}</Typography>
+                <Typography sx={{ pb: 2, whiteSpace: 'pre-wrap', hyphens: 'auto' }}>{n.content}</Typography>
                 <Typography variant="body1" display="flex" flexWrap="wrap" alignItems="center" justifyContent="flex-end" gap={1}>
                   {/* <Box display="flex" alignItems="center" gap={0.5}><Person fontSize="inherit" titleAccess="Added by" /> <span>(Unknown user)</span></Box> */}
                   <Box component="span" display="flex" alignItems="center" gap={0.5}><AccessTime fontSize="inherit" titleAccess="Added at" />{formatRelative(n.created_at, new Date())}</Box>
