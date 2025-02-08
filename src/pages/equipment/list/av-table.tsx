@@ -17,6 +17,18 @@ type AvCartConfiguration = {
     RtmpUrl: string
   }[]
 };
+
+const getRelativeTime = (value: string | null): string | null => {
+  if (!value) {
+    return null;
+  }
+  if (value === "infinity") {
+    return "Now";
+  }
+  
+  return formatDistanceToNow(new Date(value), { addSuffix: true });
+}
+
 const AvEquipmentTable = () => {
   const carts = useGetEquipmentOfType<AvCartConfiguration>(1);
   
@@ -30,7 +42,7 @@ const AvEquipmentTable = () => {
         { field: 'name', headerName: 'Name', flex: 1, minWidth: 150, renderCell: (params) => (
             <Link component={RouterLink} to={`./${params.row.id}`}>{params.value}</Link>
           ) },
-        { field: 'lastSeen', headerName: 'Last Seen', minWidth: 250, valueGetter: (_, row) => !row.configuration.LastSeen ? null : formatDistanceToNow(new Date(row.configuration.LastSeen), { addSuffix: true }) },
+        { field: 'lastSeen', headerName: 'Last Seen', minWidth: 250, valueGetter: (_, row) => getRelativeTime(row.configuration.LastSeen) },
         { field: 'assistantVersion', headerName: 'Assistant Version', minWidth: 250, valueGetter: (_, row) => row.configuration.AssistantVersion }
       ]} />
     </div>
