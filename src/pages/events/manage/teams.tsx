@@ -21,9 +21,10 @@ import useHasEventPermission from "src/hooks/useHasEventPermission.ts";
 import { GlobalPermission } from "src/data/globalPermission.ts";
 import { EventPermission } from "src/data/eventPermission.ts";
 import { useSupaMutation } from "src/hooks/useSupaMutation.ts";
-import { updateEventTeam, UpdateEventTeamRequest } from "src/data/admin-api/events.ts";
+import { refreshEventTeams, updateEventTeam, UpdateEventTeamRequest } from "src/data/admin-api/events.ts";
 import { Cancel, Edit, Save } from "@mui/icons-material";
 import { enqueueSnackbar } from "notistack";
+import { useQueryClient } from "@tanstack/react-query";
 
 const DATA_REFRESH_SEC = 60;
 
@@ -39,6 +40,7 @@ const EventsManageTeams = () => {
   const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
   const shouldRefetch = useMemo(() => !Object.values(rowModesModel).some(() => true) //r.mode == GridRowModes.Edit
   , [rowModesModel]);
+  const queryClient = useQueryClient();
   const teams = useGetEventTeams(eventId!, {
     enabled: () => shouldRefetch,
     refetchInterval: DATA_REFRESH_SEC * 1_000
@@ -47,6 +49,14 @@ const EventsManageTeams = () => {
   const canManageTeams = useHasEventPermission(eventId!, [GlobalPermission.Events_Manage], [EventPermission.Event_ManageTeams]);
   const updateTeamMutation = useSupaMutation({
     mutationFn: (client, req: UpdateEventTeamRequest) => updateEventTeam(client, req)
+  });
+  const refreshTeamsMutation = useSupaMutation({
+    mutationFn: (client) => refreshEventTeams(client, eventId!),
+    onSettled: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["getEventTeams", eventId]
+      })
+    }
   });
   const apiRef = useGridApiRef();
   
@@ -154,17 +164,22 @@ const EventsManageTeams = () => {
       </DataTableFilterToolbar>
     );
   }, [apiRef.current]);
-  if (teams.isPending || statuses.isPending) return (<Loading />);
+  if (teams.isPending || statuses.isPending || refreshTeamsMutation.isPending) return (<Loading />);
 
   if (teams.isError) return (<Alert severity="error">Failed to get teams</Alert>);
 
   if (teams.isSuccess) return (
     <Box sx={{paddingBottom: 5}}>
-      <Typography sx={{textAlign: 'center', paddingBottom: 2}}>
-        {shouldRefetch
-          ? `Data automatically refreshes every ${DATA_REFRESH_SEC} seconds`
-          : "Automatic refresh disabled while editing"}
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'center', paddingBottom: 2 }}>
+        <Typography sx={{textAlign: 'center', flex: 1}}>
+          {shouldRefetch
+            ? `Data automatically refreshes every ${DATA_REFRESH_SEC} seconds`
+            : "Automatic refresh disabled while editing"}
+        </Typography>
+        {canManageTeams && (
+          <Button onClick={refreshTeamsMutation.mutateAsync}>Refresh Team List</Button>
+        )}
+      </Box>
       <DataGrid
         apiRef={apiRef}
         columns={columnConfig}
@@ -182,7 +197,6 @@ const EventsManageTeams = () => {
             notes: newRow.notes !== '' ? newRow.notes : null,
             status: newRow.status
           });
-          console.log('finished mutating');
           
           return {
             ...newRow,

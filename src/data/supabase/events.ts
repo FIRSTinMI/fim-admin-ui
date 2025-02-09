@@ -19,6 +19,7 @@ export type EventSlim = {
 };
 
 export type Event = EventSlim & {
+  season_id: number,
   event_notes?: {
     id: number,
     content: string,
@@ -44,17 +45,22 @@ export const getEventsForSeason = async (client: FimSupabaseClient, seasonId: nu
   const { data, error } = await client
     .from("events")
     .select<string, EventSlim>("id,key,code,name,start_time,end_time,status,truck_routes(id,name)")
+    .order("start_time", {ascending: true})
+    .order("name", {ascending: true})
     .eq('season_id', seasonId);
 
   if (error) throw new Error(error.message);
 
   if (data === null) return [];
 
-  return data.map(mapDbToEvent);
+  return data.map(mapDbToEventSlim);
 }
 
+export const getEventsForSeasonQueryKey = 
+  (seasonId: number | null) => ["getEventsForSeason", seasonId]; 
+
 export const useGetEventsForSeason = (seasonId: number | null) => useSupaQuery({
-  queryKey: ["getEventsForSeason", seasonId],
+  queryKey: getEventsForSeasonQueryKey(seasonId),
   queryFn: async (client) => {
     if (!seasonId) throw new Error("No season ID provided");
     return await getEventsForSeason(client, seasonId)
@@ -73,12 +79,16 @@ export const getEvent = async (client: FimSupabaseClient, eventId: string): Prom
   return mapDbToEvent(data);
 };
 
-export const useGetEvent = (eventId: string | null | undefined) => useSupaQuery({
-  queryKey: ["getEvent", eventId],
+export const getEventQueryKey =
+  (eventId: string | null | undefined) => ["getEvent", eventId];
+
+export const useGetEvent = (eventId: string | null | undefined, refetch: boolean = true) => useSupaQuery({
+  queryKey: getEventQueryKey(eventId),
   queryFn: async (client) => {
     if (eventId === null || eventId === undefined) throw new Error("No event ID provided");
     return await getEvent(client, eventId);
-  }
+  },
+  refetchOnWindowFocus: refetch
 });
 
 export const getEventTeams = async (client: FimSupabaseClient, eventId: string): Promise<EventTeam[]> => {
@@ -92,9 +102,12 @@ export const getEventTeams = async (client: FimSupabaseClient, eventId: string):
   return data.map(mapDbToEventTeam);
 };
 
+export const getEventTeamsQueryKey =
+  (eventId: string | null | undefined) => ["getEventTeams", eventId];
+
 export const useGetEventTeams = (eventId: string | null | undefined, options: {enabled?: () => boolean, refetchInterval?: number} = {}) => useSupaQuery({
   ...options,
-  queryKey: ["getEventTeams", eventId],
+  queryKey: getEventTeamsQueryKey(eventId),
   queryFn: async (client) => {
     if (eventId === null || eventId === undefined) throw new Error("No event ID provided");
     return await getEventTeams(client, eventId);
@@ -112,14 +125,16 @@ export const getEventTeamStatuses = async (client: FimSupabaseClient): Promise<E
   return data;
 };
 
+export const getEventTeamStatusesQueryKey = () => ["getEventTeamStatuses"];
+
 export const useGetEventTeamStatuses = () => useSupaQuery({
-  queryKey: ["eventTeamStatuses"],
+  queryKey: getEventTeamStatusesQueryKey(),
   queryFn: async (client) => {
     return await getEventTeamStatuses(client);
   }
 });
 
-export const mapDbToEvent = (db: Event): Event => {
+export const mapDbToEventSlim = (db: EventSlim): EventSlim => {
   return {
     id: db.id,
     key: db.key,
@@ -133,6 +148,13 @@ export const mapDbToEvent = (db: Event): Event => {
       id: db.truck_routes.id,
       name: db.truck_routes.name
     } : undefined,
+  } as EventSlim;
+}
+
+export const mapDbToEvent = (db: Event): Event => {
+  return {
+    ...mapDbToEventSlim(db),
+    season_id: db.season_id,
     event_notes: db.event_notes ? db.event_notes.map(n => ({
       id: n.id,
       content: n.content,
@@ -150,10 +172,3 @@ export const mapDbToEventTeam = (db: any): EventTeam => {
     teamNumber: db.team_number
   };
 };
-
-export const getEventQueryKey = (eventId: string) => ['event', eventId] as [string, ...unknown[]];
-export const useGetEventQuery = (eventId: string, refetch: boolean = true) => useSupaQuery({
-  queryKey: getEventQueryKey(eventId),
-  queryFn: (client) => getEvent(client, eventId),
-  refetchOnWindowFocus: refetch
-});

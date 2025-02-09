@@ -8,7 +8,7 @@ import { useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { updateEventInfo, UpdateEventInfoRequest } from "src/data/admin-api/events";
 import { EventStatus, eventStatusToShortDescription } from "src/data/eventStatus";
-import { useGetEventQuery } from "src/data/supabase/events";
+import { getEventQueryKey, getEventsForSeasonQueryKey, useGetEvent } from "src/data/supabase/events";
 import { getTruckRoutes } from "src/data/supabase/truckRoutes";
 import { useSupaMutation } from "src/hooks/useSupaMutation";
 import { useSupaQuery } from "src/hooks/useSupaQuery";
@@ -17,7 +17,7 @@ import { Loading } from "src/shared/Loading";
 function EventsManageEventInfo() {
   const { id } = useParams();
   const queryClient = useQueryClient();
-  const eventQuery = useGetEventQuery(id!, false);
+  const eventQuery = useGetEvent(id!, false);
   const truckRoutesQuery = useSupaQuery({
     queryKey: ['truckRoutes'],
     queryFn: (client) => getTruckRoutes(client)
@@ -27,9 +27,9 @@ function EventsManageEventInfo() {
     mutationFn: (client, req: UpdateEventInfoRequest) => updateEventInfo(client, req),
     onSettled: async () => {
       await Promise.all([queryClient.invalidateQueries({
-        queryKey: ['events']
+        queryKey: getEventsForSeasonQueryKey(eventQuery.data?.season_id ?? null)
       }), queryClient.invalidateQueries({
-        queryKey: ['event', id]
+        queryKey: getEventQueryKey(eventQuery.data?.id)
       })]);
     }
   });

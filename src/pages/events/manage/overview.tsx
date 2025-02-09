@@ -10,7 +10,7 @@ import { createEventNote, CreateEventNoteRequest } from "src/data/admin-api/even
 import { EventPermission } from "src/data/eventPermission";
 import { eventStatusToShortDescription } from "src/data/eventStatus";
 import { GlobalPermission } from "src/data/globalPermission";
-import { Event, useGetEvent } from "src/data/supabase/events";
+import { Event, getEventQueryKey, useGetEvent } from "src/data/supabase/events";
 import useHasEventPermission from "src/hooks/useHasEventPermission";
 import { useSupaMutation } from "src/hooks/useSupaMutation";
 import { Loading } from "src/shared/Loading";
@@ -33,7 +33,7 @@ function CreateEventNote({ event }: { event: Event }) {
     mutationFn: (client: FimSupabaseClient, req: CreateEventNoteRequest) => createEventNote(client, req),
     onSettled: () => {
       queryClient.invalidateQueries({
-        queryKey: ['getEvent', event.id],
+        queryKey: getEventQueryKey(event.id),
         refetchType: 'active'
       });
     }

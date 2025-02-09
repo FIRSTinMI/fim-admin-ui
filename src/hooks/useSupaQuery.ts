@@ -13,7 +13,7 @@ type UseSupaQueryOptions<TQueryFnData, TError, TData, TQueryKey extends QueryKey
  * @see useQuery
  */
 export function useSupaQuery<
-  TQueryKey extends [string, ...unknown[]],
+  TQueryKey extends QueryKey,
   TQueryFnData,
   TError,
   TData = TQueryFnData

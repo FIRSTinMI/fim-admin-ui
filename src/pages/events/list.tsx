@@ -30,12 +30,6 @@ import { eventStatusToShortDescription } from "src/data/eventStatus.ts";
 import { isWithinInterval } from "date-fns";
 import StyledGridOverlay from "src/shared/StyledGridOverlay.tsx";
 
-function EventManageButton({ event }: { event: EventSlim }) {
-  return (
-    <Button component={RouterLink} to={`${event.id}`}>Manage</Button>
-  )
-}
-
 const WrappedDataGrid = styled('div')`
   max-width: 100%;
   overflow-x: scroll;
@@ -71,28 +65,7 @@ let tableColumns: GridColDef<EventSlim[][number]>[] = [
       isWithinInterval(new Date(), { start: row.start_time, end: row.end_time }),
     valueFormatter: (value) => (value === true ? 'Yes' : 'No')
   },
-  { field: 'status', headerName: 'Status', valueFormatter: eventStatusToShortDescription },
-  { 
-    field: 'actions',
-    sortable: false,
-    filterable: false,
-    hideable: false,
-    headerName: 'Actions',
-    // getActions: (params: GridRowParams) => [
-    //   <GridActionsCellItem
-    //     label="Manage"
-    //     //icon={params.row.is_discarded ? <Restore /> : <Delete />}
-    //     component={RouterLink}
-    //     to={`${params.row.id}`}
-    //     // onClick={async () => await setIsDiscardedMutation.mutateAsync({
-    //     //   matchId: params.row.id,
-    //     //   eventId: eventId!,
-    //     //   isDiscarded: !params.row.is_discarded
-    //     // })}
-    //     showInMenu />
-    // ],
-    renderCell: (params) => (<EventManageButton event={params.row} />)
-  }
+  { field: 'status', headerName: 'Status', valueFormatter: eventStatusToShortDescription, width: 150 },
 ];
 
 const presetFilters: { label: string, filterModel: GridFilterModel }[] = [

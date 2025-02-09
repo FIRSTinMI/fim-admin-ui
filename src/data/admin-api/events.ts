@@ -75,3 +75,17 @@ export const updateEventTeam = async (client: FimSupabaseClient, req: UpdateEven
     return await resp.json();
   });
 }
+
+export const refreshEventTeams = async (client: FimSupabaseClient, eventId: string) => {
+  return fetch(`${import.meta.env.PUBLIC_ADMIN_API_URL}/api/v1/events/${encodeURIComponent(eventId)}/teams`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${(await client.auth.getSession()).data.session?.access_token}`
+    }
+  }).then(async resp => {
+    if (resp.status === 401 || resp.status === 403) throw new Error("You do not have permission to perform this action.");
+    if (!resp.ok) throw new Error(`An error occurred while saving the event: ${resp.statusText}`);
+    return await resp.json();
+  });
+}
