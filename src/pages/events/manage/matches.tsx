@@ -1,4 +1,4 @@
-import { Match, useGetMatchesForEvent } from "src/data/supabase/matches.ts";
+import { Match, TournamentLevel, tournamentLevelPlayOrder, useGetMatchesForEvent } from "src/data/supabase/matches.ts";
 import { useParams } from "react-router-dom";
 import { Loading } from "src/shared/Loading.tsx";
 import {
@@ -27,8 +27,12 @@ const StrickenSpan = styled("span")(({theme}) => ({
   textDecorationColor: theme.palette.text.secondary,
 }))
 
-type MatchPlayNumberColumn = { matchNumber: number, playNumber: number | null };
+type MatchPlayNumberColumn = { level: TournamentLevel, matchNumber: number, playNumber: number | null };
 const sortMatchPlay: GridComparatorFn = (v1: MatchPlayNumberColumn, v2: MatchPlayNumberColumn, param1, param2) => {
+  const levelResult = gridNumberComparator(tournamentLevelPlayOrder(v1.level), tournamentLevelPlayOrder(v2.level), param1, param2);
+  
+  if (levelResult !== 0) return levelResult;
+  
   const matchNumberResult = gridNumberComparator(v1.matchNumber, v2.matchNumber, param1, param2);
 
   if (matchNumberResult !== 0) return matchNumberResult;
@@ -72,7 +76,7 @@ const EventsManageMatches = () => {
       headerName: 'Match Number',
       width: 150,
       flex: 1,
-      valueGetter: (_, row) => ({matchNumber: row.match_number, playNumber: row.play_number}),
+      valueGetter: (_, row) => ({level: row.tournament_level, matchNumber: row.match_number, playNumber: row.play_number}),
       valueFormatter: (value: MatchPlayNumberColumn) => (`${value.matchNumber}` + (value.playNumber && value.playNumber !== 1 ? ` (Play ${value.playNumber})` : "")),
       sortComparator: sortMatchPlay,
       renderCell: (params) => (params.row.is_discarded ? <Tooltip title="Results Discarded"><StrickenSpan>{params.formattedValue}</StrickenSpan></Tooltip> : <>{params.formattedValue}</> )

@@ -8,6 +8,17 @@ export type TournamentLevel =
   "Qualification" |
   "Playoff";
 
+export function tournamentLevelPlayOrder(level: TournamentLevel): number {
+  switch (level) {
+    case "Test": return 1;
+    case "Practice": return 2;
+    case "Qualification": return 3;
+    case "Playoff": return 4;
+  }
+  
+  return -1;
+}
+
 export type Match = {
   id: number,
   tournament_level: TournamentLevel,
