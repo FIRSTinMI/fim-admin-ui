@@ -15,6 +15,7 @@ import { JSXElementConstructor, useMemo } from "react";
 import { Delete, Restore } from "@mui/icons-material";
 import DataTableFilterToolbar from "src/shared/DataTableFilterToolbar.tsx";
 import { useSetMatchIsDiscarded } from "src/data/admin-api/matches.ts";
+import { differenceInMinutes } from "date-fns";
 
 const formatDate = (date: Date | null) => {
   if (date === null) return "";
@@ -88,8 +89,20 @@ const EventsManageMatches = () => {
       valueFormatter: (val: number[]) => val.join(", ")
     },
     {field: 'blue_alliance_teams', headerName: 'Blue Alliance', width: 150, valueFormatter: (val: number[]) => val.join(", ") },
-    { field: 'scheduled_start_time', headerName: 'Scheduled Start', width: 150, valueFormatter: formatDate },
-    { field: 'actual_start_time', headerName: 'Actual Start', width: 150, valueFormatter: formatDate },
+    { field: 'scheduled_start_time', headerName: 'Scheduled Start', width: 125, valueFormatter: formatDate },
+    { field: 'actual_start_time', headerName: 'Actual Start', width: 125, valueFormatter: formatDate },
+    {
+      field: 'ahead_behind',
+      headerName: 'Ahead/Behind',
+      width: 125,
+      valueGetter: (_, row) =>
+        row.actual_start_time && row.scheduled_start_time ? differenceInMinutes(row.scheduled_start_time, row.actual_start_time) : null,
+      valueFormatter: (val: number | null) => val === null ? '' : (
+        val === 0 ? 'On time!' : (
+          val > 0 ? `${val}m early` : `${Math.abs(val)}m late`
+        )
+      )
+    },
     {
       field: 'actions',
       type: 'actions',

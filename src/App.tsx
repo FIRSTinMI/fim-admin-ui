@@ -25,6 +25,7 @@ import ErrorBoundary from './shared/ErrorBoundary';
 import EquipmentRoutes from './pages/equipment';
 import AlertRoutes from "src/pages/alerts";
 import { SnackbarProvider } from "notistack";
+import AvTools from "src/pages/av-tools";
 
 const menuWidth: number = 240; //px
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const routes = (
     <Route path="/events/*" element={<Events />} />
     <Route path="/users/*" element={<Users />} />
     <Route path="/alerts/*" element={<AlertRoutes />} />
+    <Route path="/av-tools/*" element={<AvTools />} />
     <Route path="/routes/*" element={<TruckRoutes />} />
     <Route path="/equipment/*" element={<EquipmentRoutes />} />
     <Route path="*" element={<NotFound />} />

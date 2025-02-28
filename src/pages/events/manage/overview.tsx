@@ -1,10 +1,11 @@
 import { AccessTime } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
-import { Box, Button, Card, Collapse, Divider, FormControl, Paper, TextField, Typography } from "@mui/material";
+import { Box, Button, Card, Collapse, Divider, FormControl, Link, Paper, TextField, Typography } from "@mui/material";
+import { Link as RouterLink } from "react-router-dom";
 import { useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
-import { compareDesc, formatDistanceToNow, formatRelative, isFuture, isPast } from "date-fns";
-import { useEffect, useState } from "react";
+import { compareDesc, formatDistanceToNow, formatRelative, getYear, isFuture, isPast } from "date-fns";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { createEventNote, CreateEventNoteRequest } from "src/data/admin-api/events";
 import { EventPermission } from "src/data/eventPermission";
@@ -91,6 +92,29 @@ function EventsManageOverview() {
   const { id } = useParams();
   const eventQuery = useGetEvent(id);
   const canAddNote = useHasEventPermission(id!, [GlobalPermission.Events_Note], [EventPermission.Event_Note]);
+  
+  const frcEventsUrl = useMemo(() => {
+    if (!eventQuery.data?.code) return null;
+    const normalizedCode = eventQuery.data.code.match(/\d*(\w*)/);
+    console.log(normalizedCode);
+    if (!normalizedCode || !normalizedCode[1]) return null;
+    return `https://frc-events.firstinspires.org/${getYear(eventQuery.data.start_time)}/${normalizedCode[1]}`;
+  }, [eventQuery.data]);
+
+  const tbaUrl = useMemo(() => {
+    if (!eventQuery.data?.code) return null;
+    const normalizedCode = eventQuery.data.code.match(/\d*(\w*)/);
+    if (!normalizedCode || !normalizedCode[1]) return null;
+    return `https://thebluealliance.com/event/${getYear(eventQuery.data.start_time)}${normalizedCode[1]}`;
+  }, [eventQuery.data]);
+  
+  const links = useMemo(() => {
+    const ret = [];
+    if (frcEventsUrl) ret.push({name: 'FRC Events', url: frcEventsUrl});
+    if (tbaUrl) ret.push({name: 'The Blue Alliance', url: tbaUrl});
+    
+    return ret;
+  }, [frcEventsUrl, tbaUrl]);
 
   return (<Paper sx={{ width: '100%', p: 2 }}>
     {eventQuery.isPending && <Loading />}
@@ -118,6 +142,15 @@ function EventsManageOverview() {
             </Card>
           </Box>
           <Divider />
+          {links.length > 0 && (<>
+            <Box sx={{ m: 2 }}>
+              <Typography variant="h4">Links</Typography>
+              <Box sx={{display: 'flex', gap: 2}}>
+              {links.map((v, i) => <Link key={i} component={RouterLink} to={v.url} target="_blank">{v.name}</Link>)}
+              </Box>
+            </Box>
+            <Divider />
+          </>)}
           <Typography variant="h5" sx={{ pt: 2 }}>Notes</Typography>
           <Typography variant="body1" sx={{ pb: 2 }}><em>These notes are visible to anyone who is involved with the event, do not share anything sensitive here.</em></Typography>
           <Box display="flex" flexDirection="column" gap={2}>

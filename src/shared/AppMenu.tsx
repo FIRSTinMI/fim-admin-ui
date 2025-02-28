@@ -8,6 +8,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import DevicesIcon from '@mui/icons-material/Devices';
 import WarningIcon from '@mui/icons-material/Warning';
+import CameraIcon from '@mui/icons-material/CameraAlt';
 import { Link, useLocation } from "react-router-dom";
 import { JSX, useCallback, useContext, useEffect, useState } from "react";
 import { SupabaseContext } from "../supabaseContext";
@@ -43,6 +44,11 @@ const allMenuItems: MenuItem[] = [
     url: '/alerts',
     requiredRole: [GlobalPermission.Equipment_Manage],
     icon: <WarningIcon />
+  }, {
+    title: 'AV Tools',
+    url: '/av-tools',
+    requiredRole: [GlobalPermission.Equipment_Manage],
+    icon: <CameraIcon />
   }, {
     title: 'Equipment',
     url: '/equipment',
