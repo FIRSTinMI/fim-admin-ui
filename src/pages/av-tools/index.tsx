@@ -21,7 +21,7 @@ function AvTools() {
       </Tabs>
 
       <Routes>
-        <Route index path="/" element={<Navigate to="./match-video-stats" />} />
+        <Route index path="/" element={<Navigate to="./match-video-stats" replace />} />
         {routes.map(r => <Route path={r.path} element={r.element} />)}
       </Routes>
     </>
