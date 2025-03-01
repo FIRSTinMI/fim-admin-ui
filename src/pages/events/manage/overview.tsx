@@ -105,7 +105,7 @@ function EventsManageOverview() {
     if (!eventQuery.data?.code) return null;
     const normalizedCode = eventQuery.data.code.match(/\d*(\w*)/);
     if (!normalizedCode || !normalizedCode[1]) return null;
-    return `https://thebluealliance.com/event/${getYear(eventQuery.data.start_time)}${normalizedCode[1]}`;
+    return `https://thebluealliance.com/event/${getYear(eventQuery.data.start_time)}${normalizedCode[1].toLowerCase()}`;
   }, [eventQuery.data]);
   
   const links = useMemo(() => {
