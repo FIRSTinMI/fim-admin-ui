@@ -17,7 +17,7 @@ function AvTools() {
       <Typography variant="h2" sx={{ mb: 3 }}>AV Tools</Typography>
 
       <Tabs value={match} sx={{ mb: 2 }}>
-        {routes.map(r => <Tab key={r.path} value={r.path} label={r.label} component={Link} to={`..${r.path}`} /> )}
+        {routes.map(r => <Tab key={r.path} value={r.path} label={r.label} component={Link} to={`.${r.path}`} /> )}
       </Tabs>
 
       <Routes>
