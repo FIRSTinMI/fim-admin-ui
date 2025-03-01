@@ -7,12 +7,12 @@ type EventMatchVideoStat = {
   name: string,
   start_time: Date,
   end_time: Date,
-  num_qual: number,
-  num_qual_videos: number,
-  num_late_qual_videos: number,
-  num_playoff: number,
-  num_playoff_videos: number,
-  num_late_playoff_videos: number,
+  numQual: number,
+  numQualVideos: number,
+  lateQualVideos: string[] | null,
+  numPlayoff: number,
+  numPlayoffVideos: number,
+  latePlayoffVideos: string[] | null,
 };
 
 export const getEventMatchVideoStats = async (client: FimSupabaseClient): Promise<EventMatchVideoStat[]> => {
@@ -44,11 +44,11 @@ const mapDbToEventMatchVideoStat = (db: EventMatchVideoStat): EventMatchVideoSta
     name: db.name,
     start_time: parseISO(db.start_time as unknown as string),
     end_time: parseISO(db.end_time as unknown as string),
-    num_qual: db.num_qual,
-    num_qual_videos: db.num_qual_videos,
-    num_late_qual_videos: db.num_late_qual_videos,
-    num_playoff: db.num_playoff,
-    num_playoff_videos: db.num_playoff_videos,
-    num_late_playoff_videos: db.num_late_playoff_videos
+    numQual: db.numQual,
+    numQualVideos: db.numQualVideos,
+    lateQualVideos: db.lateQualVideos,
+    numPlayoff: db.numPlayoff,
+    numPlayoffVideos: db.numPlayoffVideos,
+    latePlayoffVideos: db.latePlayoffVideos
   } as EventMatchVideoStat;
 }

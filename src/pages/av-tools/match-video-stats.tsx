@@ -18,15 +18,29 @@ function EventMatchVideoStats() {
         </TableRow>
       </TableHead>
       <TableBody>
-        {stats.data!.map(stat => (<TableRow>
+        {stats.data!.map(stat => (<TableRow key={stat.id}>
           <TableCell><Link component={RouterLink} to={`/events/${stat.id}/overview`}>{stat.name}</Link></TableCell>
           <TableCell>
-            {stat.num_qual_videos} / {stat.num_qual}
-            {stat.num_late_qual_videos > 0 ? (<Typography color="error" component="span"> ({stat.num_late_qual_videos} late)</Typography>) : (<></>)}
+            {stat.numQualVideos} / {stat.numQual}
+            {(stat.lateQualVideos?.length ?? 0) > 0 ? (
+              <>
+                <Typography color="error" component="span"> ({stat.lateQualVideos!.length} late)</Typography>
+                <ul style={{paddingInline: '1em', marginBlock: 0, marginBlockStart: '.3em'}}>
+                  {stat.lateQualVideos!.map((v, i) => <li key={i}>{v}</li>)} 
+                </ul>
+              </>
+            ) : (<></>)}
           </TableCell>
           <TableCell>
-            {stat.num_playoff_videos} / {stat.num_playoff}
-            {stat.num_late_playoff_videos > 0 ? (<Typography color="error" component="span">({stat.num_late_playoff_videos} late)</Typography>) : (<></>)}
+            {stat.numPlayoffVideos} / {stat.numPlayoff}
+            {(stat.latePlayoffVideos?.length ?? 0) > 0 ? (
+              <>
+                <Typography color="error" component="span"> ({stat.latePlayoffVideos!.length} late)</Typography>
+                <ul style={{paddingInline: '1em', marginBlock: 0, marginBlockStart: '.3em'}}>
+                  {stat.latePlayoffVideos!.map((v, i) => <li key={i}>{v}</li>)}
+                </ul>
+              </>
+            ) : (<></>)}
           </TableCell>
         </TableRow>))}
       </TableBody>
