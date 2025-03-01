@@ -86,9 +86,14 @@ const EventsManageMatches = () => {
       field: 'red_alliance_teams',
       headerName: 'Red Alliance',
       width: 150,
-      valueFormatter: (val: number[]) => val.join(", ")
+      valueFormatter: (val: number[]) => val?.join(", ")
     },
-    {field: 'blue_alliance_teams', headerName: 'Blue Alliance', width: 150, valueFormatter: (val: number[]) => val.join(", ") },
+    {
+      field: 'blue_alliance_teams',
+      headerName: 'Blue Alliance',
+      width: 150,
+      valueFormatter: (val: number[]) => val?.join(", ")
+    },
     { field: 'scheduled_start_time', headerName: 'Scheduled Start', width: 125, valueFormatter: formatDate },
     { field: 'actual_start_time', headerName: 'Actual Start', width: 125, valueFormatter: formatDate },
     {
