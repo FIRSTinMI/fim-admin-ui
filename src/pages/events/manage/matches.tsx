@@ -5,7 +5,8 @@ import {
   DataGrid,
   GridActionsCellItem,
   GridColDef,
-  GridComparatorFn, GridFilterModel,
+  GridComparatorFn,
+  GridFilterModel,
   gridNumberComparator,
   useGridApiRef
 } from "@mui/x-data-grid";
@@ -16,6 +17,11 @@ import { Delete, Restore } from "@mui/icons-material";
 import DataTableFilterToolbar from "src/shared/DataTableFilterToolbar.tsx";
 import { useSetMatchIsDiscarded } from "src/data/admin-api/matches.ts";
 import { differenceInMinutes } from "date-fns";
+import useHasEventPermission from "src/hooks/useHasEventPermission.ts";
+import { GlobalPermission } from "src/data/globalPermission.ts";
+import { EventPermission } from "src/data/eventPermission.ts";
+import { useRefreshMatchResults } from "src/data/admin-api/events.ts";
+import { LoadingButton } from "@mui/lab";
 
 const formatDate = (date: Date | null) => {
   if (date === null) return "";
@@ -62,9 +68,11 @@ const presetFilters: { label: string, filterModel: GridFilterModel }[] = [
 
 const EventsManageMatches = () => {
   const { id: eventId } = useParams();
+  const canManageInfo = useHasEventPermission(eventId, [GlobalPermission.Events_Manage], [EventPermission.Event_ManageInfo]);
   const matches = useGetMatchesForEvent(eventId!);
   const apiRef = useGridApiRef();
   const setIsDiscardedMutation = useSetMatchIsDiscarded();
+  const refreshMatchesMutation = useRefreshMatchResults();
   
   const columnConfig = useMemo<GridColDef<Match[][number]>[]>(() => ([
     {
@@ -154,6 +162,9 @@ const EventsManageMatches = () => {
   
   if (matches.isSuccess) return (
     <Box>
+      {canManageInfo && (
+          <LoadingButton loading={refreshMatchesMutation.isPending} onClick={() => refreshMatchesMutation.mutateAsync(eventId!)} color={refreshMatchesMutation.isSuccess ? 'success' : 'primary'}>Refresh Match Results</LoadingButton>
+      )}
       <DataGrid
         apiRef={apiRef}
         columns={columnConfig}

@@ -1,5 +1,7 @@
 import { FimSupabaseClient } from "src/supabaseContext";
 import { EventTeamStatus } from "src/data/supabase/events.ts";
+import { useSupaMutation } from "src/hooks/useSupaMutation.ts";
+import { useQueryClient } from "@tanstack/react-query";
 
 export type CreateEventNoteRequest = {
   eventId: string,
@@ -89,3 +91,28 @@ export const refreshEventTeams = async (client: FimSupabaseClient, eventId: stri
     return await resp.json();
   });
 }
+
+export const refreshMatchResults = async (client: FimSupabaseClient, eventId: string) => {
+  return fetch(`${import.meta.env.PUBLIC_ADMIN_API_URL}/api/v1/events/${encodeURIComponent(eventId)}/match-results`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${(await client.auth.getSession()).data.session?.access_token}`
+    }
+  }).then(async resp => {
+    if (resp.status === 401 || resp.status === 403) throw new Error("You do not have permission to perform this action.");
+    if (!resp.ok) throw new Error(`An error occurred while saving the event: ${resp.statusText}`);
+  });
+}
+
+export const useRefreshMatchResults = () => {
+  const queryClient = useQueryClient();
+  return useSupaMutation({
+    mutationFn: (client: FimSupabaseClient, eventId: string) => refreshMatchResults(client, eventId),
+    onSettled: async (_, __, eventId: string) => {
+      await queryClient.invalidateQueries({
+        queryKey: ["getMatchesForEvent", eventId]
+      });
+    }
+  });
+};

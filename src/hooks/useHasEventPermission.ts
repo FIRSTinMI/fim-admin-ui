@@ -5,7 +5,7 @@ import { EventPermission } from "src/data/eventPermission";
 import { GlobalPermission } from "src/data/globalPermission";
 import useHasGlobalPermission from "./useHasGlobalPermission";
 
-export default function useHasEventPermission(eventId: string, globalPermissions: GlobalPermission[], eventPermissions: EventPermission[]) {
+export default function useHasEventPermission(eventId: string | undefined, globalPermissions: GlobalPermission[], eventPermissions: EventPermission[]) {
   const query = useSupaQuery({
     queryKey: ['currentUserStaff', eventId],
     queryFn: (client) => getCurrentUserStaffForEvent(client, eventId),

@@ -7,9 +7,11 @@ export type EventStaff = {
   permissions: EventPermission[]
 }
 
-export const getCurrentUserStaffForEvent = async (client: FimSupabaseClient, eventId: string): Promise<EventStaff | null> => {
+export const getCurrentUserStaffForEvent = async (client: FimSupabaseClient, eventId: string | undefined): Promise<EventStaff | null> => {
   const userId = (await client.auth.getSession()).data.session?.user.id;
   if (!userId) throw new Error("Unable to get user id");
+  
+  if (!eventId) return null;
 
   const { data, error } = await client
     .from("event_staffs")
