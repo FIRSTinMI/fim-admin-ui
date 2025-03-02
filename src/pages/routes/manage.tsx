@@ -10,6 +10,7 @@ import { UseQueryResult } from "@tanstack/react-query";
 import { LoadingButton } from "@mui/lab";
 import { DataGrid } from "@mui/x-data-grid";
 import { formatEventDate } from "src/pages/events/list.tsx";
+import { useTitle } from "src/hooks/useTitle.ts";
 
 function EditFormOrName({ routeQuery, hasManagePerm }: { routeQuery: UseQueryResult<TruckRoute | null, unknown>, hasManagePerm: boolean }) {
   const updateRouteMutation = useUpdateTruckRoute();
@@ -71,6 +72,7 @@ function TruckRoutesManage() {
   const hasEquipmentManage = useHasGlobalPermission([GlobalPermission.Equipment_Manage]);
 
   const route = useGetTruckRoute(parseInt(params['id']!));
+  useTitle(route.data?.name);
   const eventsQuery = useGetUpcomingEventsForRoute(parseInt(params['id']!));
 
   if (route.isLoading) return <Loading />;

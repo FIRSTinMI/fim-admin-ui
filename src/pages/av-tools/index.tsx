@@ -2,6 +2,7 @@ import { Tab, Tabs, Typography } from "@mui/material";
 import { Link, Navigate, Route, Routes } from "react-router-dom";
 import { useRouteMatch } from "src/shared/util.ts";
 import EventMatchVideoStats from "src/pages/av-tools/match-video-stats.tsx";
+import { useTitle } from "src/hooks/useTitle.ts";
 
 const routes = [{
   path: "/match-video-stats",
@@ -11,6 +12,7 @@ const routes = [{
 
 function AvTools() {
   const match = useRouteMatch(routes.map(r => r.path));
+  useTitle("AV Tools");
   
   return (
     <>
@@ -22,7 +24,7 @@ function AvTools() {
 
       <Routes>
         <Route index path="/" element={<Navigate to="./match-video-stats" replace />} />
-        {routes.map(r => <Route path={r.path} element={r.element} />)}
+        {routes.map(r => <Route key={r.path} path={r.path} element={r.element} />)}
       </Routes>
     </>
   )

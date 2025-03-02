@@ -3,6 +3,7 @@ import { Loading } from "src/shared/Loading.tsx";
 import { Alert, Tab, Tabs } from "@mui/material";
 import { Link, useSearchParams } from "react-router-dom";
 import AvEquipmentTable from "src/pages/equipment/list/av-table.tsx";
+import { useTitle } from "src/hooks/useTitle.ts";
 
 const searchParamsWithNewValue = (search: URLSearchParams, key: string, newValue: string) => {
   const newSearch = new URLSearchParams(search);
@@ -14,6 +15,7 @@ const searchParamsWithNewValue = (search: URLSearchParams, key: string, newValue
 const EquipmentList = () => {
   const types = useGetEquipmentTypes();
   const [search, _] = useSearchParams();
+  useTitle("Equipment");
   
   if (types.isLoading) return <Loading />;
   if (types.isError) return <Alert severity="error">{types.error!.toString()}</Alert>;

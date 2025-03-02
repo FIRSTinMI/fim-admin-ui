@@ -8,6 +8,9 @@ import useHasEventPermission from "src/hooks/useHasEventPermission";
 //import EventsManageStaff from "src/pages/events/manage/staff.tsx";
 import EventsManageMatches from "src/pages/events/manage/matches.tsx";
 import EventsManageTeams from "src/pages/events/manage/teams.tsx";
+import { useGetEvent } from "src/data/supabase/events.ts";
+import { useTitle } from "src/hooks/useTitle.ts";
+import { useMemo } from "react";
 
 const routes = [{
   path: "/overview",
@@ -63,8 +66,14 @@ function EventTab({ eventId, path, label, eventPermission, globalPermission }: {
 function EventsManage() {
   const match = useRouteMatch(routes.map(r => r.path));
   const { id: eventId } = useParams();
+  const event = useGetEvent(eventId);
+  const shortEventName = useMemo(() => 
+      event.data?.name.replace("FIM District", "").replace("Event", "").trim()
+    , [event.data?.name]);
+  useTitle(shortEventName);
 
   return (<>
+    <title>{event.data?.name} - FiM Admin</title>
     <Tabs value={match ?? routes[0].path} sx={{ mb: 2 }}>
       {routes.map(route => (<EventTab key={route.path} value={route.path}
         eventId={eventId!} path={route.path} label={route.label}

@@ -3,6 +3,7 @@ import { Link as RouterLink } from "react-router-dom";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { TruckRoute, useGetTruckRoutes } from "../../data/supabase/truckRoutes";
 import { Loading } from "src/shared/Loading.tsx";
+import { useTitle } from "src/hooks/useTitle.ts";
 
 function RouteManageButton({ route }: { route: TruckRoute }) {
   return (
@@ -27,6 +28,7 @@ const tableColumns: GridColDef<TruckRoute[][number]>[] = [
 
 function TruckRoutesList() {
   const query = useGetTruckRoutes();
+  useTitle("Routes");
 
   return (
     <Box>

@@ -88,6 +88,7 @@ export const useGetEvent = (eventId: string | null | undefined, refetch: boolean
     if (eventId === null || eventId === undefined) throw new Error("No event ID provided");
     return await getEvent(client, eventId);
   },
+  staleTime: 5_000,
   refetchOnWindowFocus: refetch
 });
 

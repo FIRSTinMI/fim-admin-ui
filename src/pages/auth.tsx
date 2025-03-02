@@ -4,12 +4,14 @@ import { useContext, useEffect } from 'react';
 import { SupabaseContext } from '../supabaseContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTheme } from '@mui/material';
+import { useTitle } from "src/hooks/useTitle.ts";
 
 function Auth() {
   const supabase = useContext(SupabaseContext);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const theme = useTheme();
+  useTitle("Log In");
 
   useEffect(() => {
     const {
