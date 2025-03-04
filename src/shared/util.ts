@@ -14,3 +14,6 @@ export function useRouteMatch(patterns: readonly string[]) {
 
   return null;
 }
+
+export type OmitFirstArg<F> = F extends (x: any, ...args: infer P) => infer R ? (...args: P) => R : never;
+
