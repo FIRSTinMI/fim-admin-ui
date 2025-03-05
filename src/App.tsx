@@ -33,6 +33,8 @@ import EquipmentRoutes from "./pages/equipment";
 import AlertRoutes from "src/pages/alerts";
 import { SnackbarProvider } from "notistack";
 import AvTools from "src/pages/av-tools";
+import NiceModal from '@ebay/nice-modal-react';
+
 
 const menuWidth: number = 240; //px
 const queryClient = new QueryClient();
@@ -92,41 +94,43 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <SnackbarProvider>
-        <BrowserRouter>
-          <Box sx={{ display: "flex" }}>
-            <CssBaseline />
-            <SupabaseContextProvider>
-              <QueryClientProvider client={queryClient}>
-                <AppBar isOpen={menuOpen} toggleMenu={toggleMenu} />
-                <AppMenu
-                  isOpen={menuOpen}
-                  menuWidth={menuWidth}
-                  toggleMenu={toggleMenu}
-                />
-                <Box
-                  component="main"
-                  sx={{
-                    backgroundColor: (theme) =>
-                      theme.palette.mode === "light"
-                        ? theme.palette.grey[100]
-                        : theme.palette.grey[900],
-                    flexGrow: 1,
-                    minHeight: "100vh",
-                    pt: 2,
-                    px: 1,
-                  }}
-                >
-                  <Toolbar />
-                  {/* <Button variant="contained">Test Button</Button> */}
-                  <ErrorBoundary>{routes}</ErrorBoundary>
-                </Box>
-                <ReactQueryDevtools />
-              </QueryClientProvider>
-            </SupabaseContextProvider>
-          </Box>
-        </BrowserRouter>
-      </SnackbarProvider>
+      <NiceModal.Provider>
+        <SnackbarProvider>
+          <BrowserRouter>
+            <Box sx={{ display: "flex" }}>
+              <CssBaseline />
+              <SupabaseContextProvider>
+                <QueryClientProvider client={queryClient}>
+                  <AppBar isOpen={menuOpen} toggleMenu={toggleMenu} />
+                  <AppMenu
+                    isOpen={menuOpen}
+                    menuWidth={menuWidth}
+                    toggleMenu={toggleMenu}
+                  />
+                  <Box
+                    component="main"
+                    sx={{
+                      backgroundColor: (theme) =>
+                        theme.palette.mode === "light"
+                          ? theme.palette.grey[100]
+                          : theme.palette.grey[900],
+                      flexGrow: 1,
+                      minHeight: "100vh",
+                      pt: 2,
+                      px: 1,
+                    }}
+                  >
+                    <Toolbar />
+                    {/* <Button variant="contained">Test Button</Button> */}
+                    <ErrorBoundary>{routes}</ErrorBoundary>
+                  </Box>
+                  <ReactQueryDevtools />
+                </QueryClientProvider>
+              </SupabaseContextProvider>
+            </Box>
+          </BrowserRouter>
+        </SnackbarProvider>
+      </NiceModal.Provider>
     </ThemeProvider>
   );
 }

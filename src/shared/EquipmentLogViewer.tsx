@@ -6,6 +6,7 @@ import {
   Info,
   Report,
   Warning,
+  Launch,
 } from "@mui/icons-material";
 import {
   Stack,
@@ -32,6 +33,8 @@ import {
 import Timestamp from "./Timestamp";
 import { stringToColor } from "./util";
 import { useQueryClient } from "@tanstack/react-query";
+import { useModal } from "@ebay/nice-modal-react";
+import JsonModal from "./JsonModal";
 
 interface IProps {
   equipment_id: string;
@@ -85,6 +88,9 @@ const EquipmentLogViewer = ({
     category,
     severity
   );
+
+  // Use Modal for viewing JSON
+  const modal = useModal(JsonModal);
 
   // If showDevice is true, we need to get the device name, so lets fetch the equipment
   const equipment = showDevice ? useGetEquipmentOfType(-1) : { data: [] };
@@ -176,6 +182,13 @@ const EquipmentLogViewer = ({
     };
 
     return <Tooltip title={severity}>{icon()}</Tooltip>;
+  };
+
+  const openJson = (log: EquipmentLog) => {
+    modal.show({
+      jsonData: log.extra_info,
+      title: `${log.log_message}`,
+    });
   };
 
   return (
@@ -380,8 +393,9 @@ const EquipmentLogViewer = ({
               direction="row"
               spacing={1}
               key={log.id}
-              sx={{ mt: "0 !important" }}
+              sx={{ mt: "0 !important", cursor: log.extra_info ? "pointer" : "default" }}
               alignItems={"center"}
+              onClick={() => openJson(log)}
             >
               <SeverityIcon severity={log.severity} />
               {showDevice && (
@@ -394,6 +408,7 @@ const EquipmentLogViewer = ({
                 relative={relativeTime}
                 fontColor={calcSeverityColor(log.severity)}
               />
+              {log.extra_info && <Tooltip title="Extra Data"><Launch fontSize="inherit" /></Tooltip>}
               :{" "}
               <code>
                 <pre style={{ margin: 0 }}>{log.log_message}</pre>

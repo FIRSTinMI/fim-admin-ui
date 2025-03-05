@@ -24,6 +24,7 @@ export type EquipmentLog = {
   log_time_utc: string,
   log_message: string,
   severity: "Debug" | "Info" | "Warning" | "Error" | "Fatal",
+  extra_info?: object,
   category: string,
 };
 
