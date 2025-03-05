@@ -3,31 +3,8 @@ import { Loading } from "src/shared/Loading.tsx";
 import { Alert, Link } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { Link as RouterLink } from "react-router-dom";
-import { formatDistanceToNow } from "date-fns";
-
-type AvCartConfiguration = {
-  LastSeen: string | null,
-  AuthToken: string,
-  AssistantVersion: string,
-  StreamInfo: {
-    Index: number,
-    CartId: string,
-    Enabled: boolean,
-    RtmpKey: string,
-    RtmpUrl: string
-  }[]
-};
-
-const getRelativeTime = (value: string | null): string | null => {
-  if (!value) {
-    return null;
-  }
-  if (value === "infinity") {
-    return "Now";
-  }
-  
-  return formatDistanceToNow(new Date(value), { addSuffix: true });
-}
+import { getRelativeTime } from "src/shared/util";
+import { AvCartConfiguration } from "src/data/admin-api/av-cart-tools";
 
 const AvEquipmentTable = () => {
   const carts = useGetEquipmentOfType<AvCartConfiguration>(1);
