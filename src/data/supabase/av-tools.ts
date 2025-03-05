@@ -1,6 +1,8 @@
 import { FimSupabaseClient } from "src/supabaseContext.tsx";
 import { useSupaQuery } from "src/hooks/useSupaQuery.ts";
 import parseISO from "date-fns/parseISO";
+import { addDays, formatISO } from "date-fns";
+import { OmitFirstArg } from "src/shared/util.ts";
 
 type EventMatchVideoStat = {
   id: string,
@@ -15,12 +17,22 @@ type EventMatchVideoStat = {
   latePlayoffVideos: string[] | null,
 };
 
-export const getEventMatchVideoStats = async (client: FimSupabaseClient): Promise<EventMatchVideoStat[]> => {
-  const { data, error } = await client
+export const getEventMatchVideoStats = async (client: FimSupabaseClient, onlyCurrent: boolean = true, eventIds?: string[]): Promise<EventMatchVideoStat[]> => {
+  let query = client
     .from("event_match_video_stats")
     .select<string, EventMatchVideoStat>("*")
     .order("start_time", {ascending: true})
     .order("name", {ascending: true});
+  
+  if (onlyCurrent) {
+    const startsBefore = new Date();
+    const endsAfter = addDays(startsBefore, -2);
+    query = query.lte("start_time", formatISO(startsBefore)).gte("end_time", formatISO(endsAfter));
+  }
+  
+  if (eventIds && eventIds.length > 0) query = query.in("id", eventIds);
+
+  const { data, error } = await query;
 
   if (error) throw new Error(error.message);
 
@@ -31,10 +43,10 @@ export const getEventMatchVideoStats = async (client: FimSupabaseClient): Promis
 
 export const getEventMatchVideoStatsQueryKey = () => ["getEventMatchVideoStats"];
 
-export const useGetEventMatchVideoStats = () => useSupaQuery({
+export const useGetEventMatchVideoStats = (...params: Parameters<OmitFirstArg<typeof getEventMatchVideoStats>>) => useSupaQuery({
   queryKey: getEventMatchVideoStatsQueryKey(),
   queryFn: async (client) => {
-    return await getEventMatchVideoStats(client)
+    return await getEventMatchVideoStats(client, ...params)
   }
 });
 
