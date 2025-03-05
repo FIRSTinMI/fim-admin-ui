@@ -23,7 +23,7 @@ export type EquipmentLog = {
   equipment_id: string,
   log_time_utc: string,
   log_message: string,
-  severity: "Debug" | "Info" | "Warning" | "Error" | "Fatal",
+  severity: "Debug" | "Info" | "Warn" | "Error" | "Fatal",
   extra_info?: object,
   category: string,
 };
