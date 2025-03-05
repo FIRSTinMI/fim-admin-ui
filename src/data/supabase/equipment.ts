@@ -125,7 +125,7 @@ export const getEquipmentById = async <TConfig = DefaultConfiguration>(client: S
     .select("id,name,teamviewer_id,slack_user_id,truck_routes(id,name),equipment_types(id,name),configuration")
     .eq('id', id)
     .single()
-    .returns<any>();
+    .returns<Equipment<TConfig>>();
 
   if (error?.code === "PGRST116") return null;
   if (error) throw new Error(error.message);

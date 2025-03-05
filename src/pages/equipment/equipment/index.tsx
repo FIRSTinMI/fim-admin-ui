@@ -32,7 +32,7 @@ const Equipment: React.FC = () => {
 
       <Tabs
         value={tab}
-        onChange={(e, newValue) => setTab(newValue)}
+        onChange={(_, newValue) => setTab(newValue)}
         variant="fullWidth"
         sx={{ mb: 2 }}
       >
