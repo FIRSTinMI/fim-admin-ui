@@ -1,6 +1,7 @@
 import { Routes, Route } from "react-router-dom";
-import { Alert, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import EquipmentList from "src/pages/equipment/list";
+import Equipment from "./equipment";
 
 function EquipmentRoutes() {
   return (
@@ -9,7 +10,7 @@ function EquipmentRoutes() {
 
       <Routes>
         <Route index path="/" element={<EquipmentList />} />
-        <Route index path="/:id" element={<Alert severity="error">Not yet implemented</Alert>} />
+        <Route index path="/:id" element={<Equipment />} />
       </Routes>
     </>
   )
