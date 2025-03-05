@@ -20,7 +20,8 @@ const globalPermissions = [
   "Events_Note",
   "Events_View",
   "Equipment_Manage",
-  "Equipment_Note"
+  "Equipment_Note",
+  "Equipment_Av_ManageStream"
 ];
 
 function UsersManage() {
