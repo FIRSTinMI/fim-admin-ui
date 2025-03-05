@@ -9,8 +9,8 @@ import { UpdateTruckRouteRequest, useUpdateTruckRoute } from "src/data/admin-api
 import { UseQueryResult } from "@tanstack/react-query";
 import { LoadingButton } from "@mui/lab";
 import { DataGrid } from "@mui/x-data-grid";
-import { formatEventDate } from "src/pages/events/list.tsx";
 import { useTitle } from "src/hooks/useTitle.ts";
+import { formatEventDate } from "src/shared/util.ts";
 
 function EditFormOrName({ routeQuery, hasManagePerm }: { routeQuery: UseQueryResult<TruckRoute | null, unknown>, hasManagePerm: boolean }) {
   const updateRouteMutation = useUpdateTruckRoute();
