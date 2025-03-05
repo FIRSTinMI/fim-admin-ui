@@ -4,7 +4,7 @@ import { Alert, Link } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { Link as RouterLink } from "react-router-dom";
 import { getRelativeTime } from "src/shared/util";
-import { AvCartConfiguration } from "src/data/supabase/av-cart-tools";
+import { AvCartConfiguration } from "src/data/admin-api/av-cart-tools";
 
 const AvEquipmentTable = () => {
   const carts = useGetEquipmentOfType<AvCartConfiguration>(1);

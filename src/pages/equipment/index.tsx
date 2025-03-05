@@ -10,6 +10,7 @@ function EquipmentRoutes() {
 
       <Routes>
         <Route index path="/" element={<EquipmentList />} />
+        <Route index path="/:id/:tab" element={<Equipment />} />
         <Route index path="/:id" element={<Equipment />} />
       </Routes>
     </>

@@ -19,7 +19,7 @@ import {
   AvCartConfiguration,
   StreamItem,
   updateCartStreamKeys,
-} from "src/data/supabase/av-cart-tools";
+} from "src/data/admin-api/av-cart-tools";
 import { useSupaMutation } from "src/hooks/useSupaMutation";
 import useNotifyMutationStatus from "src/hooks/useNotifyMutationStatus";
 

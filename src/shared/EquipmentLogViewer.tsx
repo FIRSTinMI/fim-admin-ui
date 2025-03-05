@@ -281,7 +281,7 @@ const EquipmentLogViewer = ({
                   sx={{ width: showDevice ? 1 / 3 : "50%" }}
                 >
                   <Typography variant="body2" display={"inline"} sx={{ mr: 1 }}>
-                    Equiptment
+                    Equipment
                   </Typography>
                   <Select
                     value={

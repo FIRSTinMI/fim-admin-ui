@@ -1,16 +1,39 @@
 import { LinearProgress, Stack, Tab, Tabs, Typography } from "@mui/material";
-import React, { createElement, useState } from "react";
-import { useParams } from "react-router-dom";
+import React, { createElement, useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { useGetEquipmentById } from "src/data/supabase/equipment";
 import Timestamp from "src/shared/Timestamp";
 import AVTabs from "./av/AVTabs";
 import EquipmentLogViewer from "src/shared/EquipmentLogViewer";
+import { useTitle } from "src/hooks/useTitle";
 
 const Equipment: React.FC = () => {
-  const { id: equipment_id } = useParams<{ id: string }>();
+  const { id: equipment_id, tab: sub_tab } = useParams<{
+    id: string;
+    tab: string;
+  }>();
+  const navigate = useNavigate();  
   const hardware = useGetEquipmentById(equipment_id!);
+  useTitle(`${hardware.data?.name ?? "Loading..."} | Equipment`);
 
-  const [tab, setTab] = useState<string>("logs");
+  const [tab, setTab] = useState<string>(sub_tab ?? "");
+
+  // Set the tab based on the URL, or when the URL changes
+  useEffect(() => {
+    if (sub_tab) {
+      setTab(sub_tab);
+    } else {
+      setTab("logs");
+      navigate(`/equipment/${equipment_id}/logs`, { replace: true });
+    }
+  }, [sub_tab]);
+
+  // Update the URL when the tab changes
+  useEffect(() => {
+    if (tab) {
+      navigate(`/equipment/${equipment_id}/${tab}`, { replace: true });
+    }
+  }, [tab]);
 
   if (hardware.isLoading) return <LinearProgress />;
 
@@ -24,7 +47,6 @@ const Equipment: React.FC = () => {
 
   return (
     <Stack direction={"column"} spacing={2}>
-      <Typography variant="h3">{hardware.data.name}</Typography>
       <Typography variant="body1">
         Last Online:{" "}
         <Timestamp timestamp={hardware.data.configuration.LastSeen} relative />
