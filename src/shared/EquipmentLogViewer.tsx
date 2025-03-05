@@ -51,7 +51,7 @@ const categories = {
 };
 
 // Known Severities
-const severities = ["Debug", "Info", "Warning", "Error", "Fatal"];
+const severities = ["Debug", "Info", "Warn", "Error", "Fatal"];
 
 const EquipmentLogViewer = ({
   equipment_id,
@@ -140,7 +140,7 @@ const EquipmentLogViewer = ({
         return theme.palette.info.main;
       case "Info":
         return theme.palette.text.primary;
-      case "Warning":
+      case "Warn":
         return theme.palette.warning.main;
       case "Error":
         return theme.palette.error.main;
@@ -170,7 +170,7 @@ const EquipmentLogViewer = ({
           return <Code {...props} />;
         case "Info":
           return <Info {...props} />;
-        case "Warning":
+        case "Warn":
           return <Warning {...props} />;
         case "Error":
           return <Error {...props} />;
