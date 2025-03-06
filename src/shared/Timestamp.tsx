@@ -13,7 +13,7 @@ const Timestamp = ({
   if (relative) {
     return (
       <Tooltip title={getPrettyDateTime(timestamp)}>
-        <Typography display="inline" sx={{ color: fontColor }}>
+        <Typography display="inline" sx={{ color: fontColor, whiteSpace: "nowrap" }}>
           {getRelativeTime(timestamp)}
         </Typography>
       </Tooltip>
@@ -21,7 +21,7 @@ const Timestamp = ({
   } else {
     return (
       <Tooltip title={getRelativeTime(timestamp)}>
-        <Typography display="inline" sx={{ color: fontColor }}>
+        <Typography display="inline" sx={{ color: fontColor, whiteSpace: "nowrap" }}>
           {getPrettyDateTime(timestamp)}
         </Typography>
       </Tooltip>

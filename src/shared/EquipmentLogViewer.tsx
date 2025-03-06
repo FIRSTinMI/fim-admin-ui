@@ -24,6 +24,9 @@ import {
   CardHeader,
   CardContent,
   Divider,
+  FormControl,
+  InputLabel,
+  OutlinedInput,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import {
@@ -49,6 +52,8 @@ const categories = {
   autoav_recording: "AutoAV Recording",
   autoav_fms: "AutoAV FMS",
   general: "General",
+  hwping_general: "HWPing General",
+  vmix_general: "Vmix General",
 };
 
 // Known Severities
@@ -67,11 +72,9 @@ const EquipmentLogViewer = ({
   const [page, setPage] = useState(0);
 
   // Filter State
-  const [category, setCategory] = useState<string[] | "*">(
-    Object.keys(categories)
-  );
+  const [category, setCategory] = useState<string[] | "*">("*");
   const [severity, setSeverity] = useState<string[] | "*">(
-    defaultSeverities ?? severities
+    defaultSeverities ?? "*"
   );
   const [deviceNameMap, setDeviceNameMap] = useState<{ [key: string]: string }>(
     {}
@@ -106,6 +109,13 @@ const EquipmentLogViewer = ({
       setDeviceNameMap(map);
     }
   }, [equipment.data, showDevice]);
+
+  useEffect(() => {
+    // invalidate query on unmount
+    return () => {
+      queryClient.removeQueries({ queryKey: ["equipmentLogs"] });
+    };
+  }, []);
 
   // We're going to shim all of the setState functions so we an invalidate the query before updating the state causing the new query to run.
   // This way, we don't keep a bunch of useless supabase connections open.
@@ -200,16 +210,12 @@ const EquipmentLogViewer = ({
         <CardContent>
           <Stack direction={"row"} spacing={2}>
             {/* Category Selector */}
-            <Stack
-              direction="row"
-              spacing={2}
-              alignItems={"center"}
-              sx={{ width: showDevice ? 1 / 3 : "50%" }}
-            >
-              <Typography variant="body2" display={"inline"} sx={{ mr: 1 }}>
-                Category
-              </Typography>
+
+            <FormControl sx={{ m: 1, width: showDevice ? 1 / 3 : 1 / 2 }}>
+              <InputLabel id="category-label">Category</InputLabel>
               <Select
+                labelId="category-label"
+                input={<OutlinedInput label="Category" />}
                 value={category === "*" ? Object.keys(categories) : category}
                 multiple
                 onChange={(e) =>
@@ -222,8 +228,7 @@ const EquipmentLogViewer = ({
                       : [e.target.value]
                   )
                 }
-                variant="standard"
-                size="small"
+                label="Category"
                 fullWidth
                 sx={{ mb: 2 }}
               >
@@ -233,19 +238,14 @@ const EquipmentLogViewer = ({
                   </MenuItem>
                 ))}
               </Select>
-            </Stack>
+            </FormControl>
 
             {/* Severity Selector */}
-            <Stack
-              direction="row"
-              spacing={2}
-              alignItems={"center"}
-              sx={{ width: showDevice ? 1 / 3 : "50%" }}
-            >
-              <Typography variant="body2" display={"inline"} sx={{ mr: 1 }}>
-                Severity
-              </Typography>
+            <FormControl sx={{ m: 1, width: showDevice ? 1 / 3 : 1 / 2 }}>
+              <InputLabel id="severity-label">Severity</InputLabel>
               <Select
+                labelId="severity-label"
+                input={<OutlinedInput label="Severity" />}
                 value={severity === "*" ? severities : severity}
                 multiple
                 onChange={(e) =>
@@ -258,8 +258,6 @@ const EquipmentLogViewer = ({
                       : [e.target.value]
                   )
                 }
-                variant="standard"
-                size="small"
                 fullWidth
                 sx={{ mb: 2 }}
               >
@@ -269,52 +267,40 @@ const EquipmentLogViewer = ({
                   </MenuItem>
                 ))}
               </Select>
-            </Stack>
+            </FormControl>
 
             {/* Equipment Selector */}
             {showDevice && (
-              <>
-                {/* Severity Selector */}
-                <Stack
-                  direction="row"
-                  spacing={2}
-                  alignItems={"center"}
-                  sx={{ width: showDevice ? 1 / 3 : "50%" }}
+              <FormControl sx={{ m: 1, width: showDevice ? 1 / 3 : 1 / 2 }}>
+                <InputLabel id="equipment-label">Equipment</InputLabel>
+                <Select
+                  labelId="equipment-label"
+                  input={<OutlinedInput label="Equipment" />}
+                  value={
+                    equipments === "*" ? Object.keys(deviceNameMap) : equipments
+                  }
+                  multiple
+                  onChange={(e) =>
+                    updateEquipments(
+                      Array.isArray(e.target.value)
+                        ? // If all the devices are selected, set to "*" which should make the query marginally faster
+                          e.target.value.length ===
+                          Object.keys(deviceNameMap).length
+                          ? "*"
+                          : e.target.value
+                        : [e.target.value]
+                    )
+                  }
+                  fullWidth
+                  sx={{ mb: 2 }}
                 >
-                  <Typography variant="body2" display={"inline"} sx={{ mr: 1 }}>
-                    Equipment
-                  </Typography>
-                  <Select
-                    value={
-                      equipments === "*"
-                        ? Object.keys(deviceNameMap)
-                        : equipments
-                    }
-                    multiple
-                    onChange={(e) =>
-                      updateEquipments(
-                        Array.isArray(e.target.value)
-                          ? // If all the devices are selected, set to "*" which should make the query marginally faster
-                            e.target.value.length ===
-                            Object.keys(deviceNameMap).length
-                            ? "*"
-                            : e.target.value
-                          : [e.target.value]
-                      )
-                    }
-                    variant="standard"
-                    size="small"
-                    fullWidth
-                    sx={{ mb: 2 }}
-                  >
-                    {Object.entries(deviceNameMap).map(([key, value]) => (
-                      <MenuItem key={key} value={key}>
-                        {value}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </Stack>
-              </>
+                  {Object.entries(deviceNameMap).map(([key, value]) => (
+                    <MenuItem key={key} value={key}>
+                      {value}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             )}
           </Stack>
         </CardContent>
@@ -383,8 +369,16 @@ const EquipmentLogViewer = ({
                 <MenuItem value={25}>25</MenuItem>
                 <MenuItem value={50}>50</MenuItem>
               </Select>
-              
-              <IconButton onClick={() => {queryClient.invalidateQueries({ queryKey: ["equipmentLogs"] });}}><Refresh color="primary" /></IconButton>
+
+              <IconButton
+                onClick={() => {
+                  queryClient.invalidateQueries({
+                    queryKey: ["equipmentLogs"],
+                  });
+                }}
+              >
+                <Refresh color="primary" />
+              </IconButton>
             </Stack>
           </Stack>
 
@@ -396,9 +390,12 @@ const EquipmentLogViewer = ({
               direction="row"
               spacing={1}
               key={log.id}
-              sx={{ mt: "0 !important", cursor: log.extra_info ? "pointer" : "default" }}
+              sx={{
+                mt: "0 !important",
+                cursor: log.extra_info ? "pointer" : "default",
+              }}
               alignItems={"center"}
-              onClick={() => openJson(log)}
+              onClick={() => (log.extra_info ? openJson(log) : undefined)}
             >
               <SeverityIcon severity={log.severity} />
               {showDevice && (
@@ -411,10 +408,14 @@ const EquipmentLogViewer = ({
                 relative={relativeTime}
                 fontColor={calcSeverityColor(log.severity)}
               />
-              {log.extra_info && <Tooltip title="Extra Data"><Launch fontSize="inherit" /></Tooltip>}
+              {log.extra_info && (
+                <Tooltip title="Extra Data">
+                  <Launch fontSize="inherit" />
+                </Tooltip>
+              )}
               :{" "}
               <code>
-                <pre style={{ margin: 0 }}>{log.log_message}</pre>
+                <pre style={{ margin: 0, whiteSpace: 'collapse' }}>{log.log_message}</pre>
               </code>
             </Stack>
           ))}
