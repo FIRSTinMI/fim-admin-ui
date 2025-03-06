@@ -7,6 +7,7 @@ import {
   Report,
   Warning,
   Launch,
+  Refresh,
 } from "@mui/icons-material";
 import {
   Stack,
@@ -382,6 +383,8 @@ const EquipmentLogViewer = ({
                 <MenuItem value={25}>25</MenuItem>
                 <MenuItem value={50}>50</MenuItem>
               </Select>
+              
+              <IconButton onClick={() => {queryClient.invalidateQueries({ queryKey: ["equipmentLogs"] });}}><Refresh color="primary" /></IconButton>
             </Stack>
           </Stack>
 

@@ -1,7 +1,7 @@
 import { useGetEquipmentTypes } from "src/data/supabase/equipment.ts";
 import { Loading } from "src/shared/Loading.tsx";
 import { Alert, Tab, Tabs } from "@mui/material";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, Navigate, useSearchParams } from "react-router-dom";
 import AvEquipmentTable from "src/pages/equipment/list/av-table.tsx";
 import { useTitle } from "src/hooks/useTitle.ts";
 import EquipmentLogViewer from "src/shared/EquipmentLogViewer";
@@ -13,7 +13,6 @@ const searchParamsWithNewValue = (
 ) => {
   const newSearch = new URLSearchParams(search);
   newSearch.set(key, newValue);
-  console.log(newSearch);
   return newSearch;
 };
 
@@ -62,7 +61,13 @@ const EquipmentList = () => {
       {/* TODO: This id is hardcoded, but we need a way to differentiate the types because the tables will be different */}
       {typeId === "1" && <AvEquipmentTable />}
       {typeId === null && (
-        <p>Select a type of equipment above to view and manage</p>
+        <Navigate to={{
+          search: searchParamsWithNewValue(
+            search,
+            "typeId",
+            "1"
+          ).toString(),
+        }} replace />
       )}
       {typeId !== null && !["1", "overall_logs"].includes(typeId) && (
         <Alert severity="info">
