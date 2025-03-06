@@ -15,6 +15,7 @@ import {
   Tooltip,
   ListItem,
   IconButton,
+  Grid2,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import {
@@ -74,7 +75,7 @@ const StreamItemEditor = ({ item, onComplete }: IStreamItemEditorProps) => {
   return (
     <Card
       variant="elevation"
-      sx={{ width: "100%", height: "100%"  }}
+      sx={{ width: "100%", height: "100%" }}
       onKeyDown={handleEnterKey}
     >
       <CardHeader title={`Stream #${data.Index + 1}`} />
@@ -113,7 +114,8 @@ const StreamItemEditor = ({ item, onComplete }: IStreamItemEditorProps) => {
           )}
           {data.Enabled && !changed && (
             <Typography variant="caption">
-              *Be sure to force configuration to cart to see changes and restart the stream
+              *Be sure to force configuration to cart to see changes and restart
+              the stream
             </Typography>
           )}
 
@@ -220,9 +222,14 @@ const StreamKeys = ({ hardware }: IProps) => {
   };
 
   return (
-    <Stack direction="row" spacing={2}>
+    <Grid2 container direction="row" spacing={2}>
       {/* Stream Selector / Push Keys Button */}
-      <Stack direction="column" spacing={2} sx={{ width: 1 / 4 }}>
+      <Grid2
+        size={{ sm: 12, md: 6, lg: 3 }}
+        component={Stack}
+        direction="column"
+        spacing={2}
+      >
         <List>
           {streams.map((key) => (
             <ListItem
@@ -289,14 +296,16 @@ const StreamKeys = ({ hardware }: IProps) => {
         >
           Force Config to Cart
         </Button>
-      </Stack>
+      </Grid2>
 
-      <StreamItemEditor
-        key={selected}
-        item={streams.find((k) => k.Index === selected)}
-        onComplete={onUpdate}
-      />
-    </Stack>
+      <Grid2 size={{ sm: 12, md: 6, lg: 9 }}>
+        <StreamItemEditor
+          key={selected}
+          item={streams.find((k) => k.Index === selected)}
+          onComplete={onUpdate}
+        />
+      </Grid2>
+    </Grid2>
   );
 };
 

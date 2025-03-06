@@ -27,6 +27,7 @@ import {
   FormControl,
   InputLabel,
   OutlinedInput,
+  Grid2,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import {
@@ -208,101 +209,109 @@ const EquipmentLogViewer = ({
       <Card variant="outlined" sx={{ mb: 2 }}>
         <CardHeader title="Filter" />
         <CardContent>
-          <Stack direction={"row"} spacing={2}>
+          <Grid2
+            container
+            direction={"row"}
+            spacing={2}
+            flexWrap={"wrap"}
+            flexGrow={1}
+          >
             {/* Category Selector */}
-
-            <FormControl sx={{ m: 1, width: showDevice ? 1 / 3 : 1 / 2 }}>
-              <InputLabel id="category-label">Category</InputLabel>
-              <Select
-                labelId="category-label"
-                input={<OutlinedInput label="Category" />}
-                value={category === "*" ? Object.keys(categories) : category}
-                multiple
-                onChange={(e) =>
-                  updateCategory(
-                    // If all the categories are selected, set to "*" which should make the query marginally faster
-                    Array.isArray(e.target.value)
-                      ? e.target.value.length === Object.keys(categories).length
-                        ? "*"
-                        : e.target.value
-                      : [e.target.value]
-                  )
-                }
-                label="Category"
-                fullWidth
-                sx={{ mb: 2 }}
-              >
-                {Object.entries(categories).map(([key, value]) => (
-                  <MenuItem key={key} value={key}>
-                    {value}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            {/* Severity Selector */}
-            <FormControl sx={{ m: 1, width: showDevice ? 1 / 3 : 1 / 2 }}>
-              <InputLabel id="severity-label">Severity</InputLabel>
-              <Select
-                labelId="severity-label"
-                input={<OutlinedInput label="Severity" />}
-                value={severity === "*" ? severities : severity}
-                multiple
-                onChange={(e) =>
-                  updateSeverity(
-                    Array.isArray(e.target.value)
-                      ? // If all the severities are selected, set to "*" which should make the query marginally faster
-                        e.target.value.length === severities.length
-                        ? "*"
-                        : e.target.value
-                      : [e.target.value]
-                  )
-                }
-                fullWidth
-                sx={{ mb: 2 }}
-              >
-                {severities.map((key) => (
-                  <MenuItem key={key} value={key}>
-                    {key}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            {/* Equipment Selector */}
-            {showDevice && (
-              <FormControl sx={{ m: 1, width: showDevice ? 1 / 3 : 1 / 2 }}>
-                <InputLabel id="equipment-label">Equipment</InputLabel>
+            <Grid2 size={{ sm: 12, md: showDevice ? 4 : 6 }}>
+              <FormControl fullWidth>
+                <InputLabel id="category-label">Category</InputLabel>
                 <Select
-                  labelId="equipment-label"
-                  input={<OutlinedInput label="Equipment" />}
-                  value={
-                    equipments === "*" ? Object.keys(deviceNameMap) : equipments
-                  }
+                  labelId="category-label"
+                  input={<OutlinedInput label="Category" />}
+                  value={category === "*" ? Object.keys(categories) : category}
                   multiple
                   onChange={(e) =>
-                    updateEquipments(
+                    updateCategory(
+                      // If all the categories are selected, set to "*" which should make the query marginally faster
                       Array.isArray(e.target.value)
-                        ? // If all the devices are selected, set to "*" which should make the query marginally faster
-                          e.target.value.length ===
-                          Object.keys(deviceNameMap).length
+                        ? e.target.value.length ===
+                          Object.keys(categories).length
                           ? "*"
                           : e.target.value
                         : [e.target.value]
                     )
                   }
-                  fullWidth
-                  sx={{ mb: 2 }}
+                  label="Category"
                 >
-                  {Object.entries(deviceNameMap).map(([key, value]) => (
+                  {Object.entries(categories).map(([key, value]) => (
                     <MenuItem key={key} value={key}>
                       {value}
                     </MenuItem>
                   ))}
                 </Select>
               </FormControl>
+            </Grid2>
+
+            {/* Severity Selector */}
+            <Grid2 size={{ sm: 12, md: showDevice ? 4 : 6 }}>
+              <FormControl fullWidth>
+                <InputLabel id="severity-label">Severity</InputLabel>
+                <Select
+                  labelId="severity-label"
+                  input={<OutlinedInput label="Severity" />}
+                  value={severity === "*" ? severities : severity}
+                  multiple
+                  onChange={(e) =>
+                    updateSeverity(
+                      Array.isArray(e.target.value)
+                        ? // If all the severities are selected, set to "*" which should make the query marginally faster
+                          e.target.value.length === severities.length
+                          ? "*"
+                          : e.target.value
+                        : [e.target.value]
+                    )
+                  }
+                >
+                  {severities.map((key) => (
+                    <MenuItem key={key} value={key}>
+                      {key}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid2>
+
+            {/* Equipment Selector */}
+            {showDevice && (
+              <Grid2 size={{ sm: 12, md: 4 }}>
+                <FormControl fullWidth>
+                  <InputLabel id="equipment-label">Equipment</InputLabel>
+                  <Select
+                    labelId="equipment-label"
+                    input={<OutlinedInput label="Equipment" />}
+                    value={
+                      equipments === "*"
+                        ? Object.keys(deviceNameMap)
+                        : equipments
+                    }
+                    multiple
+                    onChange={(e) =>
+                      updateEquipments(
+                        Array.isArray(e.target.value)
+                          ? // If all the devices are selected, set to "*" which should make the query marginally faster
+                            e.target.value.length ===
+                            Object.keys(deviceNameMap).length
+                            ? "*"
+                            : e.target.value
+                          : [e.target.value]
+                      )
+                    }
+                  >
+                    {Object.entries(deviceNameMap).map(([key, value]) => (
+                      <MenuItem key={key} value={key}>
+                        {value}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid2>
             )}
-          </Stack>
+          </Grid2>
         </CardContent>
       </Card>
 
@@ -415,7 +424,9 @@ const EquipmentLogViewer = ({
               )}
               :{" "}
               <code>
-                <pre style={{ margin: 0, whiteSpace: 'collapse' }}>{log.log_message}</pre>
+                <pre style={{ margin: 0, whiteSpace: "collapse" }}>
+                  {log.log_message}
+                </pre>
               </code>
             </Stack>
           ))}
