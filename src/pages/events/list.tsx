@@ -17,7 +17,6 @@ import {
   GridFilterModel,
   useGridApiRef
 } from "@mui/x-data-grid";
-import format from "date-fns/format";
 import { Link as RouterLink } from "react-router-dom";
 import { EventSlim, useGetEventsForSeason } from "src/data/supabase/events";
 import { useGetSeasons } from "src/data/supabase/seasons";
@@ -29,6 +28,8 @@ import DataTableFilterToolbar from "src/shared/DataTableFilterToolbar.tsx";
 import { eventStatusToShortDescription } from "src/data/eventStatus.ts";
 import { isWithinInterval } from "date-fns";
 import StyledGridOverlay from "src/shared/StyledGridOverlay.tsx";
+import usePersistTableState from "src/hooks/usePersistTableState.ts";
+import { formatEventDate } from "src/shared/util.ts";
 
 const WrappedDataGrid = styled('div')`
   max-width: 100%;
@@ -37,8 +38,6 @@ const WrappedDataGrid = styled('div')`
     overflow-x: hidden;
   }
 `;
-
-export const formatEventDate = (date: Date) => format(date, "PP");
 
 let tableColumns: GridColDef<EventSlim[][number]>[] = [
   { field: 'key', headerName: 'Event Key', width: 150 },
@@ -81,6 +80,24 @@ const presetFilters: { label: string, filterModel: GridFilterModel }[] = [
 
 function EventsList() {
   const grid = useGridApiRef();
+  const initialState = usePersistTableState(grid, "events-list", 1, {
+    pagination: {
+      paginationModel: {
+        pageSize: 100
+      }
+    },
+    sorting: {
+      sortModel: [{
+        field: 'start_time',
+        sort: 'asc'
+      }]
+    },
+    columns: {
+      columnVisibilityModel: {
+        is_current: false
+      }
+    }
+  });
   const [selectedSeason, setSelectedSeason] = useState<number | null>(null);
   const hasCreatePermission = useHasGlobalPermission([GlobalPermission.Events_Create]);
   const [showKeys, setShowKeys] = useState(false);
@@ -166,9 +183,9 @@ function EventsList() {
         </Alert>}
 
       {selectedSeason && <>
-        {getEventsQuery.isLoading && <Loading />}
+        {(getEventsQuery.isLoading || !initialState) && <Loading />}
         {getEventsQuery.isError && <Alert severity="error">Failed to get events</Alert>}
-        {getEventsQuery.isSuccess && <WrappedDataGrid sx={{ display: 'flex', flexDirection: 'column', minHeight: '400px', pb: '2em', maxWidth: '100%' }}>
+        {getEventsQuery.isSuccess && initialState && <WrappedDataGrid sx={{ display: 'flex', flexDirection: 'column', minHeight: '400px', pb: '2em', maxWidth: '100%' }}>
           <DataGrid
             apiRef={grid}
             columns={tableColumns}
@@ -182,24 +199,7 @@ function EventsList() {
                 <StyledGridOverlay>No events were found that match your filter settings.</StyledGridOverlay>
               )
             }}
-            initialState={{
-              pagination: {
-                paginationModel: {
-                  pageSize: 100
-                }
-              },
-              sorting: {
-                sortModel: [{
-                  field: 'start_time',
-                  sort: 'asc'
-                }]
-              },
-              columns: {
-                columnVisibilityModel: {
-                  is_current: false
-                }
-              }
-            }}
+            initialState={initialState}
           />
         </WrappedDataGrid>}
       </>}

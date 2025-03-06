@@ -1,5 +1,6 @@
 import { formatDistanceToNow } from "date-fns";
 import { matchPath, resolvePath, useLocation } from "react-router-dom";
+import format from "date-fns/format";
 
 export function useRouteMatch(patterns: readonly string[]) {
   const { pathname } = useLocation();
@@ -15,6 +16,8 @@ export function useRouteMatch(patterns: readonly string[]) {
 
   return null;
 }
+
+export const formatEventDate = (date: Date) => format(date, "PP");
 
 export const getRelativeTime = (value: string | null): string | null => {
   if (!value) {
