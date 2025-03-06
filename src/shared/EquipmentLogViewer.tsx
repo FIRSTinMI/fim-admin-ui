@@ -62,7 +62,7 @@ const EquipmentLogViewer = ({
   const queryClient = useQueryClient();
 
   // Log "Table" State
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(25);
   const [relativeTime, setRelativeTime] = useState(true);
   const [page, setPage] = useState(0);
 
