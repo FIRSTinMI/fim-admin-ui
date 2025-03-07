@@ -24,6 +24,10 @@ import {
   CardHeader,
   CardContent,
   Divider,
+  FormControl,
+  InputLabel,
+  OutlinedInput,
+  Grid2,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import {
@@ -49,6 +53,8 @@ const categories = {
   autoav_recording: "AutoAV Recording",
   autoav_fms: "AutoAV FMS",
   general: "General",
+  hwping_general: "HWPing General",
+  vmix_general: "Vmix General",
 };
 
 // Known Severities
@@ -62,16 +68,14 @@ const EquipmentLogViewer = ({
   const queryClient = useQueryClient();
 
   // Log "Table" State
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(25);
   const [relativeTime, setRelativeTime] = useState(true);
   const [page, setPage] = useState(0);
 
   // Filter State
-  const [category, setCategory] = useState<string[] | "*">(
-    Object.keys(categories)
-  );
+  const [category, setCategory] = useState<string[] | "*">("*");
   const [severity, setSeverity] = useState<string[] | "*">(
-    defaultSeverities ?? severities
+    defaultSeverities ?? "*"
   );
   const [deviceNameMap, setDeviceNameMap] = useState<{ [key: string]: string }>(
     {}
@@ -106,6 +110,13 @@ const EquipmentLogViewer = ({
       setDeviceNameMap(map);
     }
   }, [equipment.data, showDevice]);
+
+  useEffect(() => {
+    // invalidate query on unmount
+    return () => {
+      queryClient.removeQueries({ queryKey: ["equipmentLogs"] });
+    };
+  }, []);
 
   // We're going to shim all of the setState functions so we an invalidate the query before updating the state causing the new query to run.
   // This way, we don't keep a bunch of useless supabase connections open.
@@ -198,93 +209,81 @@ const EquipmentLogViewer = ({
       <Card variant="outlined" sx={{ mb: 2 }}>
         <CardHeader title="Filter" />
         <CardContent>
-          <Stack direction={"row"} spacing={2}>
+          <Grid2
+            container
+            direction={"row"}
+            spacing={2}
+            flexWrap={"wrap"}
+            flexGrow={1}
+          >
             {/* Category Selector */}
-            <Stack
-              direction="row"
-              spacing={2}
-              alignItems={"center"}
-              sx={{ width: showDevice ? 1 / 3 : "50%" }}
-            >
-              <Typography variant="body2" display={"inline"} sx={{ mr: 1 }}>
-                Category
-              </Typography>
-              <Select
-                value={category === "*" ? Object.keys(categories) : category}
-                multiple
-                onChange={(e) =>
-                  updateCategory(
-                    // If all the categories are selected, set to "*" which should make the query marginally faster
-                    Array.isArray(e.target.value)
-                      ? e.target.value.length === Object.keys(categories).length
-                        ? "*"
-                        : e.target.value
-                      : [e.target.value]
-                  )
-                }
-                variant="standard"
-                size="small"
-                fullWidth
-                sx={{ mb: 2 }}
-              >
-                {Object.entries(categories).map(([key, value]) => (
-                  <MenuItem key={key} value={key}>
-                    {value}
-                  </MenuItem>
-                ))}
-              </Select>
-            </Stack>
+            <Grid2 size={{ sm: 12, md: showDevice ? 4 : 6 }}>
+              <FormControl fullWidth>
+                <InputLabel id="category-label">Category</InputLabel>
+                <Select
+                  labelId="category-label"
+                  input={<OutlinedInput label="Category" />}
+                  value={category === "*" ? Object.keys(categories) : category}
+                  multiple
+                  onChange={(e) =>
+                    updateCategory(
+                      // If all the categories are selected, set to "*" which should make the query marginally faster
+                      Array.isArray(e.target.value)
+                        ? e.target.value.length ===
+                          Object.keys(categories).length
+                          ? "*"
+                          : e.target.value
+                        : [e.target.value]
+                    )
+                  }
+                  label="Category"
+                >
+                  {Object.entries(categories).map(([key, value]) => (
+                    <MenuItem key={key} value={key}>
+                      {value}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid2>
 
             {/* Severity Selector */}
-            <Stack
-              direction="row"
-              spacing={2}
-              alignItems={"center"}
-              sx={{ width: showDevice ? 1 / 3 : "50%" }}
-            >
-              <Typography variant="body2" display={"inline"} sx={{ mr: 1 }}>
-                Severity
-              </Typography>
-              <Select
-                value={severity === "*" ? severities : severity}
-                multiple
-                onChange={(e) =>
-                  updateSeverity(
-                    Array.isArray(e.target.value)
-                      ? // If all the severities are selected, set to "*" which should make the query marginally faster
-                        e.target.value.length === severities.length
-                        ? "*"
-                        : e.target.value
-                      : [e.target.value]
-                  )
-                }
-                variant="standard"
-                size="small"
-                fullWidth
-                sx={{ mb: 2 }}
-              >
-                {severities.map((key) => (
-                  <MenuItem key={key} value={key}>
-                    {key}
-                  </MenuItem>
-                ))}
-              </Select>
-            </Stack>
+            <Grid2 size={{ sm: 12, md: showDevice ? 4 : 6 }}>
+              <FormControl fullWidth>
+                <InputLabel id="severity-label">Severity</InputLabel>
+                <Select
+                  labelId="severity-label"
+                  input={<OutlinedInput label="Severity" />}
+                  value={severity === "*" ? severities : severity}
+                  multiple
+                  onChange={(e) =>
+                    updateSeverity(
+                      Array.isArray(e.target.value)
+                        ? // If all the severities are selected, set to "*" which should make the query marginally faster
+                          e.target.value.length === severities.length
+                          ? "*"
+                          : e.target.value
+                        : [e.target.value]
+                    )
+                  }
+                >
+                  {severities.map((key) => (
+                    <MenuItem key={key} value={key}>
+                      {key}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid2>
 
             {/* Equipment Selector */}
             {showDevice && (
-              <>
-                {/* Severity Selector */}
-                <Stack
-                  direction="row"
-                  spacing={2}
-                  alignItems={"center"}
-                  sx={{ width: showDevice ? 1 / 3 : "50%" }}
-                >
-                  <Typography variant="body2" display={"inline"} sx={{ mr: 1 }}>
-                    Equipment
-                  </Typography>
+              <Grid2 size={{ sm: 12, md: 4 }}>
+                <FormControl fullWidth>
+                  <InputLabel id="equipment-label">Equipment</InputLabel>
                   <Select
+                    labelId="equipment-label"
+                    input={<OutlinedInput label="Equipment" />}
                     value={
                       equipments === "*"
                         ? Object.keys(deviceNameMap)
@@ -302,10 +301,6 @@ const EquipmentLogViewer = ({
                           : [e.target.value]
                       )
                     }
-                    variant="standard"
-                    size="small"
-                    fullWidth
-                    sx={{ mb: 2 }}
                   >
                     {Object.entries(deviceNameMap).map(([key, value]) => (
                       <MenuItem key={key} value={key}>
@@ -313,10 +308,10 @@ const EquipmentLogViewer = ({
                       </MenuItem>
                     ))}
                   </Select>
-                </Stack>
-              </>
+                </FormControl>
+              </Grid2>
             )}
-          </Stack>
+          </Grid2>
         </CardContent>
       </Card>
 
@@ -383,8 +378,16 @@ const EquipmentLogViewer = ({
                 <MenuItem value={25}>25</MenuItem>
                 <MenuItem value={50}>50</MenuItem>
               </Select>
-              
-              <IconButton onClick={() => {queryClient.invalidateQueries({ queryKey: ["equipmentLogs"] });}}><Refresh color="primary" /></IconButton>
+
+              <IconButton
+                onClick={() => {
+                  queryClient.invalidateQueries({
+                    queryKey: ["equipmentLogs"],
+                  });
+                }}
+              >
+                <Refresh color="primary" />
+              </IconButton>
             </Stack>
           </Stack>
 
@@ -396,9 +399,12 @@ const EquipmentLogViewer = ({
               direction="row"
               spacing={1}
               key={log.id}
-              sx={{ mt: "0 !important", cursor: log.extra_info ? "pointer" : "default" }}
+              sx={{
+                mt: "0 !important",
+                cursor: log.extra_info ? "pointer" : "default",
+              }}
               alignItems={"center"}
-              onClick={() => openJson(log)}
+              onClick={() => (log.extra_info ? openJson(log) : undefined)}
             >
               <SeverityIcon severity={log.severity} />
               {showDevice && (
@@ -411,10 +417,16 @@ const EquipmentLogViewer = ({
                 relative={relativeTime}
                 fontColor={calcSeverityColor(log.severity)}
               />
-              {log.extra_info && <Tooltip title="Extra Data"><Launch fontSize="inherit" /></Tooltip>}
+              {log.extra_info && (
+                <Tooltip title="Extra Data">
+                  <Launch fontSize="inherit" />
+                </Tooltip>
+              )}
               :{" "}
               <code>
-                <pre style={{ margin: 0 }}>{log.log_message}</pre>
+                <pre style={{ margin: 0, whiteSpace: "collapse" }}>
+                  {log.log_message}
+                </pre>
               </code>
             </Stack>
           ))}
