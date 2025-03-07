@@ -1,4 +1,4 @@
-import { Equipment } from "src/data/supabase/equipment";
+import { Equipment, getEquipmentByIdQueryKey } from "src/data/supabase/equipment";
 import {
   Stack,
   List,
@@ -22,6 +22,7 @@ import {
 } from "src/data/admin-api/av-cart-tools";
 import { useSupaMutation } from "src/hooks/useSupaMutation";
 import useNotifyMutationStatus from "src/hooks/useNotifyMutationStatus";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface IProps {
   hardware: Equipment<AvCartConfiguration>;
@@ -97,8 +98,15 @@ const StreamKeys = ({ hardware }: IProps) => {
   const [selected, setSelected] = useState(0);
   const [streams, setStreams] = useState(hardware.configuration.StreamInfo);
 
+  const queryClient = useQueryClient();
   const updateMutation = useSupaMutation({
-    mutationFn: (client, streams: StreamItem[]) => updateCartStreamKeys(client, hardware.id!, streams),
+    mutationFn: async (client, streams: StreamItem[]) => {
+      const resp = await updateCartStreamKeys(client, hardware.id!, streams);
+      queryClient.invalidateQueries({
+        queryKey: getEquipmentByIdQueryKey(hardware.id)
+      });
+      return resp;
+    },
   });
 
   useNotifyMutationStatus(updateMutation, "Successfully updated", "Failed to update stream keys");

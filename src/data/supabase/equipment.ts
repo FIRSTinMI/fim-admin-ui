@@ -134,8 +134,9 @@ export const getEquipmentById = async <TConfig = DefaultConfiguration>(client: S
   return data !== null ? mapDbToEquipment(data) : null;
 }
 
+export const getEquipmentByIdQueryKey = (id: string) => ["equipment", id];
 export const useGetEquipmentById = <TConfig = DefaultConfiguration>(id: string) => useSupaQuery({
-  queryKey: ["equipment", id],
+  queryKey: getEquipmentByIdQueryKey(id),
   queryFn: (client) => getEquipmentById<TConfig>(client, id)
 });
 
