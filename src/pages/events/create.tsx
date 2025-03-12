@@ -28,7 +28,8 @@ function Step1({ setResult }: { setResult: (r: CreateEventsResponse | null) => v
       dataSource: 'FrcEvents',
       districtCode: null,
       eventCodesUserInput: '',
-      eventCodes: []
+      eventCodes: [],
+      isOfficial: false
     },
     onSubmit: async (form) => {
       const value = form.value;
@@ -124,7 +125,7 @@ function Step1({ setResult }: { setResult: (r: CreateEventsResponse | null) => v
       </Box>
 
       <Box display="flex" flexDirection="row" sx={{ gap: 1, mb: 2 }}>
-        <FormControl fullWidth>
+        <FormControl>
           <form.Field name="overrideExisting">{
             ({ state, handleChange, handleBlur }) => (
               <FormControlLabel control={<Checkbox
@@ -132,6 +133,17 @@ function Step1({ setResult }: { setResult: (r: CreateEventsResponse | null) => v
                 onChange={(e) => handleChange(e.target.checked)}
                 onBlur={handleBlur}
               />} label="Override Existing Events?" />
+            )}
+          </form.Field>
+        </FormControl>
+        <FormControl>
+          <form.Field name="isOfficial">{
+            ({ state, handleChange, handleBlur }) => (
+              <FormControlLabel control={<Checkbox
+                value={state.value}
+                onChange={(e) => handleChange(e.target.checked)}
+                onBlur={handleBlur}
+              />} label="Official Events?" />
             )}
           </form.Field>
         </FormControl>

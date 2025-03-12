@@ -7,7 +7,8 @@ export type SyncSourceRequest = {
   seasonId: number,
   dataSource: DataSource,
   districtCode: string | null,
-  eventCodes: string[] | null
+  eventCodes: string[] | null,
+  isOfficial: boolean
 };
 
 export type CreateEventsResponse = {

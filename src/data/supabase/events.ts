@@ -59,12 +59,13 @@ export const getEventsForSeason = async (client: FimSupabaseClient, seasonId: nu
 export const getEventsForSeasonQueryKey = 
   (seasonId: number | null) => ["getEventsForSeason", seasonId]; 
 
-export const useGetEventsForSeason = (seasonId: number | null) => useSupaQuery({
+export const useGetEventsForSeason = (seasonId: number | null, enabled: boolean = true) => useSupaQuery({
   queryKey: getEventsForSeasonQueryKey(seasonId),
   queryFn: async (client) => {
     if (!seasonId) throw new Error("No season ID provided");
     return await getEventsForSeason(client, seasonId)
-  }
+  },
+  enabled: enabled
 });
 
 export const getEvent = async (client: FimSupabaseClient, eventId: string): Promise<Event> => {

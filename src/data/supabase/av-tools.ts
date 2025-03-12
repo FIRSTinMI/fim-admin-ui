@@ -41,10 +41,10 @@ export const getEventMatchVideoStats = async (client: FimSupabaseClient, onlyCur
   return data.map(mapDbToEventMatchVideoStat);
 }
 
-export const getEventMatchVideoStatsQueryKey = () => ["getEventMatchVideoStats"];
+export const getEventMatchVideoStatsQueryKey = (...params: Parameters<OmitFirstArg<typeof getEventMatchVideoStats>>) => ["getEventMatchVideoStats", ...params];
 
 export const useGetEventMatchVideoStats = (...params: Parameters<OmitFirstArg<typeof getEventMatchVideoStats>>) => useSupaQuery({
-  queryKey: getEventMatchVideoStatsQueryKey(),
+  queryKey: getEventMatchVideoStatsQueryKey(...params),
   queryFn: async (client) => {
     return await getEventMatchVideoStats(client, ...params)
   }
