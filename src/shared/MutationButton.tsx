@@ -1,4 +1,4 @@
-import Button from "@mui/material/button";
+import { LoadingButton } from "@mui/lab";
 import { UseMutationResult } from "@tanstack/react-query";
 import { PropsWithChildren } from "react";
 
@@ -8,11 +8,11 @@ interface MutationButtonProps<T1, T2, T3, T4> extends PropsWithChildren {
 }
 export default function MutationButton<T1, T2, T3, T4>({mutation, onClick, children}: MutationButtonProps<T1, T2, T3, T4>) {
   return (
-    <Button
+    <LoadingButton
       loading={mutation.isPending}
       onClick={onClick}
       color={mutation.isSuccess ? 'success' : 'primary'}>
       {children}
-    </Button>
+    </LoadingButton>
   );
 }
