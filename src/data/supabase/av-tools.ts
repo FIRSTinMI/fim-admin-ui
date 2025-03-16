@@ -7,6 +7,7 @@ import { OmitFirstArg } from "src/shared/util.ts";
 type EventMatchVideoStat = {
   id: string,
   name: string,
+  code: string,
   start_time: Date,
   end_time: Date,
   numQual: number,
@@ -54,6 +55,7 @@ const mapDbToEventMatchVideoStat = (db: EventMatchVideoStat): EventMatchVideoSta
   return {
     id: db.id,
     name: db.name,
+    code: db.code,
     start_time: parseISO(db.start_time as unknown as string),
     end_time: parseISO(db.end_time as unknown as string),
     numQual: db.numQual,

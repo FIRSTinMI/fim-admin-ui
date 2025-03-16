@@ -21,7 +21,7 @@ import useHasEventPermission from "src/hooks/useHasEventPermission.ts";
 import { GlobalPermission } from "src/data/globalPermission.ts";
 import { EventPermission } from "src/data/eventPermission.ts";
 import { useRefreshMatchResults } from "src/data/admin-api/events.ts";
-import { LoadingButton } from "@mui/lab";
+import MutationButton from "src/shared/MutationButton.tsx";
 
 const formatDate = (date: Date | null) => {
   if (date === null) return "";
@@ -163,7 +163,7 @@ const EventsManageMatches = () => {
   if (matches.isSuccess) return (
     <Box>
       {canManageInfo && (
-          <LoadingButton loading={refreshMatchesMutation.isPending} onClick={() => refreshMatchesMutation.mutateAsync(eventId!)} color={refreshMatchesMutation.isSuccess ? 'success' : 'primary'}>Refresh Match Results</LoadingButton>
+        <MutationButton mutation={refreshMatchesMutation} onClick={() => refreshMatchesMutation.mutateAsync(eventId!)}>Refresh Match Results</MutationButton>
       )}
       <DataGrid
         apiRef={apiRef}

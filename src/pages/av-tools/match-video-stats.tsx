@@ -17,13 +17,25 @@ import { Loading } from "src/shared/Loading.tsx";
 import { useState } from "react";
 import { useGetSeasons } from "src/data/supabase/seasons.ts";
 import { useGetEventsForSeason } from "src/data/supabase/events.ts";
+import MutationButton from "src/shared/MutationButton.tsx";
+import { useRefreshMatchResults } from "src/data/admin-api/events.ts";
+
+function RefreshMatchesButton({eventId}: {eventId: string}) {
+  const refreshMatchesMutation = useRefreshMatchResults();
+
+  return (<MutationButton
+    mutation={refreshMatchesMutation}
+    onClick={() => refreshMatchesMutation.mutateAsync(eventId)}>
+    Refresh
+  </MutationButton>)
+}
 
 function EventMatchVideoStats() {
   const seasons = useGetSeasons();
   const [seasonId, setSeasonId] = useState<number | undefined>(undefined);
   const seasonEvents = useGetEventsForSeason(seasonId ?? null, !!seasonId);
   const stats = useGetEventMatchVideoStats(!seasonId, seasonEvents?.data?.map(e => e.id));
-  
+
   if (stats.isPending) return <Loading />;
   
   return (
@@ -47,11 +59,15 @@ function EventMatchVideoStats() {
             <TableCell>Event Name</TableCell>
             <TableCell>Quals</TableCell>
             <TableCell>Playoffs</TableCell>
+            <TableCell>Actions</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {stats.data!.map(stat => (<TableRow key={stat.id}>
-            <TableCell><Link component={RouterLink} to={`/events/${stat.id}/overview`}>{stat.name}</Link></TableCell>
+            <TableCell>
+              <Link component={RouterLink} to={`/events/${stat.id}/overview`}>{stat.name}</Link>{' '}
+              ({stat.code})
+            </TableCell>
             <TableCell>
               {stat.numQualVideos} / {stat.numQual}
               {(stat.lateQualVideos?.length ?? 0) > 0 ? (
@@ -73,6 +89,9 @@ function EventMatchVideoStats() {
                   </ul>
                 </>
               ) : (<></>)}
+            </TableCell>
+            <TableCell>
+              <RefreshMatchesButton eventId={stat.id} />
             </TableCell>
           </TableRow>))}
         </TableBody>
