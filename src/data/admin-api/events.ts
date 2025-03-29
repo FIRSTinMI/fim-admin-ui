@@ -110,9 +110,14 @@ export const useRefreshMatchResults = () => {
   return useSupaMutation({
     mutationFn: (client: FimSupabaseClient, eventId: string) => refreshMatchResults(client, eventId),
     onSettled: async (_, __, eventId: string) => {
-      await queryClient.invalidateQueries({
-        queryKey: ["getMatchesForEvent", eventId]
-      });
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["getMatchesForEvent", eventId]
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["getEventMatchVideoStats"]
+        })
+      ])
     }
   });
 };
