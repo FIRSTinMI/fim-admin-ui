@@ -25,11 +25,15 @@ const routes = [{
 }, {
   path: "/matches",
   label: "Matches",
-  element: (<EventsManageMatches />)
-} , {
+  element: (<EventsManageMatches />),
+  globalPermission: GlobalPermission.Events_Manage,
+  eventPermission: EventPermission.Event_ManageInfo
+}, {
   path: "/teams",
   label: "Teams",
-  element: (<EventsManageTeams />)
+  element: (<EventsManageTeams />),
+  globalPermission: GlobalPermission.Events_Manage,
+  eventPermission: EventPermission.Event_ManageInfo
 }// , {
 //   path: "/staff",
 //   label: "Staff",
