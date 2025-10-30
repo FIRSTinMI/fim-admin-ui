@@ -2,7 +2,18 @@ import { Link as RouterLink, useParams } from "react-router-dom";
 import useHasGlobalPermission from "src/hooks/useHasGlobalPermission";
 import { TruckRoute, useGetTruckRoute, useGetUpcomingEventsForRoute } from "src/data/supabase/truckRoutes";
 import { GlobalPermission } from "src/data/globalPermission.ts";
-import { Alert, Button, FormControl, Link, TextField, Typography } from "@mui/material";
+import {
+  Alert,
+  Button, Checkbox,
+  FormControl,
+  InputLabel,
+  Link,
+  MenuItem,
+  OutlinedInput,
+  Select,
+  TextField,
+  Typography
+} from "@mui/material";
 import { Loading } from "src/shared/Loading.tsx";
 import { useForm } from "@tanstack/react-form";
 import { UpdateTruckRouteRequest, useUpdateTruckRoute } from "src/data/admin-api/truck-routes.ts";
@@ -11,13 +22,18 @@ import { LoadingButton } from "@mui/lab";
 import { DataGrid } from "@mui/x-data-grid";
 import { useTitle } from "src/hooks/useTitle.ts";
 import { formatEventDate } from "src/shared/util.ts";
+import { useGetEquipmentOfType } from "src/data/supabase/equipment.ts";
+import ListItemText from "@mui/material/ListItemText";
+import { useEffect } from "react";
 
 function EditFormOrName({ routeQuery, hasManagePerm }: { routeQuery: UseQueryResult<TruckRoute | null, unknown>, hasManagePerm: boolean }) {
   const updateRouteMutation = useUpdateTruckRoute();
+  const equipmentList = useGetEquipmentOfType(-1);
   
   const form = useForm<Omit<UpdateTruckRouteRequest, "routeId">>({
     defaultValues: {
-      name: routeQuery?.data?.name ?? ''
+      name: routeQuery?.data?.name ?? '',
+      equipmentIds: equipmentList?.data?.filter(e => e.truckRoute?.id == routeQuery?.data?.id).map(e => e.id) ?? []
     },
     onSubmit: async (form) => {
       const routeId = routeQuery?.data?.id;
@@ -28,10 +44,18 @@ function EditFormOrName({ routeQuery, hasManagePerm }: { routeQuery: UseQueryRes
       
       await updateRouteMutation.mutateAsync({
         routeId: routeId,
-        name: form.value.name
+        name: form.value.name,
+        equipmentIds: form.value.equipmentIds
       })
     }
   });
+  
+  useEffect(() => {
+    if (!equipmentList.data) return;
+    form.setFieldValue("equipmentIds", equipmentList.data?.filter(e => e.truckRoute?.id === routeQuery.data!.id).map(e => e.id) ?? []);
+  }, [equipmentList.data]);
+  
+  if (equipmentList.isPending) return;
   
   if (!hasManagePerm) {
     return (
@@ -58,6 +82,34 @@ function EditFormOrName({ routeQuery, hasManagePerm }: { routeQuery: UseQueryRes
           )}
         </form.Field>
       </FormControl>
+
+      {equipmentList.isSuccess && (
+        <FormControl fullWidth sx={{mb: 2}}>
+          <form.Field name="equipmentIds">{
+            ({ state, handleChange }) => (
+              <>
+                <InputLabel id="equipment-label">Equipment</InputLabel>
+                <Select
+                  labelId="equipment-label"
+                  id="equipment"
+                  multiple
+                  value={state.value}
+                  onChange={(e) => handleChange(typeof e.target.value === "string" ? e.target.value.split(',') : (e.target.value as string[]))}
+                  input={<OutlinedInput label="Equipment" />}
+                  renderValue={(selected) => equipmentList.data.filter(e => (selected ?? []).includes(e.id)).map(e => `${e.name} (${e.equipmentType?.name})`).join(', ')}
+                >
+                  {equipmentList.data!.map((item) => (
+                    <MenuItem key={item.id} value={item.id}>
+                      <Checkbox checked={(state.value ?? []).includes(item.id)} />
+                      <ListItemText primary={`${item.name} (${item.equipmentType?.name})`} />
+                    </MenuItem>
+                  ))}
+                </Select>
+              </>
+            )
+          }</form.Field>
+        </FormControl>
+      )}
       
       {updateRouteMutation.isPending
         ? <LoadingButton loading />

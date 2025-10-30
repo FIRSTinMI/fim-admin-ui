@@ -147,7 +147,7 @@ export const mapDbToEquipment = (db: any): Equipment => {
     equipmentType: db.equipment_type ? db.equipment_type : db.equipment_types ? db.equipment_types : null,
     teamviewerId: db.teamviewer_id,
     slackUserId: db.slack_user_id,
-    truckRoute: db.truck_route ? mapDbToTruckRoute(db.truck_route) : null,
+    truckRoute: db.truck_routes ? mapDbToTruckRoute(db.truck_routes) : null,
     configuration: db.configuration
   };
 };

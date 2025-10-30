@@ -4,7 +4,8 @@ import { useQueryClient } from "@tanstack/react-query";
 
 export type UpdateTruckRouteRequest = {
   routeId: number,
-  name: string
+  name: string,
+  equipmentIds: string[] | null
 };
 
 const updateTruckRoute = async (client: FimSupabaseClient, request: UpdateTruckRouteRequest) => {
