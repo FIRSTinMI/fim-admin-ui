@@ -18,7 +18,7 @@ export type CreateEventsResponse = {
   upsertedEvents: EventSlim[]
 };
 
-export type DataSource = "FrcEvents" | "BlueAlliance" | "OrangeAlliance";
+export type DataSource = "FrcEvents" | "BlueAlliance" | "FtcEvents";
 
 export const createEventsFromSyncSource = async (client: FimSupabaseClient, request: SyncSourceRequest): Promise<CreateEventsResponse> => {
   return fetch(`${import.meta.env.PUBLIC_ADMIN_API_URL}/api/v1/events-create/sync-source`, {
