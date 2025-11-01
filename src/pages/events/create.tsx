@@ -12,8 +12,8 @@ import { LoadingButton } from "@mui/lab";
 
 const getValidSourcesForSeason = (season: Season): DataSource[] => {
   if (season.levels.name == "FRC") return ["FrcEvents", "BlueAlliance"];
-  if (season.levels.name == "FTC") return ["OrangeAlliance"];
-  return ["FrcEvents", "BlueAlliance", "OrangeAlliance"];
+  if (season.levels.name == "FTC") return ["FtcEvents"];
+  return ["FrcEvents", "BlueAlliance", "FtcEvents"];
 }
 
 function Step1({ setResult }: { setResult: (r: CreateEventsResponse | null) => void }) {
