@@ -3,12 +3,19 @@ import { Link, Navigate, Route, Routes } from "react-router-dom";
 import { useRouteMatch } from "src/shared/util.ts";
 import EventMatchVideoStats from "src/pages/av-tools/match-video-stats.tsx";
 import { useTitle } from "src/hooks/useTitle.ts";
+import Twitch from "./twitch";
 
 const routes = [{
   path: "/match-video-stats",
   label: "Match Video Stats",
   element: (<EventMatchVideoStats />)
-}];
+},
+{
+  path: "/twitch",
+  label: "Twitch",
+  element: (<Twitch />)
+}
+];
 
 function AvTools() {
   const match = useRouteMatch(routes.map(r => r.path));
