@@ -1,6 +1,7 @@
 import { FimSupabaseClient } from "src/supabaseContext";
 import { EventSlim } from "../supabase/events";
 import { parseISO } from "date-fns";
+import { DataSource } from "src/data/admin-api/events.ts";
 
 export type SyncSourceRequest = {
   overrideExisting: boolean,
@@ -17,8 +18,6 @@ export type CreateEventsResponse = {
   isSuccess: boolean,
   upsertedEvents: EventSlim[]
 };
-
-export type DataSource = "FrcEvents" | "BlueAlliance" | "FtcEvents";
 
 export const createEventsFromSyncSource = async (client: FimSupabaseClient, request: SyncSourceRequest): Promise<CreateEventsResponse> => {
   return fetch(`${import.meta.env.PUBLIC_ADMIN_API_URL}/api/v1/events-create/sync-source`, {

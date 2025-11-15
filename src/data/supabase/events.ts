@@ -2,6 +2,7 @@ import parseISO from "date-fns/parseISO";
 import { FimSupabaseClient } from "../../supabaseContext";
 import { useSupaQuery } from "src/hooks/useSupaQuery";
 import { EventStatus } from "../eventStatus";
+import { DataSource } from "src/data/admin-api/events.ts";
 
 export type EventSlim = {
   id: string
@@ -20,6 +21,14 @@ export type EventSlim = {
 
 export type Event = EventSlim & {
   season_id: number,
+  sync_source: DataSource,
+  seasons: {
+    start_time: Date,
+    end_time: Date,
+    levels: {
+      name: string
+    }
+  },
   event_notes?: {
     id: number,
     content: string,
@@ -105,7 +114,7 @@ export const useGetEventDashboard = (seasonId: number | null, enabled: boolean =
 export const getEvent = async (client: FimSupabaseClient, eventId: string): Promise<Event> => {
   const { data, error } = await client
     .from("events")
-    .select("*,truck_routes(id,name),event_notes(*)")
+    .select("*,truck_routes(id,name),event_notes(*),seasons(levels(name),start_time,end_time)")
     .eq('id', eventId)
     .single<Event>();
 
@@ -191,8 +200,8 @@ export const mapDbToEventDashboard = (db: EventDashboard): EventDashboard => {
   const result: Partial<EventDashboard> = mapDbToEventSlim(db);
   result.last_match_num = db.last_match_num;
   result.level_matches = db.level_matches;
-  result.last_match_scheduled = parseISO(db.last_match_scheduled as unknown as string)
-  result.last_match_actual = parseISO(db.last_match_actual as unknown as string)
+  result.last_match_scheduled = db.last_match_scheduled ? parseISO(db.last_match_scheduled as unknown as string) : null
+  result.last_match_actual = db.last_match_actual ? parseISO(db.last_match_actual as unknown as string) : null
   return result as EventDashboard;
 }
 
@@ -200,6 +209,14 @@ export const mapDbToEvent = (db: Event): Event => {
   return {
     ...mapDbToEventSlim(db),
     season_id: db.season_id,
+    seasons: {
+      levels: {
+        name: db.seasons.levels.name
+      },
+      start_time: parseISO(db.seasons.start_time as unknown as string),
+      end_time: parseISO(db.seasons.end_time as unknown as string)
+    },
+    sync_source: db.sync_source,
     event_notes: db.event_notes ? db.event_notes.map(n => ({
       id: n.id,
       content: n.content,
