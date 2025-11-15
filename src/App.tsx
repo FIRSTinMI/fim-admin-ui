@@ -3,7 +3,7 @@ import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, Suspense, ReactElement } from "react";
 import "./App.css";
 
 import {
@@ -17,38 +17,46 @@ import {
 import AppBar from "./shared/AppBar";
 import AppMenu from "./shared/AppMenu";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import Events from "./pages/events";
 import Auth from "./pages/auth";
 import { SupabaseContextProvider } from "./supabaseContext";
 import NotFound from "./pages/not-found";
 import React from "react";
-import Users from "./pages/users";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import TruckRoutes from "./pages/routes";
 import useIsAuthenticated from "./hooks/useIsAuthenticated";
 import { Loading } from "./shared/Loading";
 import ErrorBoundary from "./shared/ErrorBoundary";
-import EquipmentRoutes from "./pages/equipment";
-import AlertRoutes from "src/pages/alerts";
 import { SnackbarProvider } from "notistack";
-import AvTools from "src/pages/av-tools";
 import NiceModal from '@ebay/nice-modal-react';
-
 
 const menuWidth: number = 240; //px
 const queryClient = new QueryClient();
+
+const AlertsRoutes = React.lazy(() => import("./pages/alerts"));
+const EventsRoutes = React.lazy(() => import("./pages/events"));
+const UsersRoutes = React.lazy(() => import("./pages/users"));
+const AvToolsRoutes = React.lazy(() => import("./pages/av-tools"));
+const RoutesRoutes = React.lazy(() => import("./pages/routes"));
+const EquipmentRoutes = React.lazy(() => import("./pages/equipment"));
+
+const Lazy = ({ component }: { component: ReactElement }) => {
+  return (
+    <Suspense fallback={<Loading />}>
+      { component }
+    </Suspense>
+  );
+};
 
 const routes = (
   <Routes>
     <Route index path="/" element={<RootPage />} />
     <Route index path="/auth" element={<Auth />} />
-    <Route path="/events/*" element={<Events />} />
-    <Route path="/users/*" element={<Users />} />
-    <Route path="/alerts/*" element={<AlertRoutes />} />
-    <Route path="/av-tools/*" element={<AvTools />} />
-    <Route path="/routes/*" element={<TruckRoutes />} />
-    <Route path="/equipment/*" element={<EquipmentRoutes />} />
+    <Route path="/events/*" element={<Lazy component={<EventsRoutes />} />}/>
+    <Route path="/users/*" element={<Lazy component={<UsersRoutes />} />} />
+    <Route path="/alerts/*" element={<Lazy component={<AlertsRoutes />} />} />
+    <Route path="/av-tools/*" element={<Lazy component={<AvToolsRoutes />} />} />
+    <Route path="/routes/*" element={<Lazy component={<RoutesRoutes />} />} />
+    <Route path="/equipment/*" element={<Lazy component={<EquipmentRoutes />} />} />
     <Route path="*" element={<NotFound />} />
   </Routes>
 );
