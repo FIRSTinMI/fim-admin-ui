@@ -28,6 +28,13 @@ export type Event = EventSlim & {
   }[]
 };
 
+export type EventDashboard = EventSlim & {
+  last_match_num: string | null,
+  level_matches: number,
+  last_match_scheduled: Date | null,
+  last_match_actual: Date | null
+};
+
 export type EventTeamStatus = {
   id: string,
   name: string,
@@ -64,6 +71,33 @@ export const useGetEventsForSeason = (seasonId: number | null, enabled: boolean 
   queryFn: async (client) => {
     if (!seasonId) throw new Error("No season ID provided");
     return await getEventsForSeason(client, seasonId)
+  },
+  enabled: enabled
+});
+
+export const getEventDashboard = async (client: FimSupabaseClient, seasonId: number): Promise<EventDashboard[]> => {
+  const { data, error } = await client
+    .from("event_dashboard")
+    .select<string, EventDashboard>("id,key,code,name,start_time,end_time,status,truck_routes(id,name),last_match_num,level_matches,last_match_scheduled,last_match_actual")
+    .order("start_time", {ascending: true})
+    .order("name", {ascending: true})
+    .eq('season_id', seasonId);
+
+  if (error) throw new Error(error.message);
+
+  if (data === null) return [];
+
+  return data.map(mapDbToEventDashboard);
+}
+
+export const getEventDashboardQueryKey =
+  (seasonId: number | null) => ["getEventDashboard", seasonId];
+
+export const useGetEventDashboard = (seasonId: number | null, enabled: boolean = true) => useSupaQuery({
+  queryKey: getEventDashboardQueryKey(seasonId),
+  queryFn: async (client) => {
+    if (!seasonId) throw new Error("No season ID provided");
+    return await getEventDashboard(client, seasonId)
   },
   enabled: enabled
 });
@@ -151,6 +185,15 @@ export const mapDbToEventSlim = (db: EventSlim): EventSlim => {
       name: db.truck_routes.name
     } : undefined,
   } as EventSlim;
+}
+
+export const mapDbToEventDashboard = (db: EventDashboard): EventDashboard => {
+  const result: Partial<EventDashboard> = mapDbToEventSlim(db);
+  result.last_match_num = db.last_match_num;
+  result.level_matches = db.level_matches;
+  result.last_match_scheduled = parseISO(db.last_match_scheduled as unknown as string)
+  result.last_match_actual = parseISO(db.last_match_actual as unknown as string)
+  return result as EventDashboard;
 }
 
 export const mapDbToEvent = (db: Event): Event => {
