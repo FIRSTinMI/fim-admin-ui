@@ -5,6 +5,7 @@ import EventMatchVideoStats from "src/pages/av-tools/match-video-stats.tsx";
 import { useTitle } from "src/hooks/useTitle.ts";
 import Twitch from "./twitch";
 import EventLivestreams from "./event-livestreams";
+import Youtube from "./youtube";
 
 const routes = [{
   path: "/match-video-stats",
@@ -15,6 +16,11 @@ const routes = [{
   path: "/twitch",
   label: "Twitch",
   element: (<Twitch />)
+},
+{
+  path: "/youtube",
+  label: "Youtube",
+  element: (<Youtube />)
 },
 {
   path: "/event-livestreams",

@@ -7,7 +7,7 @@ export type UpdateTruckRouteRequest = {
   routeId: number,
   name: string,
   equipmentIds: string[] | null,
-  streaming_config?: StreamingConfig
+  streamingConfig?: StreamingConfig
 };
 
 const updateTruckRoute = async (client: FimSupabaseClient, request: UpdateTruckRouteRequest) => {

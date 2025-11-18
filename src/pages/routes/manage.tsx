@@ -44,10 +44,12 @@ function EditFormOrName({
   const updateRouteMutation = useUpdateTruckRoute();
   const equipmentList = useGetEquipmentOfType(-1);
 
+
+  console.log(routeQuery.data);
   const form = useForm<Omit<UpdateTruckRouteRequest, "routeId">>({
     defaultValues: {
       name: routeQuery?.data?.name ?? "",
-      streaming_config: routeQuery?.data?.streaming_config ?? {
+      streamingConfig: routeQuery.data?.streamingConfig ?? {
         Channel_Type: null,
         Channel_Id: "",
       },
@@ -67,7 +69,7 @@ function EditFormOrName({
         routeId: routeId,
         name: form.value.name,
         equipmentIds: form.value.equipmentIds,
-        streaming_config: form.value.streaming_config, // oof camel case AND snake case
+        streamingConfig: form.value.streamingConfig,
       });
     },
   });
@@ -155,7 +157,7 @@ function EditFormOrName({
 
       <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
         <FormControl fullWidth sx={{ mb: 2 }}>
-          <form.Field name="streaming_config.Channel_Type">
+          <form.Field name="streamingConfig.Channel_Type">
             {({ state, handleChange, handleBlur }) => (
               <>
                 <InputLabel id="streaming-platform-label">Streaming Platform</InputLabel>
@@ -176,7 +178,7 @@ function EditFormOrName({
           </form.Field>
         </FormControl>
         <FormControl fullWidth sx={{ mb: 2 }}>
-          <form.Field name="streaming_config.Channel_Id">
+          <form.Field name="streamingConfig.Channel_Id">
             {({ state, handleChange, handleBlur }) => (
               <TextField
                 label="Streaming Channel ID"

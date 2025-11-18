@@ -1,41 +1,36 @@
 import { Button, Stack, Typography, Box, Chip } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import {
-  useGetActiveTwitchScopes,
-  useGetTwitchLogin,
-  useUpdateTwitchAuth,
-} from "src/data/admin-api/twitch";
+import { useGetActiveYoutubeScopes, useGetYoutubeLogin, useUpdateYoutubeAuth } from "src/data/admin-api/youtube";
 import Timestamp from "src/shared/Timestamp";
 
-export default function Twitch() {
-  const twitchLogin = useGetTwitchLogin();
+export default function Youtube() {
+  const youtubeLogin = useGetYoutubeLogin();
   const {
     data: activeScopes,
     isError: activeScopesError,
     isLoading: activeScopesLoading,
     refetch: refetchActiveScopes,
-  } = useGetActiveTwitchScopes();
-  const { mutate: updateTwitchAuth, isPending: saving } = useUpdateTwitchAuth();
+  } = useGetActiveYoutubeScopes();
+  const { mutate: updateYoutubeAuth, isPending: saving } = useUpdateYoutubeAuth();
 
-  // Check if this is a response from Twitch after authorization
-  // Example URL: http://localhost:5173/av-tools/twitch?code=<code>&scope=<scopes>&state=<state>
+  // Check if this is a response from Youtube after authorization
+  // Example URL: http://localhost:5173/av-tools/youtube?code=<code>&scope=<scopes>
   const urlParams = new URLSearchParams(window.location.search);
   const code = urlParams.get("code");
   const scope = urlParams.get("scope");
-  const state = urlParams.get("state");
 
-  const isTwitchResponse = code && scope && state;
+  const isYoutubeResponse = code && scope;
 
   const getSignInUrl = async () => {
-    const data = await twitchLogin.refetch();
+    const data = await youtubeLogin.refetch();
     if (data.data) {
       location.href = data.data.authorizeUrl;
     }
   };
 
-  if (isTwitchResponse) {
-    // Save the Twitch authorization code
-    updateTwitchAuth({ code, scope });
+  if (isYoutubeResponse) {
+    // Save the Youtube authorization code
+    updateYoutubeAuth({ code, scope });
     // Remove the query parameters from the URL
     const newUrl = window.location.origin + window.location.pathname;
     window.history.replaceState({}, document.title, newUrl);
@@ -44,7 +39,7 @@ export default function Twitch() {
   return (
     <Stack spacing={2} direction={"column"}>
       <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Typography variant="h6">Twitch Accounts</Typography>
+        <Typography variant="h6">Youtube Accounts</Typography>
         <Box>
           <Button
             variant="outlined"
@@ -54,7 +49,7 @@ export default function Twitch() {
             Refresh Scopes
           </Button>
           <Button variant="contained" onClick={getSignInUrl}>
-            Add or Reconnect Twitch Account
+            Add or Reconnect Google Account
           </Button>
         </Box>
       </Box>

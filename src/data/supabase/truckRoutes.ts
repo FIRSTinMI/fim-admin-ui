@@ -13,7 +13,7 @@ export type StreamingConfig = {
 export type TruckRoute = {
   id: number;
   name: string;
-  streaming_config?: StreamingConfig;
+  streamingConfig?: StreamingConfig;
 };
 
 export const getTruckRoutes = async (client: FimSupabaseClient) => {
@@ -91,5 +91,5 @@ export const mapDbToTruckRoute = (dbRoute: any) =>
   ({
     id: dbRoute.id,
     name: dbRoute.name,
-    streaming_config: dbRoute.streaming_config,
+    streamingConfig: dbRoute.streaming_config,
   } as TruckRoute);
