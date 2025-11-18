@@ -43,7 +43,7 @@ function EditFormOrName({
 }) {
   const updateRouteMutation = useUpdateTruckRoute();
   const equipmentList = useGetEquipmentOfType(-1);
-
+  const isStreamAdmin = useHasGlobalPermission([GlobalPermission.Equipment_Av_ManageStream]);
 
   const form = useForm<Omit<UpdateTruckRouteRequest, "routeId">>({
     defaultValues: {
@@ -154,7 +154,7 @@ function EditFormOrName({
         </FormControl>
       )}
 
-      <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+      <Stack direction="row" spacing={2} sx={{ mb: 2, display: isStreamAdmin ? undefined : 'none' }}>
         <FormControl fullWidth sx={{ mb: 2 }}>
           <form.Field name="streamingConfig.Channel_Type">
             {({ state, handleChange, handleBlur }) => (
