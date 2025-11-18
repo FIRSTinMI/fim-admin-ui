@@ -94,27 +94,46 @@ function EventsManageOverview() {
   const canAddNote = useHasEventPermission(id!, [GlobalPermission.Events_Note], [EventPermission.Event_Note]);
   
   const frcEventsUrl = useMemo(() => {
-    if (!eventQuery.data?.code) return null;
+    if (!eventQuery.data?.code || eventQuery.data?.seasons.levels.name !== 'FRC') return null;
     const normalizedCode = eventQuery.data.code.match(/\d*(\w*)/);
-    console.log(normalizedCode);
     if (!normalizedCode || !normalizedCode[1]) return null;
     return `https://frc-events.firstinspires.org/${getYear(eventQuery.data.start_time)}/${normalizedCode[1]}`;
   }, [eventQuery.data]);
 
   const tbaUrl = useMemo(() => {
-    if (!eventQuery.data?.code) return null;
+    if (!eventQuery.data?.code || eventQuery.data?.seasons.levels.name !== 'FRC') return null;
     const normalizedCode = eventQuery.data.code.match(/\d*(\w*)/);
     if (!normalizedCode || !normalizedCode[1]) return null;
     return `https://thebluealliance.com/event/${getYear(eventQuery.data.start_time)}${normalizedCode[1].toLowerCase()}`;
+  }, [eventQuery.data]);
+
+  const ftcEventsUrl = useMemo(() => {
+    if (!eventQuery.data?.code || eventQuery.data?.seasons.levels.name !== 'FTC') return null;
+    if (eventQuery.data.sync_source !== 'FtcEvents') return null;
+    return `https://ftc-events.firstinspires.org/${getYear(eventQuery.data.start_time)}/${eventQuery.data.code}`;
+  }, [eventQuery.data]);
+  
+  const toaUrl = useMemo(() => {
+    if (!eventQuery.data?.code || eventQuery.data.seasons.levels.name !== 'FTC') return null;
+    if (eventQuery.data.sync_source === 'FtcEvents') {
+      const season = `${eventQuery.data.seasons.start_time.getFullYear() % 100}${eventQuery.data.seasons.end_time.getFullYear() % 100}`
+      return `https://theorangealliance.org/events/first-code/${season}/${eventQuery.data.code}`;
+    } else if (eventQuery.data.sync_source === 'OrangeAlliance') {
+      return `https://theorangealliance.org/events/${eventQuery.data.code}`;
+    } else {
+      return null;
+    }
   }, [eventQuery.data]);
   
   const links = useMemo(() => {
     const ret = [];
     if (frcEventsUrl) ret.push({name: 'FRC Events', url: frcEventsUrl});
     if (tbaUrl) ret.push({name: 'The Blue Alliance', url: tbaUrl});
+    if (ftcEventsUrl) ret.push({name: 'FTC Events', url: ftcEventsUrl});
+    if (toaUrl) ret.push({name: 'The Orange Alliance', url: toaUrl});
     
     return ret;
-  }, [frcEventsUrl, tbaUrl]);
+  }, [frcEventsUrl, tbaUrl, ftcEventsUrl, toaUrl]);
 
   return (<Paper sx={{ width: '100%', p: 2 }}>
     {eventQuery.isPending && <Loading />}
@@ -132,10 +151,12 @@ function EventsManageOverview() {
               <Typography variant="h5">{eventStatusToShortDescription(event.status)}</Typography>
               Status
             </Card>
-            <Card sx={{ p: 1, textAlign: 'center', minWidth: '15em' }} elevation={6}>
-              <Typography variant="h5">{event.truck_routes?.name ?? "(N/A)"}</Typography>
-              Truck Route
-            </Card>
+            <RouterLink to={`/routes/${event.truck_routes?.id}`} style={{ textDecoration: 'unset' }}>
+              <Card sx={{ p: 1, textAlign: 'center', minWidth: '15em' }} elevation={6}>
+                <Typography variant="h5">{event.truck_routes?.name ?? "(N/A)"}</Typography>
+                Truck Route
+              </Card>
+            </RouterLink>
             <Card sx={{ p: 1, textAlign: 'center', minWidth: '15em' }} elevation={6}>
               <Typography variant="h5">{event.code ?? "(N/A)"}</Typography>
               Event Code

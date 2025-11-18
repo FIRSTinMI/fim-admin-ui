@@ -18,7 +18,7 @@ import {
   useGridApiRef
 } from "@mui/x-data-grid";
 import { Link as RouterLink } from "react-router-dom";
-import { EventSlim, useGetEventsForSeason } from "src/data/supabase/events";
+import { EventDashboard, useGetEventDashboard } from "src/data/supabase/events";
 import { useGetSeasons } from "src/data/supabase/seasons";
 import { Loading } from "src/shared/Loading";
 import AddIcon from "@mui/icons-material/Add";
@@ -26,7 +26,7 @@ import useHasGlobalPermission from "src/hooks/useHasGlobalPermission";
 import { GlobalPermission } from "src/data/globalPermission";
 import DataTableFilterToolbar from "src/shared/DataTableFilterToolbar.tsx";
 import { eventStatusToShortDescription } from "src/data/eventStatus.ts";
-import { isWithinInterval } from "date-fns";
+import { differenceInMinutes, isWithinInterval } from "date-fns";
 import StyledGridOverlay from "src/shared/StyledGridOverlay.tsx";
 import usePersistTableState from "src/hooks/usePersistTableState.ts";
 import { formatEventDate } from "src/shared/util.ts";
@@ -39,7 +39,7 @@ const WrappedDataGrid = styled('div')`
   }
 `;
 
-let tableColumns: GridColDef<EventSlim[][number]>[] = [
+let tableColumns: GridColDef<EventDashboard[][number]>[] = [
   { field: 'key', headerName: 'Event Key', width: 150 },
   { field: 'code', headerName: 'Event Code', width: 150 },
   { field: 'name', headerName: 'Name', flex: 1, minWidth: 150, renderCell: (params) => (
@@ -49,6 +49,7 @@ let tableColumns: GridColDef<EventSlim[][number]>[] = [
     field: 'truck_routes.name',
     valueGetter: (_, row) => row.truck_routes?.name,
     headerName: 'Route',
+    width: 150,
     renderCell: (params) => (
       params.row.truck_routes?.id
         ? <Link component={RouterLink} to={`/routes/${params.row.truck_routes.id}`}>{params.value}</Link>
@@ -65,6 +66,21 @@ let tableColumns: GridColDef<EventSlim[][number]>[] = [
     valueFormatter: (value) => (value === true ? 'Yes' : 'No')
   },
   { field: 'status', headerName: 'Status', valueFormatter: eventStatusToShortDescription, width: 150 },
+  { field: 'info', headerName: 'Last Match', width: 200, valueGetter: (_, row) => {
+    let result: string | null = null;
+    if (!row.last_match_num || !row.level_matches) return result;
+    result = `${row.last_match_num} of ${row.level_matches}`;
+    
+    if (row.last_match_scheduled && row.last_match_actual) {
+      const val = differenceInMinutes(row.last_match_scheduled, row.last_match_actual);
+      const relativeDelay = val === 0 ? 'On time!' : (
+        val > 0 ? `${val}m early` : `${Math.abs(val)}m late`
+      )
+      result += ` (${relativeDelay})`;
+    }
+    
+    return result;
+  }, sortable: false}
 ];
 
 const presetFilters: { label: string, filterModel: GridFilterModel }[] = [
@@ -102,7 +118,7 @@ function EventsList() {
   const hasCreatePermission = useHasGlobalPermission([GlobalPermission.Events_Create]);
   const [showKeys, setShowKeys] = useState(false);
 
-  const getEventsQuery = useGetEventsForSeason(selectedSeason);
+  const getEventsQuery = useGetEventDashboard(selectedSeason);
   const getSeasonsQuery = useGetSeasons();
 
   useEffect(() => {

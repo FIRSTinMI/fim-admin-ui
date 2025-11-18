@@ -8,6 +8,8 @@ export type CreateEventNoteRequest = {
   content: string
 };
 
+export type DataSource = "FrcEvents" | "BlueAlliance" | "FtcEvents" | "OrangeAlliance";
+
 export const createEventNote = async (client: FimSupabaseClient, req: CreateEventNoteRequest) => {
   return fetch(`${import.meta.env.PUBLIC_ADMIN_API_URL}/api/v1/events/${encodeURIComponent(req.eventId)}/notes`, {
     method: "POST",

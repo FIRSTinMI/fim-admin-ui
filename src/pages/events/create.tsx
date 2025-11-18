@@ -4,10 +4,11 @@ import { useForm } from "@tanstack/react-form";
 import { format } from "date-fns";
 import { useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
-import { createEventsFromSyncSource, CreateEventsResponse, DataSource, SyncSourceRequest } from "src/data/admin-api/create-events";
+import { createEventsFromSyncSource, CreateEventsResponse, SyncSourceRequest } from "src/data/admin-api/create-events";
 import { Season, useGetSeasons } from "src/data/supabase/seasons";
 import { useSupaMutation } from "src/hooks/useSupaMutation";
 import { LoadingButton } from "@mui/lab";
+import { DataSource } from "src/data/admin-api/events.ts";
 
 
 const getValidSourcesForSeason = (season: Season): DataSource[] => {

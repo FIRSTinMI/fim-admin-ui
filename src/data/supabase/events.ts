@@ -2,6 +2,7 @@ import parseISO from "date-fns/parseISO";
 import { FimSupabaseClient } from "../../supabaseContext";
 import { useSupaQuery } from "src/hooks/useSupaQuery";
 import { EventStatus } from "../eventStatus";
+import { DataSource } from "src/data/admin-api/events.ts";
 
 export type EventSlim = {
   id: string
@@ -20,12 +21,27 @@ export type EventSlim = {
 
 export type Event = EventSlim & {
   season_id: number,
+  sync_source: DataSource,
+  seasons: {
+    start_time: Date,
+    end_time: Date,
+    levels: {
+      name: string
+    }
+  },
   event_notes?: {
     id: number,
     content: string,
     created_by: string,
     created_at: Date
   }[]
+};
+
+export type EventDashboard = EventSlim & {
+  last_match_num: string | null,
+  level_matches: number,
+  last_match_scheduled: Date | null,
+  last_match_actual: Date | null
 };
 
 export type EventTeamStatus = {
@@ -68,10 +84,37 @@ export const useGetEventsForSeason = (seasonId: number | null, enabled: boolean 
   enabled: enabled
 });
 
+export const getEventDashboard = async (client: FimSupabaseClient, seasonId: number): Promise<EventDashboard[]> => {
+  const { data, error } = await client
+    .from("event_dashboard")
+    .select<string, EventDashboard>("id,key,code,name,start_time,end_time,status,truck_routes(id,name),last_match_num,level_matches,last_match_scheduled,last_match_actual")
+    .order("start_time", {ascending: true})
+    .order("name", {ascending: true})
+    .eq('season_id', seasonId);
+
+  if (error) throw new Error(error.message);
+
+  if (data === null) return [];
+
+  return data.map(mapDbToEventDashboard);
+}
+
+export const getEventDashboardQueryKey =
+  (seasonId: number | null) => ["getEventDashboard", seasonId];
+
+export const useGetEventDashboard = (seasonId: number | null, enabled: boolean = true) => useSupaQuery({
+  queryKey: getEventDashboardQueryKey(seasonId),
+  queryFn: async (client) => {
+    if (!seasonId) throw new Error("No season ID provided");
+    return await getEventDashboard(client, seasonId)
+  },
+  enabled: enabled
+});
+
 export const getEvent = async (client: FimSupabaseClient, eventId: string): Promise<Event> => {
   const { data, error } = await client
     .from("events")
-    .select("*,truck_routes(id,name),event_notes(*)")
+    .select("*,truck_routes(id,name),event_notes(*),seasons(levels(name),start_time,end_time)")
     .eq('id', eventId)
     .single<Event>();
 
@@ -153,10 +196,27 @@ export const mapDbToEventSlim = (db: EventSlim): EventSlim => {
   } as EventSlim;
 }
 
+export const mapDbToEventDashboard = (db: EventDashboard): EventDashboard => {
+  const result: Partial<EventDashboard> = mapDbToEventSlim(db);
+  result.last_match_num = db.last_match_num;
+  result.level_matches = db.level_matches;
+  result.last_match_scheduled = db.last_match_scheduled ? parseISO(db.last_match_scheduled as unknown as string) : null
+  result.last_match_actual = db.last_match_actual ? parseISO(db.last_match_actual as unknown as string) : null
+  return result as EventDashboard;
+}
+
 export const mapDbToEvent = (db: Event): Event => {
   return {
     ...mapDbToEventSlim(db),
     season_id: db.season_id,
+    seasons: {
+      levels: {
+        name: db.seasons.levels.name
+      },
+      start_time: parseISO(db.seasons.start_time as unknown as string),
+      end_time: parseISO(db.seasons.end_time as unknown as string)
+    },
+    sync_source: db.sync_source,
     event_notes: db.event_notes ? db.event_notes.map(n => ({
       id: n.id,
       content: n.content,
