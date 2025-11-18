@@ -1,6 +1,6 @@
 import { formatISO } from "date-fns";
 import { FimSupabaseClient } from "../../supabaseContext";
-import { Event, mapDbToEvent } from "./events";
+import { EventSlim, mapDbToEventSlim } from "./events";
 import { useSupaQuery } from "src/hooks/useSupaQuery.ts";
 import useHasGlobalPermission from "src/hooks/useHasGlobalPermission.ts";
 import { GlobalPermission } from "src/data/globalPermission.ts";
@@ -65,7 +65,7 @@ export const getUpcomingEventsForRoute = async (
 ) => {
   const { data, error } = await client
     .from("events")
-    .select<string, Event>("*")
+    .select<string, EventSlim>("id,key,code,name,start_time,end_time,status,truck_routes(id,name)")
     .eq("truck_route_id", routeId)
     .gte("end_time", formatISO(new Date()));
 
@@ -73,7 +73,7 @@ export const getUpcomingEventsForRoute = async (
 
   if (data === null) return [];
 
-  return data.map(mapDbToEvent);
+    return data.map(mapDbToEventSlim);
 };
 
 export const useGetUpcomingEventsForRoute = (routeId: number) => {
