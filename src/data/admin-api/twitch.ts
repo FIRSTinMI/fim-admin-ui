@@ -4,7 +4,7 @@ import { useSupaQuery } from "src/hooks/useSupaQuery";
 import { FimSupabaseClient } from "src/supabaseContext.tsx";
 
 const getTwitchLogin = async (client: FimSupabaseClient) => {
-  const redirectUri = location.href;
+  const redirectUri = location.href.split("?")[0];
   const scopes = [
     encodeURIComponent("channel:manage:broadcast"),
     encodeURIComponent("channel:manage:videos"),
