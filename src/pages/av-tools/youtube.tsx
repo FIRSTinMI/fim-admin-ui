@@ -1,5 +1,6 @@
 import { Button, Stack, Typography, Box, Chip } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { useEffect } from "react";
 import { useGetActiveYoutubeScopes, useGetYoutubeLogin, useUpdateYoutubeAuth } from "src/data/admin-api/youtube";
 import Timestamp from "src/shared/Timestamp";
 
@@ -28,13 +29,15 @@ export default function Youtube() {
     }
   };
 
-  if (isYoutubeResponse) {
-    // Save the Youtube authorization code
-    updateYoutubeAuth({ code, scope });
-    // Remove the query parameters from the URL
-    const newUrl = window.location.origin + window.location.pathname;
-    window.history.replaceState({}, document.title, newUrl);
-  }
+  useEffect(() => {
+    if (isYoutubeResponse) {
+      // Save the Youtube authorization code
+      updateYoutubeAuth({ code, scope });
+      // Remove the query parameters from the URL
+      const newUrl = window.location.origin + window.location.pathname;
+      window.history.replaceState({}, document.title, newUrl);
+    }
+  }, []);
 
   return (
     <Stack spacing={2} direction={"column"}>

@@ -164,7 +164,9 @@ function EditFormOrName({
                   labelId="streaming-platform-label"
                   id="streaming-platform"
                   value={state.value ?? ""}
-                  onChange={(e) => handleChange(e.target.value as string)}
+                  onChange={(e) =>
+                    handleChange(e.target.value as "" | "youtube" | "twitch" | null)
+                  }
                   onBlur={handleBlur}
                   label="Streaming Platform"
                 >

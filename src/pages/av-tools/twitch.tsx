@@ -1,5 +1,6 @@
 import { Button, Stack, Typography, Box, Chip } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { useEffect } from "react";
 import {
   useGetActiveTwitchScopes,
   useGetTwitchLogin,
@@ -33,13 +34,15 @@ export default function Twitch() {
     }
   };
 
-  if (isTwitchResponse) {
-    // Save the Twitch authorization code
-    updateTwitchAuth({ code, scope });
-    // Remove the query parameters from the URL
-    const newUrl = window.location.origin + window.location.pathname;
-    window.history.replaceState({}, document.title, newUrl);
-  }
+  useEffect(() => {
+    if (isTwitchResponse) {
+      // Save the Twitch authorization code
+      updateTwitchAuth({ code, scope });
+      // Remove the query parameters from the URL
+      const newUrl = window.location.origin + window.location.pathname;
+      window.history.replaceState({}, document.title, newUrl);
+    }
+  }, []);
 
   return (
     <Stack spacing={2} direction={"column"}>
