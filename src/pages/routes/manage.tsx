@@ -45,7 +45,6 @@ function EditFormOrName({
   const equipmentList = useGetEquipmentOfType(-1);
 
 
-  console.log(routeQuery.data);
   const form = useForm<Omit<UpdateTruckRouteRequest, "routeId">>({
     defaultValues: {
       name: routeQuery?.data?.name ?? "",
