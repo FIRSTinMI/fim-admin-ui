@@ -85,7 +85,7 @@ const updateTwitchAuth = async (
     `${import.meta.env.PUBLIC_ADMIN_API_URL}/api/v1/twitch/set-code`,
     {
       method: "POST",
-      body: JSON.stringify({ code, scope, redirectUri: location.href }),
+      body: JSON.stringify({ code, scope, redirectUri: location.href.split("?")[0] }),
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${
