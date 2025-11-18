@@ -11,7 +11,7 @@ export default function Youtube() {
     isLoading: activeScopesLoading,
     refetch: refetchActiveScopes,
   } = useGetActiveYoutubeScopes();
-  const { mutate: updateYoutubeAuth, isPending: saving } = useUpdateYoutubeAuth();
+  const { mutate: updateYoutubeAuth } = useUpdateYoutubeAuth();
 
   // Check if this is a response from Youtube after authorization
   // Example URL: http://localhost:5173/av-tools/youtube?code=<code>&scope=<scopes>

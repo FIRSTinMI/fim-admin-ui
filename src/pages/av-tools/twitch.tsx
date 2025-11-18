@@ -15,7 +15,7 @@ export default function Twitch() {
     isLoading: activeScopesLoading,
     refetch: refetchActiveScopes,
   } = useGetActiveTwitchScopes();
-  const { mutate: updateTwitchAuth, isPending: saving } = useUpdateTwitchAuth();
+  const { mutate: updateTwitchAuth } = useUpdateTwitchAuth();
 
   // Check if this is a response from Twitch after authorization
   // Example URL: http://localhost:5173/av-tools/twitch?code=<code>&scope=<scopes>&state=<state>
