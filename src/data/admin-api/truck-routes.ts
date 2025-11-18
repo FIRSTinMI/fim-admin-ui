@@ -1,11 +1,13 @@
 import { FimSupabaseClient } from "src/supabaseContext.tsx";
 import { useSupaMutation } from "src/hooks/useSupaMutation.ts";
 import { useQueryClient } from "@tanstack/react-query";
+import { StreamingConfig } from "../supabase/truckRoutes";
 
 export type UpdateTruckRouteRequest = {
   routeId: number,
   name: string,
-  equipmentIds: string[] | null
+  equipmentIds: string[] | null,
+  streamingConfig?: StreamingConfig
 };
 
 const updateTruckRoute = async (client: FimSupabaseClient, request: UpdateTruckRouteRequest) => {
