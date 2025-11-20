@@ -56,7 +56,7 @@ const livestreamDelete = async (
       throw new Error("You do not have permission to perform this action.");
     if (!resp.ok)
       throw new Error(
-        `An error occurred while setting the event streams: ${resp.statusText}`
+        `An error occurred while deleting the event stream: ${resp.statusText}`
       );
   });
 };

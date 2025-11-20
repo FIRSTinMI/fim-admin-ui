@@ -194,7 +194,7 @@ export const mapDbToEventSlim = (db: EventSlim): EventSlim => {
     truck_routes: db.truck_routes ? {
       id: db.truck_routes.id,
       name: db.truck_routes.name,
-      streaming_config: db.truck_routes.streaming_config ? db.truck_routes.streaming_config : undefined
+      streaming_config: db.truck_routes.streaming_config
     } : undefined,
   } as EventSlim;
 }

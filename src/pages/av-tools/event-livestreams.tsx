@@ -66,7 +66,7 @@ const EventLivestreams = () => {
         map[stream.event_id].push(stream);
       }
     }
-    console.log(map);
+
     return map;
   }, [eventStreams.data]);
 
@@ -149,7 +149,7 @@ const EventLivestreams = () => {
                           <Tooltip title="Update or Create Livestream">
                             <IconButton
                               edge="end"
-                              aria-label="delete"
+                              aria-label="update or create livestream"
                               onClick={() => runSingleEvent(ev.id)}
                               disabled={singleLoading === ev.id}
                             >
@@ -191,7 +191,7 @@ const EventLivestreams = () => {
                                     aria-label="delete"
                                     onClick={() => runDeleteStream(stream.id)}
                                     disabled={singleDelete === stream.id.toString()}
-                                    sx={{mr: 10}}
+                                    sx={{ mr: 10 }}
                                   >
                                     {singleDelete === stream.id.toString() ? (
                                       <CircularProgress size={24} />
