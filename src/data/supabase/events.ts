@@ -3,6 +3,7 @@ import { FimSupabaseClient } from "../../supabaseContext";
 import { useSupaQuery } from "src/hooks/useSupaQuery";
 import { EventStatus } from "../eventStatus";
 import { DataSource } from "src/data/admin-api/events.ts";
+import { StreamingConfig } from "./truckRoutes";
 
 export type EventSlim = {
   id: string
@@ -15,7 +16,8 @@ export type EventSlim = {
   status: EventStatus,
   truck_routes?: {
     id: number,
-    name: string
+    name: string,
+    streaming_config?: StreamingConfig
   }
 };
 
@@ -60,7 +62,7 @@ export type EventTeam = {
 export const getEventsForSeason = async (client: FimSupabaseClient, seasonId: number): Promise<EventSlim[]> => {
   const { data, error } = await client
     .from("events")
-    .select<string, EventSlim>("id,key,code,name,start_time,end_time,status,truck_routes(id,name)")
+    .select<string, EventSlim>("id,key,code,name,start_time,end_time,status,truck_routes(id,name,streaming_config)")
     .order("start_time", {ascending: true})
     .order("name", {ascending: true})
     .eq('season_id', seasonId);
@@ -191,7 +193,8 @@ export const mapDbToEventSlim = (db: EventSlim): EventSlim => {
     status: db.status,
     truck_routes: db.truck_routes ? {
       id: db.truck_routes.id,
-      name: db.truck_routes.name
+      name: db.truck_routes.name,
+      streaming_config: db.truck_routes.streaming_config
     } : undefined,
   } as EventSlim;
 }

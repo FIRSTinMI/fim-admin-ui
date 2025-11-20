@@ -18,6 +18,17 @@ type EventMatchVideoStat = {
   latePlayoffVideos: string[] | null,
 };
 
+export type EventStream = {
+  id: string,
+  event_id: string,
+  title: string,
+  platform: string,
+  channel: string,
+  url: string,
+  internal_id: string,
+  start_time: Date,
+}
+
 export const getEventMatchVideoStats = async (client: FimSupabaseClient, onlyCurrent: boolean = true, eventIds?: string[]): Promise<EventMatchVideoStat[]> => {
   let query = client
     .from("event_match_video_stats")
@@ -66,3 +77,22 @@ const mapDbToEventMatchVideoStat = (db: EventMatchVideoStat): EventMatchVideoSta
     latePlayoffVideos: db.latePlayoffVideos
   } as EventMatchVideoStat;
 }
+
+const getEventStreamsFromEventIds = async (client: FimSupabaseClient, eventIds: string[]): Promise<EventStream[]> => {
+  const { data, error } = await client
+    .from("event_streams")
+    .select<string, EventStream>("id, event_id, title, platform, channel, url, internal_id, start_time")
+    .in("event_id", eventIds);
+  if (error) throw new Error(error.message);
+
+  return data;
+};
+
+export const getEventStreamsFromEventIdsQueryKey = (...params: Parameters<OmitFirstArg<typeof getEventStreamsFromEventIds>>) => ["getEventStreamsFromEventIds", ...params];
+
+export const useGetEventStreamsFromEventIds = (...params: Parameters<OmitFirstArg<typeof getEventStreamsFromEventIds>>) => useSupaQuery({
+  queryKey: getEventStreamsFromEventIdsQueryKey(...params),
+  queryFn: async (client) => {
+    return await getEventStreamsFromEventIds(client, ...params)
+  }
+});
