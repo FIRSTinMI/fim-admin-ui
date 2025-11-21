@@ -39,11 +39,11 @@ const allMenuItems: MenuItem[] = [
     url: '/routes',
     requiredRole: [GlobalPermission.Equipment_View],
     icon: <LocalShippingIcon />
-  }, {
-    title: 'Alerts',
-    url: '/alerts',
-    requiredRole: [GlobalPermission.Equipment_Manage],
-    icon: <WarningIcon />
+  // }, {
+  //   title: 'Alerts',
+  //   url: '/alerts',
+  //   requiredRole: [GlobalPermission.Equipment_Manage],
+  //   icon: <WarningIcon />
   }, {
     title: 'AV Tools',
     url: '/av-tools',
