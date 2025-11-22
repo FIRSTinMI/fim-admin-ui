@@ -45,7 +45,8 @@ function AvTools() {
     <>
       <Typography variant="h2" sx={{ mb: 3 }}>AV Tools</Typography>
 
-      <Tabs value={match} sx={{ mb: 2 }}>
+      {/* Hacky. The tabs like to complain if we aren't sure yet whether the user has access to the current route. */}
+      <Tabs value={filteredRoutes.findIndex(r => r.path == match) > -1 ? match : filteredRoutes[0].path} sx={{ mb: 2 }}>
         {filteredRoutes.map(r => <Tab key={r.path} value={r.path} label={r.label} component={Link} to={`..${r.path}`} relative="path" /> )}
       </Tabs>
 

@@ -9,6 +9,7 @@ import { Season, useGetSeasons } from "src/data/supabase/seasons";
 import { useSupaMutation } from "src/hooks/useSupaMutation";
 import { LoadingButton } from "@mui/lab";
 import { DataSource } from "src/data/admin-api/events.ts";
+import usePersistedSeason from "src/hooks/usePersistedSeason.ts";
 
 
 const getValidSourcesForSeason = (season: Season): DataSource[] => {
@@ -22,10 +23,12 @@ function Step1({ setResult }: { setResult: (r: CreateEventsResponse | null) => v
     mutationFn: (client, req: SyncSourceRequest) => createEventsFromSyncSource(client, req)
   });
 
+  const [selectedSeason, _] = usePersistedSeason();
+
   const form = useForm<{ eventCodesUserInput?: string } & SyncSourceRequest>({
     defaultValues: {
       overrideExisting: false,
-      seasonId: 0,
+      seasonId: selectedSeason ?? 0,
       dataSource: 'FrcEvents',
       districtCode: null,
       eventCodesUserInput: '',

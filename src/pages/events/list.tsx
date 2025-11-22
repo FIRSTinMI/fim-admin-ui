@@ -30,6 +30,7 @@ import { differenceInMinutes, isWithinInterval } from "date-fns";
 import StyledGridOverlay from "src/shared/StyledGridOverlay.tsx";
 import usePersistTableState from "src/hooks/usePersistTableState.ts";
 import { formatEventDate } from "src/shared/util.ts";
+import usePersistedSeason from "src/hooks/usePersistedSeason.ts";
 
 const WrappedDataGrid = styled('div')`
   max-width: 100%;
@@ -114,24 +115,12 @@ function EventsList() {
       }
     }
   });
-  const [selectedSeason, setSelectedSeason] = useState<number | null>(null);
+  const [selectedSeason, setSelectedSeason] = usePersistedSeason();
   const hasCreatePermission = useHasGlobalPermission([GlobalPermission.Events_Create]);
   const [showKeys, setShowKeys] = useState(false);
 
   const getEventsQuery = useGetEventDashboard(selectedSeason);
   const getSeasonsQuery = useGetSeasons();
-
-  useEffect(() => {
-    const selected = localStorage.getItem('fim-admin-selected-season');
-    if (selected) {
-      setSelectedSeason(Number(selected));
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!selectedSeason) return;
-    localStorage.setItem('fim-admin-selected-season', selectedSeason.toString());
-  }, [selectedSeason]);
   
   useEffect(() => {
     const keyCol = tableColumns.findIndex(c => c.field === "key");

@@ -10,6 +10,9 @@ import {
   Chip,
   Menu,
   MenuItem,
+  Link,
+  Alert,
+  Typography,
 } from "@mui/material";
 import React, { memo, useState } from "react";
 import NiceModal from "@ebay/nice-modal-react";
@@ -31,7 +34,7 @@ const StatusChip = ({
   onClick?: () => void;
   loading?: boolean;
 }) => {
-  const translateMap: Record<YoutubeStreamStatus["lifeCycleStatus"], string> = {
+  const lifecycleTranslationMap: Record<YoutubeStreamStatus["lifeCycleStatus"], string> = {
     complete: "Completed",
     live: "Live",
     liveStarting: "Starting",
@@ -39,6 +42,13 @@ const StatusChip = ({
     revoked: "Revoked",
     testStarting: "Test Starting",
     testing: "Testing",
+  };
+  const streamTranslationMap: Record<YoutubeStreamStatus["streamStatus"], string> = {
+    "active": "Broadcasting",
+    "created": "No Data Yet",
+    "error": "Stream Error",
+    "inactive": "Not Sending Data",
+    "ready": "Waiting For Data"
   };
   const colorMap: Record<
     YoutubeStreamStatus["lifeCycleStatus"],
@@ -53,17 +63,31 @@ const StatusChip = ({
     testing: "warning",
   };
 
+  const getChipColor = (status?: YoutubeStreamStatus): "default" | "primary" | "success" | "warning" | "error" => {
+    if (!status) return "default";
+    
+    if ((status.lifeCycleStatus === "live" || status.lifeCycleStatus === "testing") && !status.isLive)
+      return "error";
+    
+    return colorMap[status.lifeCycleStatus];
+  }
+  
+  const getChipText = (status?: YoutubeStreamStatus): string => {
+    if (!status) return "Unknown";
+    
+    let retVal = lifecycleTranslationMap[status.lifeCycleStatus];
+    if ((status.lifeCycleStatus === "live" || status.lifeCycleStatus === "testing") && !status.isLive) {
+      retVal += ` (${streamTranslationMap[status.streamStatus]})`;
+    }
+    
+    return retVal;
+  }
+
   return (
     <Tooltip title="Click to refresh status">
       <Chip
-        label={
-          status?.lifeCycleStatus
-            ? translateMap[status.lifeCycleStatus]
-            : "Unknown"
-        }
-        color={
-          status?.lifeCycleStatus ? colorMap[status.lifeCycleStatus] : "default"
-        }
+        label={getChipText(status)}
+        color={getChipColor(status)}
         sx={{
           cursor: "pointer",
         }}
@@ -73,6 +97,15 @@ const StatusChip = ({
     </Tooltip>
   );
 };
+
+const WatchUrl = (stream: EventStream) => {
+  if (stream.platform === "Youtube") {
+    return `https://youtube.com/watch?v=${stream.internal_id}`;
+  }
+  if (stream.platform === "Twitch") {
+    return `https://twitch.tv/${stream.channel}`;
+  }
+}
 
 const LiveStreamRow = ({
   stream,
@@ -112,6 +145,7 @@ const LiveStreamRow = ({
       streamName: stream.title,
       title: 'Stop Stream',
       confirmText: 'Stop',
+      action: 'stop',
       onConfirm: () =>
         stopStream
           .mutateAsync({
@@ -133,9 +167,10 @@ const LiveStreamRow = ({
   };
 
   const cantStop = myStatus?.lifeCycleStatus !== "live" && myStatus?.lifeCycleStatus !== "liveStarting";
-
+  
   return (
     <ListItem
+      sx={{".MuiListItemSecondaryAction-root": { height: "100%" }}}
       key={stream.id}
       secondaryAction={
         <Stack direction="row" spacing={1} alignItems="end" sx={{ mr: 8 }}>
@@ -151,8 +186,10 @@ const LiveStreamRow = ({
 
           <Menu anchorEl={menuAnchor} open={Boolean(menuAnchor)} onClose={closeMenu}>
             <MenuItem
+              component={Link}
+              href={WatchUrl(stream)}
+              target="_blank"
               onClick={() => {
-                window.open(stream.url, "_blank");
                 closeMenu();
               }}
             >
@@ -203,10 +240,15 @@ const LiveStreamRow = ({
           <YouTube />
         )}
       </ListItemIcon>
-      <ListItemText
-        primary={stream.title}
-        secondary={`${stream.platform} - ${stream.url}`}
-      />
+      <ListItemText>
+        <div>
+          <Typography>{stream.title}</Typography>
+          <Typography color="textDisabled">{`${stream.platform} - ${stream.url}`}</Typography>
+        </div>
+        {(myStatus?.streamHealth?.length ?? 0) > 0 && (
+          <Alert severity="warning" sx={{ mr: 8 }}>{myStatus!.streamHealth!.join("; ")}</Alert>
+        )}
+      </ListItemText>
     </ListItem>
   );
 };

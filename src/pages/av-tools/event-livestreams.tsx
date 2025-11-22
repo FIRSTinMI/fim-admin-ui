@@ -26,15 +26,14 @@ import {
 import { useGetEventsForSeason } from "src/data/supabase/events";
 import { useGetSeasons } from "src/data/supabase/seasons";
 import { LiveStreamRowMemo } from "src/shared/LiveStreamRow";
+import usePersistedSeason from "src/hooks/usePersistedSeason.ts";
 
 const EventLivestreams = () => {
   // Seasons
   const seasons = useGetSeasons();
 
   // Track Selected Season
-  const [seasonId, setSeasonId] = useState<number | undefined>(
-    seasons.data?.[seasons.data?.length - 1]?.id
-  );
+  const [seasonId, setSeasonId] = usePersistedSeason();
 
   // Track loading state for single event updates
   const [singleLoading, setSingleLoading] = useState<string>("");
@@ -108,7 +107,7 @@ const EventLivestreams = () => {
               }
               label="Season"
               onChange={(e) =>
-                setSeasonId(e.target.value as number | undefined)
+                setSeasonId((e.target.value ?? null) as number | null)
               }
             >
               {(seasons.data ?? []).map((s) => (
