@@ -119,7 +119,7 @@ const LiveStreamRow = ({
             accountId: acctId,
           })
           .finally(() => {
-            refetch();
+            youtubeStatuses.refetch();
           }),
     });
   };
