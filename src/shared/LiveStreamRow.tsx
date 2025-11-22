@@ -69,11 +69,17 @@ const StatusChip = ({
     if ((status.lifeCycleStatus === "live" || status.lifeCycleStatus === "testing") && !status.isLive)
       return "error";
     
+    if (status.lifeCycleStatus === "ready" && !status.autoStart)
+      return "default";
+    
     return colorMap[status.lifeCycleStatus];
   }
   
   const getChipText = (status?: YoutubeStreamStatus): string => {
     if (!status) return "Unknown";
+
+    if (status.lifeCycleStatus === "ready" && !status.autoStart)
+      return "Disabled";
     
     let retVal = lifecycleTranslationMap[status.lifeCycleStatus];
     if ((status.lifeCycleStatus === "live" || status.lifeCycleStatus === "testing") && !status.isLive) {
@@ -166,7 +172,7 @@ const LiveStreamRow = ({
     youtubeStatuses.refetch();
   };
 
-  const cantStop = myStatus?.lifeCycleStatus !== "live" && myStatus?.lifeCycleStatus !== "liveStarting";
+  const cantStop = myStatus?.lifeCycleStatus === "complete" || myStatus?.autoStart === false;
   
   return (
     <ListItem
@@ -245,7 +251,7 @@ const LiveStreamRow = ({
           <Typography>{stream.title}</Typography>
           <Typography color="textDisabled">{`${stream.platform} - ${stream.url}`}</Typography>
         </div>
-        {(myStatus?.streamHealth?.length ?? 0) > 0 && (
+        {myStatus?.lifeCycleStatus !== "complete" && (myStatus?.streamHealth?.length ?? 0) > 0 && (
           <Alert severity="warning" sx={{ mr: 8 }}>{myStatus!.streamHealth!.join("; ")}</Alert>
         )}
       </ListItemText>

@@ -190,6 +190,7 @@ export type YoutubeStreamStatus = {
   lifeCycleStatus: "ready" | "complete" | "live" | "liveStarting" | "revoked" | "testStarting" | "testing", 
   streamStatus: "active" | "created" | "error" | "inactive" | "ready",
   streamHealth: string[] | null,
+  autoStart: boolean,
   autoStop: boolean,
   privacyStatus: "public" | "private" | "unlisted",
   scheduledEndTime: string,
