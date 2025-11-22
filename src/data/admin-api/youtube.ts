@@ -114,3 +114,81 @@ export const useUpdateYoutubeAuth = () => {
     },
   });
 };
+
+const stopYoutubeStream = async (
+  client: FimSupabaseClient,
+  broadcastId: string,
+  accountId: string
+) => {
+  return fetch(
+    `${import.meta.env.PUBLIC_ADMIN_API_URL}/api/v1/youtube/broadcasts/${broadcastId}/stop?acctEmail=${encodeURIComponent(accountId)}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${
+          (await client.auth.getSession()).data.session?.access_token
+        }`,
+      },
+    }
+  ).then(async (resp) => {
+    if (resp.status === 401 || resp.status === 403)
+      throw new Error("You do not have permission to perform this action.");
+    if (!resp.ok)
+      throw new Error(
+        `An error occurred while stopping the Youtube stream: ${resp.statusText}`
+      );
+  });
+};
+
+export const useStopYoutubeStream = () => {
+  return useSupaMutation({
+    mutationFn: (
+      client: FimSupabaseClient,
+      { broadcastId, accountId }: { broadcastId: string; accountId: string; }
+    ) => stopYoutubeStream(client, broadcastId, accountId)
+  });
+};
+
+const getYoutubeStreamStatuses = async (client: FimSupabaseClient, accountId: string): Promise<YoutubeStreamStatus[]> => {
+  return fetch(
+    `${
+      import.meta.env.PUBLIC_ADMIN_API_URL
+    }/api/v1/youtube/broadcasts/status?acctEmail=${encodeURIComponent(accountId)}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${
+          (await client.auth.getSession()).data.session?.access_token
+        }`,
+      },
+    }
+  ).then(async (resp) => {
+    if (resp.status === 401 || resp.status === 403)
+      throw new Error("You do not have permission to perform this action.");
+    if (!resp.ok)
+      throw new Error(
+        `An error occurred while checking Youtube statuses: ${resp.statusText}`
+      );
+    return resp.json();
+  });
+};
+
+export const useGetYoutubeStreamStatuses = (accountId: string) => {
+  return useSupaQuery({
+    queryFn: (client: FimSupabaseClient) => getYoutubeStreamStatuses(client, accountId),
+    queryKey: ["youtubeStreamStatuses", accountId],
+    enabled: !!accountId,
+    staleTime: 5000
+  });
+};
+
+export type YoutubeStreamStatus = {
+  broadcastId: string,
+  isLive: boolean,
+  lifeCycleStatus: "ready" | "complete" | "live" | "liveStarting" | "revoked" | "testStarting" | "testing", 
+  privacyStatus: "public" | "private" | "unlisted",
+  scheduledEndTime: string,
+  scheduledStartTime: string,
+}

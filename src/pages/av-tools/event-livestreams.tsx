@@ -1,4 +1,4 @@
-import { Delete, Refresh, YouTube } from "@mui/icons-material";
+import { Refresh } from "@mui/icons-material";
 import {
   FormControl,
   InputLabel,
@@ -13,17 +13,19 @@ import {
   IconButton,
   Tooltip,
   CircularProgress,
-  ListItemIcon,
   Box,
 } from "@mui/material";
 import { Fragment, useMemo, useState } from "react";
-import { useLivestreamDelete, useRunEventStreamSetter } from "src/data/admin-api/event-streams";
+import {
+  useRunEventStreamSetter,
+} from "src/data/admin-api/event-streams";
 import {
   EventStream,
   useGetEventStreamsFromEventIds,
 } from "src/data/supabase/av-tools";
 import { useGetEventsForSeason } from "src/data/supabase/events";
 import { useGetSeasons } from "src/data/supabase/seasons";
+import { LiveStreamRowMemo } from "src/shared/LiveStreamRow";
 
 const EventLivestreams = () => {
   // Seasons
@@ -36,7 +38,6 @@ const EventLivestreams = () => {
 
   // Track loading state for single event updates
   const [singleLoading, setSingleLoading] = useState<string>("");
-  const [singleDelete, setSingleDelete] = useState<string>("");
 
   // Events for Season
   const events = useGetEventsForSeason(seasonId ?? -1);
@@ -71,14 +72,15 @@ const EventLivestreams = () => {
   }, [eventStreams.data]);
 
   const setEvents = useRunEventStreamSetter();
-  const deleteStream = useLivestreamDelete();
 
   const runSetEvents = () => {
-    setEvents.mutateAsync({
-      eventIds: filteredEvents.map((ev) => ev.id),
-    }).finally(() => {
-      eventStreams.refetch();
-    });
+    setEvents
+      .mutateAsync({
+        eventIds: filteredEvents.map((ev) => ev.id),
+      })
+      .finally(() => {
+        eventStreams.refetch();
+      });
   };
 
   const runSingleEvent = (eventId: string) => {
@@ -90,18 +92,6 @@ const EventLivestreams = () => {
       .finally(() => {
         eventStreams.refetch();
         setSingleLoading("");
-      });
-  };
-
-  const runDeleteStream = (livestreamId: string) => {
-    setSingleDelete(livestreamId.toString());
-    deleteStream
-      .mutateAsync({
-        livestreamId,
-      })
-      .finally(() => {
-        eventStreams.refetch();
-        setSingleDelete("");
       });
   };
 
@@ -182,42 +172,14 @@ const EventLivestreams = () => {
                       {streamMap[ev.id] && streamMap[ev.id].length > 0 && (
                         <List sx={{ pl: 4 }}>
                           {streamMap[ev.id].map((stream) => (
-                            <ListItem 
-                              key={stream.id}                              
-                              secondaryAction={
-                                <Tooltip title="Delete Livestream">
-                                  <IconButton
-                                    edge="end"
-                                    aria-label="delete"
-                                    onClick={() => runDeleteStream(stream.id)}
-                                    disabled={singleDelete === stream.id.toString()}
-                                    sx={{ mr: 10 }}
-                                  >
-                                    {singleDelete === stream.id.toString() ? (
-                                      <CircularProgress size={24} />
-                                    ) : (
-                                      <Delete />
-                                    )}
-                                  </IconButton>
-                                </Tooltip>
+                            <LiveStreamRowMemo
+                              key={stream.id}
+                              stream={stream}
+                              refetch={eventStreams.refetch}
+                              acctId={
+                                ev.truck_routes.streaming_config.Channel_Id
                               }
-                            >
-                              <ListItemIcon>
-                                {stream.platform.toLowerCase() === "twitch" ? (
-                                  <img
-                                    src="https://pngimg.com/d/twitch_PNG48.png"
-                                    alt="Twitch"
-                                    style={{ width: 24, height: 24 }}
-                                  />
-                                ) : (
-                                  <YouTube />
-                                )}
-                              </ListItemIcon>
-                              <ListItemText
-                                primary={stream.title}
-                                secondary={`${stream.platform} - ${stream.url}`}
-                              />
-                            </ListItem>
+                            />
                           ))}
                         </List>
                       )}
@@ -230,7 +192,7 @@ const EventLivestreams = () => {
             </>
           )}
 
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
             <Button
               variant="contained"
               loading={setEvents.isPending}
