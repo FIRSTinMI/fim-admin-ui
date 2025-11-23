@@ -210,10 +210,10 @@ const LiveStreamRow = ({
                 closeMenu();
                 runStopStream();
               }}
-              disabled={!stopStream.isIdle || cantStop}
+              disabled={stopStream.isPending || cantStop}
             >
               <ListItemIcon>
-                {!stopStream.isIdle ? <CircularProgress size={18} /> : <Stop fontSize="small" />}
+                {stopStream.isPending ? <CircularProgress size={18} /> : <Stop fontSize="small" />}
               </ListItemIcon>
               Stop stream
             </MenuItem>
@@ -223,11 +223,11 @@ const LiveStreamRow = ({
                 closeMenu();
                 runDeleteStream(stream.id);
               }}
-              disabled={!deleteStream.isIdle}
+              disabled={deleteStream.isPending}
               sx={{ color: "error.main" }}
             >
               <ListItemIcon>
-                {!deleteStream.isIdle ? <CircularProgress size={18} /> : <Delete fontSize="small" color="error" />}
+                {deleteStream.isPending ? <CircularProgress size={18} /> : <Delete fontSize="small" color="error" />}
               </ListItemIcon>
               Delete stream
             </MenuItem>

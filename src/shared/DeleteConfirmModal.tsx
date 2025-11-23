@@ -41,9 +41,10 @@ const DeleteConfirmModal = NiceModal.create(
         modal.resolve(true);
         modal.hide();
       } catch (err) {
-        setLoading(false);
         modal.resolve(false);
         modal.hide();
+      } finally {
+        setLoading(false);
       }
     };
 
