@@ -81,7 +81,6 @@ function UsersManage() {
   const handleSubmit = useCallback((e: FormEvent) => {
     e.preventDefault();
     if (!formData) return;
-    console.log('hs', formData);
     updateUserMutation.mutate(formData);
   }, [formData, updateUserMutation]);
 

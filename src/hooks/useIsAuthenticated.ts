@@ -5,8 +5,7 @@ export default function useIsAuthenticated() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const supabase = useContext(SupabaseContext);
   useEffect(() => {
-    const subscription = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('uia', event, session);
+    const subscription = supabase.auth.onAuthStateChange((_, session) => {
       if (session) {
         setIsAuthenticated(true);
       } else {
