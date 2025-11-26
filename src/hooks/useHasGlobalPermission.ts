@@ -6,27 +6,18 @@ export default function useHasGlobalPermission(permissions: GlobalPermission[]) 
   const [hasPermission, setHasPermission] = useState(false);
   const supabase = useContext(SupabaseContext);
   useEffect(() => {
-    const subscription = supabase.auth.onAuthStateChange((_, session) => {
-      if (session) {
-        const userPermissions = session.user?.app_metadata ? session.user?.app_metadata['globalPermissions'] : null;
-        if (!permissions) setHasPermission(false);
-        else if (userPermissions.includes(GlobalPermission.Superuser)) setHasPermission(true);
-        else {
-          console.log('up', userPermissions, 'p', permissions);
-          for (const permission of permissions) {
-            if (userPermissions.includes(permission)) {
-              setHasPermission(true);
-              break;
-            }
-          }
+    if (!supabase.globalPermissions) setHasPermission(false);
+    else if (supabase.globalPermissions.includes(GlobalPermission.Superuser)) setHasPermission(true);
+    else if (permissions.length === 0) setHasPermission(true);
+    else {
+      for (const permission of permissions) {
+        if (supabase.globalPermissions.includes(permission)) {
+          setHasPermission(true);
+          break;
         }
-      } else {
-        setHasPermission(false);
       }
-    });
-
-    return () => { subscription.data.subscription.unsubscribe(); }
-  }, [supabase.auth, permissions]);
+    }
+  }, [supabase.globalPermissions, permissions]);
 
   return hasPermission;
 }
