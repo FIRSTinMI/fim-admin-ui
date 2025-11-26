@@ -8,6 +8,7 @@ export default function useHasGlobalPermission(permissions: GlobalPermission[]) 
   useEffect(() => {
     if (!supabase.globalPermissions) setHasPermission(false);
     else if (supabase.globalPermissions.includes(GlobalPermission.Superuser)) setHasPermission(true);
+    else if (permissions.length === 0) setHasPermission(true);
     else {
       for (const permission of permissions) {
         if (supabase.globalPermissions.includes(permission)) {
