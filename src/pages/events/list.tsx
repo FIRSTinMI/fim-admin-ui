@@ -9,7 +9,7 @@ import {
   Alert,
   Box,
   Divider,
-  Typography, styled
+  Typography, styled, LinearProgress
 } from "@mui/material";
 import {
   DataGrid,
@@ -188,8 +188,8 @@ function EventsList() {
         </Alert>}
 
       {selectedSeason && <>
-        {(getEventsQuery.isLoading || !initialState) && <Loading />}
         {getEventsQuery.isError && <Alert severity="error">Failed to get events</Alert>}
+        {getEventsQuery.isFetching && <Box sx={{width: '100%'}}><LinearProgress /></Box>}
         {getEventsQuery.isSuccess && initialState && <WrappedDataGrid sx={{ display: 'flex', flexDirection: 'column', minHeight: '400px', pb: '2em', maxWidth: '100%' }}>
           <DataGrid
             apiRef={grid}
