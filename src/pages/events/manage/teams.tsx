@@ -185,6 +185,7 @@ const EventsManageTeams = () => {
         columns={columnConfig}
         rows={ teams.data }
         slots={{ toolbar: tableToolbar }}
+        hideFooter={true}
         rowModesModel={rowModesModel}
         onRowModesModelChange={handleRowModesModelChange}
         editMode={"row"}
@@ -220,11 +221,6 @@ const EventsManageTeams = () => {
           await teams.refetch();
         }}
         initialState={{
-          pagination: {
-            paginationModel: {
-              pageSize: 100
-            }
-          },
           sorting: {
             sortModel: [{
               field: 'teamNumber',

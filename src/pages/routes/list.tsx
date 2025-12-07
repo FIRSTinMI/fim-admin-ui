@@ -31,7 +31,7 @@ function TruckRoutesList() {
   useTitle("Routes");
 
   return (
-    <Box>
+    <Box sx={{paddingBottom: 5}}>
       {query.isLoading && <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
         <Loading />
       </Box>}
@@ -39,6 +39,7 @@ function TruckRoutesList() {
       {query.isFetched && <DataGrid
         columns={tableColumns}
         rows={query.data}
+        hideFooter={true}
         initialState={{
           sorting: {
             sortModel: [{

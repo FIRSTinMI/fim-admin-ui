@@ -205,6 +205,7 @@ function EventsList() {
               )
             }}
             initialState={initialState}
+            hideFooter={true}
           />
         </WrappedDataGrid>}
       </>}

@@ -76,12 +76,10 @@ function UsersList() {
           Unable to get user information.
         </Alert>}
 
-      {query.isSuccess && <DataGrid
-        autoHeight
+      {query.isSuccess && <Box sx={{display: 'flex'}}><DataGrid
         columns={tableColumns}
         rows={query.data}
-        pageSizeOptions={[20]}
-        hideFooterPagination={true}
+        hideFooter={true}
         initialState={{
           sorting: {
             sortModel: [{
@@ -90,7 +88,7 @@ function UsersList() {
             }]
           }
         }}
-       />}
+      /></Box>}
     </>
   );
 }

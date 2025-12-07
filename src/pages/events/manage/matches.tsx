@@ -161,7 +161,7 @@ const EventsManageMatches = () => {
   if (matches.isError) return (<Alert severity="error">Failed to get events</Alert>);
   
   if (matches.isSuccess) return (
-    <Box>
+    <Box sx={{paddingBottom: 5}}>
       {canManageInfo && (
         <MutationButton mutation={refreshMatchesMutation} onClick={() => refreshMatchesMutation.mutateAsync(eventId!)}>Refresh Match Results</MutationButton>
       )}
@@ -170,12 +170,8 @@ const EventsManageMatches = () => {
         columns={columnConfig}
         rows={ matches.data }
         slots={{ toolbar: tableToolbar }}
+        hideFooter={true}
         initialState={{
-          pagination: {
-            paginationModel: {
-              pageSize: 100
-            }
-          },
           sorting: {
             sortModel: [{
               field: 'match_play_number',
