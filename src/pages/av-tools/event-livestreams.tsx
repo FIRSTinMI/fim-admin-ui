@@ -176,7 +176,7 @@ const EventLivestreams = () => {
                               stream={stream}
                               refetch={eventStreams.refetch}
                               acctId={
-                                ev.truck_routes.streaming_config.Channel_Id
+                                stream.channel_id ?? ev.truck_routes.streaming_config.Channel_Id
                               }
                             />
                           ))}

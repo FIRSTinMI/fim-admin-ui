@@ -27,6 +27,7 @@ export type EventStream = {
   url: string,
   internal_id: string,
   start_time: Date,
+  channel_id: string,
 }
 
 export const getEventMatchVideoStats = async (client: FimSupabaseClient, onlyCurrent: boolean = true, eventIds?: string[]): Promise<EventMatchVideoStat[]> => {
@@ -81,7 +82,7 @@ const mapDbToEventMatchVideoStat = (db: EventMatchVideoStat): EventMatchVideoSta
 const getEventStreamsFromEventIds = async (client: FimSupabaseClient, eventIds: string[]): Promise<EventStream[]> => {
   const { data, error } = await client
     .from("event_streams")
-    .select<string, EventStream>("id, event_id, title, platform, channel, url, internal_id, start_time")
+    .select<string, EventStream>("id, event_id, title, platform, channel, url, internal_id, start_time, channel_id")
     .in("event_id", eventIds);
   if (error) throw new Error(error.message);
 
