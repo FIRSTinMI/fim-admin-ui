@@ -22,6 +22,7 @@ import { EventDashboard, useGetEventDashboard } from "src/data/supabase/events";
 import { useGetSeasons } from "src/data/supabase/seasons";
 import { Loading } from "src/shared/Loading";
 import AddIcon from "@mui/icons-material/Add";
+import CopyIcon from "@mui/icons-material/ContentCopy";
 import useHasGlobalPermission from "src/hooks/useHasGlobalPermission";
 import { GlobalPermission } from "src/data/globalPermission";
 import DataTableFilterToolbar from "src/shared/DataTableFilterToolbar.tsx";
@@ -154,6 +155,11 @@ function EventsList() {
             </Button>
           ))}
           <div style={{flexGrow: 1}} />
+          <Button variant="text" title="Copy to Clipboard" onClick={() =>
+              navigator.clipboard.writeText(grid.current.getDataAsCsv({delimiter: "\t", includeHeaders: true, shouldAppendQuotes: false}))}
+            sx={{mr: 2}}>
+              <CopyIcon />
+          </Button>
         </>
       </DataTableFilterToolbar>
     );
