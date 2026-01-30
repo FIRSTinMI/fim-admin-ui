@@ -229,6 +229,11 @@ function TruckRoutesManage() {
           ) : (
             <DataGrid
               rows={eventsQuery.data}
+              initialState={{
+                sorting: {
+                  sortModel: [{ field: "start_time", sort: "asc" }]
+                }
+              }}
               columns={[
                 {
                   field: "name",
