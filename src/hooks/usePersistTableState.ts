@@ -33,11 +33,11 @@ export default function usePersistTableState(apiRef: RefObject<GridApi> | null, 
     setInitialState(effectiveState);
 
     // handle refresh and navigating away/refreshing
-    window.addEventListener('beforeunload', saveSnapshot);
+    window.addEventListener('visibilitychange', saveSnapshot);
 
     return () => {
       // in case of an SPA remove the event-listener
-      window.removeEventListener('beforeunload', saveSnapshot);
+      window.removeEventListener('visibilitychange', saveSnapshot);
       saveSnapshot();
     };
   }, [saveSnapshot]);

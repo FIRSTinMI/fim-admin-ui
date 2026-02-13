@@ -111,7 +111,7 @@ function MenuItem({ item, icon, isOpen }: { item: MenuItem, icon: JSX.Element, i
           }}
           sx={{'.MuiMenu-paper': {borderTopLeftRadius: '0px', borderBottomLeftRadius: '0px'}}}
         >
-          {!isOpen && <ListSubheader sx={{backgroundColor: 'unset', lineHeight: '32px'}}>{item.title}</ListSubheader>}
+          {!isOpen && <ListSubheader sx={{backgroundImage: "var(--Paper-overlay)", lineHeight: '32px'}}>{item.title}</ListSubheader>}
           {item.subMenu?.map((subitem, idx) => <SubmenuItem key={idx} item={subitem} onClick={popupState.close} />)}
         </HoverMenu>
       }
