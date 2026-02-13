@@ -4,6 +4,12 @@ import { useSupaQuery } from "src/hooks/useSupaQuery";
 import { EventStatus } from "../eventStatus";
 import { DataSource } from "src/data/admin-api/events.ts";
 import { StreamingConfig } from "./truckRoutes";
+import { formatISO } from "date-fns";
+
+export type EventSlimmer = {
+  id: string,
+  name: string
+};
 
 export type EventSlim = {
   id: string
@@ -58,6 +64,34 @@ export type EventTeam = {
   notes: string | null,
   status: EventTeamStatus['id']
 };
+
+export const getCurrentEvents = async (client: FimSupabaseClient): Promise<EventSlimmer[]> => {
+  const now = new Date();
+  const { data, error } = await client
+    .from("events")
+    .select<string, EventSlimmer>("id,name")
+    .order("start_time", {ascending: true})
+    .order("name", {ascending: true})
+    .lte("start_time", formatISO(now))
+    .gte("end_time", formatISO(now));
+
+    if (error) throw new Error(error.message);
+  
+    if (data === null) return [];
+  
+    return data.map(mapDbToEventSlimmer);
+}
+
+export const getCurrentEventsQueryKey = () => ["getCurrentEvents"];
+
+export const useGetCurrentEvents = (enabled: boolean) => useSupaQuery({
+  queryKey: getCurrentEventsQueryKey(),
+  queryFn: async (client) => {
+    return await getCurrentEvents(client)
+  },
+  staleTime: 15_000,
+  enabled: enabled
+});
 
 export const getEventsForSeason = async (client: FimSupabaseClient, seasonId: number): Promise<EventSlim[]> => {
   const { data, error } = await client
@@ -180,6 +214,13 @@ export const useGetEventTeamStatuses = () => useSupaQuery({
     return await getEventTeamStatuses(client);
   }
 });
+
+export const mapDbToEventSlimmer = (db: EventSlimmer): EventSlimmer => {
+  return {
+    id: db.id,
+    name: db.name,
+  } as EventSlimmer;
+}
 
 export const mapDbToEventSlim = (db: EventSlim): EventSlim => {
   return {

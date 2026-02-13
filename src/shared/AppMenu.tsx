@@ -25,6 +25,7 @@ import useHasGlobalPermission from "src/hooks/useHasGlobalPermission.ts";
 import useIsAuthenticated from "src/hooks/useIsAuthenticated.ts";
 import { bindFocus, bindHover, bindMenu, usePopupState } from "material-ui-popup-state/hooks";
 import HoverMenu from 'material-ui-popup-state/HoverMenu'
+import { useGetCurrentEvents } from "src/data/supabase/events.ts";
 
 type AppMenuProps = {
   isOpen: boolean;
@@ -39,67 +40,6 @@ type MenuItem = {
   icon?: JSX.Element,
   subMenu?: MenuItem[]
 };
-
-const allMenuItems: MenuItem[] = [
-  {
-    title: 'Events',
-    url: '/events',
-    requiredRole: [GlobalPermission.Events_View],
-    icon: <EventIcon />
-  }, {
-    title: 'Routes',
-    url: '/routes',
-    requiredRole: [GlobalPermission.Equipment_View],
-    icon: <LocalShippingIcon />
-  // }, {
-  //   title: 'Alerts',
-  //   url: '/alerts',
-  //   requiredRole: [GlobalPermission.Equipment_Manage],
-  //   icon: <WarningIcon />
-  }, {
-    title: 'AV Tools',
-    url: '/av-tools',
-    requiredRole: [GlobalPermission.Equipment_Manage, GlobalPermission.Equipment_Av_ManageStream],
-    icon: <CameraIcon />,
-    subMenu: [{
-        title: 'Match Video Stats',
-        url: '/av-tools/match-video-stats',
-        requiredRole: [GlobalPermission.Equipment_Manage]
-      },
-      {
-        title: 'Twitch',
-        url: '/av-tools/twitch',
-        requiredRole: [GlobalPermission.Equipment_Av_ManageStream]
-      },
-      {
-        title: 'YouTube',
-        url: '/av-tools/youtube',
-        requiredRole: [GlobalPermission.Equipment_Av_ManageStream]
-      },
-      {
-        title: 'Event Livestreams',
-        url: '/av-tools/event-livestreams',
-        requiredRole: [GlobalPermission.Equipment_Av_ManageStream]
-      }]
-  }, {
-    title: 'Equipment',
-    url: '/equipment',
-    requiredRole: [GlobalPermission.Equipment_Note, GlobalPermission.Equipment_View],
-    icon: <DevicesIcon />,
-    subMenu: [{
-      title: 'AV Carts',
-      url: '/equipment?typeId=1'
-    }, {
-      title: 'Logs Viewer',
-      url: '/equipment?typeId=overall_logs'
-    }]
-  }, {
-    title: 'Users',
-    url: '/users',
-    requiredRole: [GlobalPermission.Superuser],
-    icon: <PersonIcon />
-  }
-];
 
 const secondaryListItems = (
   <>
@@ -183,9 +123,73 @@ function AppMenu({ isOpen, menuWidth, toggleMenu }: AppMenuProps) {
   const isAuthenticated = useIsAuthenticated();
   const theme = useTheme();
   const mobileMatches = useMediaQuery(theme.breakpoints.up('sm'));
+  const currentEvents = useGetCurrentEvents(isAuthenticated ?? false);
 
-  const menuItems = useMemo<MenuItem[]>(() => 
-    isAuthenticated ? allMenuItems : [], [isAuthenticated]);
+  const menuItems = useMemo<MenuItem[]>(() =>
+    isAuthenticated ? [
+      {
+        title: 'Events',
+        url: '/events',
+        requiredRole: [GlobalPermission.Events_View],
+        icon: <EventIcon/>,
+        subMenu: (currentEvents.data ?? []).map(e => ({
+          title: e.name,
+          url: `/events/${e.id}/overview`
+        }))
+      }, {
+        title: 'Routes',
+        url: '/routes',
+        requiredRole: [GlobalPermission.Equipment_View],
+        icon: <LocalShippingIcon/>
+        // }, {
+        //   title: 'Alerts',
+        //   url: '/alerts',
+        //   requiredRole: [GlobalPermission.Equipment_Manage],
+        //   icon: <WarningIcon />
+      }, {
+        title: 'AV Tools',
+        url: '/av-tools',
+        requiredRole: [GlobalPermission.Equipment_Manage, GlobalPermission.Equipment_Av_ManageStream],
+        icon: <CameraIcon/>,
+        subMenu: [{
+          title: 'Match Video Stats',
+          url: '/av-tools/match-video-stats',
+          requiredRole: [GlobalPermission.Equipment_Manage]
+        },
+          {
+            title: 'Twitch',
+            url: '/av-tools/twitch',
+            requiredRole: [GlobalPermission.Equipment_Av_ManageStream]
+          },
+          {
+            title: 'YouTube',
+            url: '/av-tools/youtube',
+            requiredRole: [GlobalPermission.Equipment_Av_ManageStream]
+          },
+          {
+            title: 'Event Livestreams',
+            url: '/av-tools/event-livestreams',
+            requiredRole: [GlobalPermission.Equipment_Av_ManageStream]
+          }]
+      }, {
+        title: 'Equipment',
+        url: '/equipment',
+        requiredRole: [GlobalPermission.Equipment_Note, GlobalPermission.Equipment_View],
+        icon: <DevicesIcon/>,
+        subMenu: [{
+          title: 'AV Carts',
+          url: '/equipment?typeId=1'
+        }, {
+          title: 'Logs Viewer',
+          url: '/equipment?typeId=overall_logs'
+        }]
+      }, {
+        title: 'Users',
+        url: '/users',
+        requiredRole: [GlobalPermission.Superuser],
+        icon: <PersonIcon/>
+      }
+    ] : [], [isAuthenticated, currentEvents.data]);
 
   return (
     <StyledDrawer variant={mobileMatches ? 'permanent' : 'temporary'} isOpen={isOpen} menuWidth={menuWidth} open={isOpen} onClose={toggleMenu}>
