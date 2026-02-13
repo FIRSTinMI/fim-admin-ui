@@ -30,6 +30,25 @@ const makeRequest = async (client: FimSupabaseClient, method: string, path: stri
     });
 };
 
+export const getVmixConfig = async (client: FimSupabaseClient, cartId: string): Promise<object | null> => {
+  return makeRequest(
+    client,
+    "GET",
+    `/${cartId}/vmix-config`
+  )
+    .then(async resp => {
+      if (resp.status === 204) return null;
+      else if (resp.status === 200) {
+        let json = await resp.json();
+        if (typeof json === "string") json = JSON.parse(json); // TODO this is hacky, the API doesn't like returning raw JSON
+        return json;
+      }
+      else {
+        throw new Error(await resp.text());
+      }
+    });
+}
+
 export const updateCartStreamKeys = async (client: FimSupabaseClient, cartId: string, request: StreamItem[]): Promise<null> => {
     return makeRequest(
         client,
