@@ -2,7 +2,7 @@ import { Alert, AlertTitle, Box, Button, Checkbox, FormControl, FormControlLabel
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { useForm } from "@tanstack/react-form";
 import { format } from "date-fns";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import { createEventsFromSyncSource, CreateEventsResponse, SyncSourceRequest } from "src/data/admin-api/create-events";
 import { Season, useGetSeasons } from "src/data/supabase/seasons";
@@ -48,6 +48,18 @@ function Step1({ setResult }: { setResult: (r: CreateEventsResponse | null) => v
   const seasons = useGetSeasons();
 
   const [validDataSources, setValidDataSources] = useState<DataSource[]>([]);
+
+  useEffect(() => {
+    if (selectedSeason && seasons.isSuccess) {
+      const season = seasons.data.find(s => s.id == selectedSeason);
+      if (!season) return;
+      
+      const dataSources = getValidSourcesForSeason(season);
+      setValidDataSources(dataSources);
+      form.setFieldValue("seasonId", selectedSeason);
+      form.setFieldValue("dataSource", dataSources[0] ?? "FrcEvents");
+    }
+  }, [selectedSeason, seasons.data]);
 
   return (
     <form onSubmit={(e) => {
@@ -156,6 +168,10 @@ function Step1({ setResult }: { setResult: (r: CreateEventsResponse | null) => v
       {createMutation.isPending
         ? <LoadingButton loading />
         : <Button variant="contained" type="submit">Create</Button>}
+      
+      {createMutation.isError
+        ? <Alert severity="error">{createMutation.error?.toString()}</Alert>
+        : <></>}
     </form>
   )
 }
