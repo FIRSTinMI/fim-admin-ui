@@ -1,7 +1,6 @@
 import { FimSupabaseClient } from "src/supabaseContext.tsx";
 import { useSupaQuery } from "src/hooks/useSupaQuery.ts";
-import parseISO from "date-fns/parseISO";
-import { addDays, formatISO } from "date-fns";
+import { addDays, formatISO, parseISO } from "date-fns";
 import { OmitFirstArg } from "src/shared/util.ts";
 
 type EventMatchVideoStat = {

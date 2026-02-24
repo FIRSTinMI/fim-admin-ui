@@ -15,7 +15,7 @@ import {
   Tooltip,
   ListItem,
   IconButton,
-  Grid2,
+  Grid,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import {
@@ -229,9 +229,9 @@ const StreamKeys = ({ hardware }: IProps) => {
   };
 
   return (
-    <Grid2 container direction="row" spacing={2}>
+    <Grid container direction="row" spacing={2}>
       {/* Stream Selector / Push Keys Button */}
-      <Grid2
+      <Grid
         size={{ sm: 12, md: 6, lg: 3 }}
         component={Stack}
         direction="column"
@@ -303,16 +303,16 @@ const StreamKeys = ({ hardware }: IProps) => {
         >
           Force Config to Cart
         </Button>
-      </Grid2>
+      </Grid>
 
-      <Grid2 size={{ sm: 12, md: 6, lg: 9 }}>
+      <Grid size={{ sm: 12, md: 6, lg: 9 }}>
         <StreamItemEditor
           key={selected}
           item={streams.find((k) => k.Index === selected)}
           onComplete={onUpdate}
         />
-      </Grid2>
-    </Grid2>
+      </Grid>
+    </Grid>
   );
 };
 

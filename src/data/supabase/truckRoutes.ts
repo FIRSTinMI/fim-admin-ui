@@ -6,7 +6,7 @@ import useHasGlobalPermission from "src/hooks/useHasGlobalPermission.ts";
 import { GlobalPermission } from "src/data/globalPermission.ts";
 
 export type StreamingConfig = {
-  Channel_Type: "twitch" | "youtube" | "" | null;
+  Channel_Type: "Twitch" | "Youtube" | "" | null;
   Channel_Id: string;
 };
 

@@ -13,11 +13,11 @@ type StoredTableState = {
  * @param version Increment this to invalidate all users saved state
  * @param defaultState What to use if there's nothing saved
  */
-export default function usePersistTableState(apiRef: RefObject<GridApi> | null, storageKey: string, version: number, defaultState: GridInitialState) {
+export default function usePersistTableState(apiRef: RefObject<GridApi | null> | null, storageKey: string, version: number, defaultState: GridInitialState) {
   const [initialState, setInitialState] = useState<GridInitialState | null>(null);
   const saveSnapshot = useCallback(() => {
     if (apiRef?.current?.exportState && localStorage) {
-      const currentState = apiRef.current.exportState();
+      const currentState = apiRef.current?.exportState();
       if (!currentState) return;
       localStorage.setItem(storageKey, JSON.stringify({
         version: version,

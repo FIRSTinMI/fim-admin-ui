@@ -1,6 +1,5 @@
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, format } from "date-fns";
 import { matchPath, resolvePath, useLocation } from "react-router-dom";
-import format from "date-fns/format";
 
 export function useRouteMatch(patterns: readonly string[]) {
   const { pathname } = useLocation();

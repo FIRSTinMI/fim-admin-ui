@@ -122,9 +122,6 @@ const EventsManageTeams = () => {
             <GridActionsCellItem
               icon={<Save/>}
               label="Save"
-              sx={{
-                color: 'primary.main',
-              }}
               onClick={handleSaveClick(id)}
             />,
             <GridActionsCellItem
@@ -156,7 +153,7 @@ const EventsManageTeams = () => {
         <div>
           <span style={{textTransform: 'uppercase'}}>Filters:</span>
           {presetFilters.map(filter => (
-            <Button key={filter.label} variant="text" onClick={() => apiRef.current.setFilterModel(filter.filterModel)}>
+            <Button key={filter.label} variant="text" onClick={() => apiRef.current?.setFilterModel(filter.filterModel)}>
               {filter.label}
             </Button>
           ))}
@@ -190,7 +187,7 @@ const EventsManageTeams = () => {
         onRowModesModelChange={handleRowModesModelChange}
         editMode={"row"}
         processRowUpdate={async (newRow, _row, {rowId}) => {
-          apiRef.current.updateRows([{id: rowId, isLoading: true}]);
+          apiRef.current?.updateRows([{id: rowId, isLoading: true}]);
 
           await updateTeamMutation.mutateAsync({
             eventId: eventId!,

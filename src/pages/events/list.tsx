@@ -150,13 +150,15 @@ function EventsList() {
           
           <Typography sx={{alignSelf: "center"}}>Quick filters:</Typography> 
           {presetFilters.map(filter => (
-            <Button key={filter.label} variant="text" onClick={() => grid.current.setFilterModel(filter.filterModel)}>
+            <Button key={filter.label} variant="text" onClick={() => grid.current?.setFilterModel(filter.filterModel)}>
               {filter.label}
             </Button>
           ))}
           <div style={{flexGrow: 1}} />
-          <Button variant="text" title="Copy to Clipboard" onClick={() =>
-              navigator.clipboard.writeText(grid.current.getDataAsCsv({delimiter: "\t", includeHeaders: true, shouldAppendQuotes: false}))}
+          <Button variant="text" title="Copy to Clipboard" onClick={async () => {
+              const exportedContent = grid.current?.getDataAsCsv({delimiter: "\t", includeHeaders: true, shouldAppendQuotes: false});
+              if (exportedContent) await navigator.clipboard.writeText(exportedContent);
+            }}
             sx={{mr: 2}}>
               <CopyIcon />
           </Button>

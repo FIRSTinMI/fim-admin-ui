@@ -18,7 +18,9 @@ const VmixConfig = ({ hardware }: IProps) => {
   return (
     <div>
       {configQuery.isFetching && <Box sx={{width: '100%'}}><LinearProgress /></Box>}
-      {configQuery.isSuccess && <JsonEditor maxWidth="100%" data={configQuery.data ?? {}} viewOnly collapse={(node) => node.level >= 2} />}
+      {configQuery.isSuccess && (configQuery.data === null
+        ? <Alert severity="warning">Unable to fetch config, is vMix running?</Alert>
+        : <JsonEditor maxWidth="100%" data={configQuery.data ?? {}} viewOnly collapse={(node) => node.level >= 2} />)}
       {configQuery.isError && <Alert security="error">Error loading config: {configQuery.error!.toString()}</Alert> }
     </div>
   );

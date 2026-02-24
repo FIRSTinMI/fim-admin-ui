@@ -18,6 +18,7 @@ import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import DevicesIcon from '@mui/icons-material/Devices';
 // import WarningIcon from '@mui/icons-material/Warning';
 import CameraIcon from '@mui/icons-material/CameraAlt';
+import BusinessIcon from '@mui/icons-material/Business';
 import { Link, useLocation } from "react-router-dom";
 import { JSX, useId, useMemo } from "react";
 import { GlobalPermission } from "src/data/globalPermission.ts";
@@ -183,6 +184,11 @@ function AppMenu({ isOpen, menuWidth, toggleMenu }: AppMenuProps) {
           title: 'Logs Viewer',
           url: '/equipment?typeId=overall_logs'
         }]
+      }, {
+        title: 'Sponsors',
+        url: '/sponsors',
+        requiredRole: [GlobalPermission.Sponsors_Manage],
+        icon: <BusinessIcon/>
       }, {
         title: 'Users',
         url: '/users',

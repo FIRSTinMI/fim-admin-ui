@@ -1,5 +1,4 @@
 import { AccessTime } from "@mui/icons-material";
-import { LoadingButton } from "@mui/lab";
 import { Box, Button, Card, Collapse, Divider, FormControl, Link, Paper, TextField, Typography } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 import { useForm } from "@tanstack/react-form";
@@ -39,7 +38,7 @@ function CreateEventNote({ event }: { event: Event }) {
       });
     }
   });
-  const form = useForm<{ content: string }>({
+  const form = useForm({
     defaultValues: {
       content: ''
     },
@@ -80,7 +79,7 @@ function CreateEventNote({ event }: { event: Event }) {
       <Box sx={{ pt: 1, display: 'flex', justifyContent: 'flex-end' }}>
         <Collapse in={showPostButton}>
           {createNoteMutation.isPending
-              ? <LoadingButton loading />
+              ? <Button loading />
               : <Button variant="contained" type="submit">Post</Button>}
         </Collapse>
       </Box>

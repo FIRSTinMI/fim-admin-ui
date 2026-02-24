@@ -45,7 +45,7 @@ function EditFormOrName({
   const equipmentList = useGetEquipmentOfType(-1);
   const isStreamAdmin = useHasGlobalPermission([GlobalPermission.Equipment_Av_ManageStream]);
 
-  const form = useForm<Omit<UpdateTruckRouteRequest, "routeId">>({
+  const form = useForm({
     defaultValues: {
       name: routeQuery?.data?.name ?? "",
       streamingConfig: routeQuery.data?.streamingConfig ?? {
@@ -56,7 +56,7 @@ function EditFormOrName({
         equipmentList?.data
           ?.filter((e) => e.truckRoute?.id == routeQuery?.data?.id)
           .map((e) => e.id) ?? [],
-    },
+    } as Omit<UpdateTruckRouteRequest, "routeId">,
     onSubmit: async (form) => {
       const routeId = routeQuery?.data?.id;
 
@@ -165,14 +165,14 @@ function EditFormOrName({
                   id="streaming-platform"
                   value={state.value ?? ""}
                   onChange={(e) =>
-                    handleChange(e.target.value as "" | "youtube" | "twitch" | null)
+                    handleChange(e.target.value as "" | "Youtube" | "Twitch" | null)
                   }
                   onBlur={handleBlur}
                   label="Streaming Platform"
                 >
                   <MenuItem value="">None</MenuItem>
-                  <MenuItem value="youtube">YouTube</MenuItem>
-                  <MenuItem value="twitch">Twitch</MenuItem>
+                  <MenuItem value="Youtube">YouTube</MenuItem>
+                  <MenuItem value="Twitch">Twitch</MenuItem>
                 </Select>
               </>
             )}

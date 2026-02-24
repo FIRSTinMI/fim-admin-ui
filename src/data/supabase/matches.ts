@@ -1,6 +1,6 @@
-import parseISO from "date-fns/parseISO";
 import { FimSupabaseClient } from "../../supabaseContext";
 import { useSupaQuery } from "src/hooks/useSupaQuery";
+import { parseISO } from "date-fns";
 
 export type TournamentLevel = 
   "Test" |

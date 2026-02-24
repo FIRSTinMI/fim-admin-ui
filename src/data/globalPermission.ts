@@ -7,5 +7,6 @@ export enum GlobalPermission {
   Equipment_View = "Equipment_View",
   Equipment_Manage = "Equipment_Manage",
   Equipment_Note = "Equipment_Note",
-  Equipment_Av_ManageStream = "Equipment_Av_ManageStream"
+  Equipment_Av_ManageStream = "Equipment_Av_ManageStream",
+  Sponsors_Manage = "Sponsors_Manage",
 }

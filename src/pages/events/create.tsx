@@ -25,16 +25,16 @@ function Step1({ setResult }: { setResult: (r: CreateEventsResponse | null) => v
 
   const [selectedSeason, _] = usePersistedSeason();
 
-  const form = useForm<{ eventCodesUserInput?: string } & SyncSourceRequest>({
+  const form = useForm({
     defaultValues: {
       overrideExisting: false,
       seasonId: selectedSeason ?? 0,
       dataSource: 'FrcEvents',
       districtCode: null,
       eventCodesUserInput: '',
-      eventCodes: [],
+      eventCodes: [] as string[],
       isOfficial: false
-    },
+    } as { eventCodesUserInput?: string } & SyncSourceRequest,
     onSubmit: async (form) => {
       const value = form.value;
       value.eventCodes = value.eventCodesUserInput?.split(/[\s,]/).map(c => c.trim()).filter(c => c !== '') ?? [];

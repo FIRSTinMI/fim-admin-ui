@@ -10,13 +10,12 @@ import {
   gridNumberComparator,
   useGridApiRef
 } from "@mui/x-data-grid";
-import format from "date-fns/format";
 import { Alert, Box, Button, styled, Tooltip } from "@mui/material";
 import { JSXElementConstructor, useMemo } from "react";
 import { Delete, Restore } from "@mui/icons-material";
 import DataTableFilterToolbar from "src/shared/DataTableFilterToolbar.tsx";
 import { useSetMatchIsDiscarded } from "src/data/admin-api/matches.ts";
-import { differenceInMinutes } from "date-fns";
+import { differenceInMinutes, format } from "date-fns";
 import useHasEventPermission from "src/hooks/useHasEventPermission.ts";
 import { GlobalPermission } from "src/data/globalPermission.ts";
 import { EventPermission } from "src/data/eventPermission.ts";
@@ -147,7 +146,7 @@ const EventsManageMatches = () => {
         <div>
           <span style={{textTransform: 'uppercase'}}>Filters:</span>
           {presetFilters.map(filter => (
-            <Button key={filter.label} variant="text" onClick={() => apiRef.current.setFilterModel(filter.filterModel)}>
+            <Button key={filter.label} variant="text" onClick={() => apiRef.current?.setFilterModel(filter.filterModel)}>
               {filter.label}
             </Button>
           ))}

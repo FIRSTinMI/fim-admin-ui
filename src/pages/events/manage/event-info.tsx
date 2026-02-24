@@ -1,10 +1,9 @@
-import { LoadingButton } from "@mui/lab";
 import { Alert, Box, Button, FormControl, InputLabel, MenuItem, Select, TextField } from "@mui/material";
 import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns"
 import { useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { updateEventInfo, UpdateEventInfoRequest } from "src/data/admin-api/events";
 import { EventStatus, eventStatusToShortDescription } from "src/data/eventStatus";
@@ -34,24 +33,23 @@ function EventsManageEventInfo() {
     }
   });
 
-  const form = useForm<{
-    name: string,
-    truckRouteId: number | null,
-    startTime: Date | null,
-    endTime: Date | null,
-    timezone: string,
-    status: string
-  }>({
+  const form = useForm({
     defaultValues: {
-      name: "",
-      truckRouteId: null,
-      startTime: new Date(),
-      endTime: new Date(),
-      timezone: "",
-      status: ""
+      name: eventQuery.data?.name ?? "",
+      truckRouteId: eventQuery.data?.truck_routes?.id ?? null,
+      startTime: eventQuery.data?.start_time ?? "",
+      endTime: eventQuery.data?.end_time ?? "",
+      timezone: eventQuery.data?.time_zone ?? "",
+      status: eventQuery.data?.status ?? ""
+    } as {
+      name: string,
+      truckRouteId: number | null,
+      startTime: Date | null,
+      endTime: Date | null,
+      timezone: string,
+      status: string
     },
-    onSubmit: async (props) => {
-      const { value } = props;
+    onSubmit: async ({ value }) => {
       if (!id) {
         throw new Error("Event ID was null");
       }
@@ -68,28 +66,11 @@ function EventsManageEventInfo() {
     }
   });
 
-  useEffect(() => {
-    if (!eventQuery.data || form.state.isDirty) {
-      return;
-    }
-
-    const { data } = eventQuery;
-    form.update({
-      defaultValues: {
-        name: data.name,
-        truckRouteId: data.truck_routes?.id ?? null,
-        startTime: data.start_time,
-        endTime: data.end_time,
-        timezone: data.time_zone,
-        status: data.status
-      }
-    });
-  }, [eventQuery, form]);
-
   const pcTimezone = useMemo(() => {
     return Intl.DateTimeFormat().resolvedOptions().timeZone;
   }, []);
 
+  // Be sure not to render the form until default values are populated
   if (eventQuery.isPending) {
     return <Loading />;
   }
@@ -109,61 +90,52 @@ function EventsManageEventInfo() {
           }
           <form.Field name="name" validators={{
             onChange: ({value}) => !value ? "Name is required" : undefined
-          }}>
-            {({ state, handleChange, handleBlur }) => (
-              <TextField
-                fullWidth
-                label="Name"
-                required
-                error={state.meta.errors.length > 0}
-                helperText={state.meta.errors.join(', ')}
-                value={state.value}
-                onChange={(e) => handleChange(e.target.value)}
-                onBlur={handleBlur} />
-            )}
-          </form.Field>
-
+          }} children={({ state, handleChange, handleBlur}) => <TextField
+              fullWidth
+              label="Name"
+              required
+              error={state.meta.errors.length > 0}
+              helperText={state.meta.errors.join(', ')}
+              value={state.value}
+              onChange={(e) => handleChange(e.target.value)}
+              onBlur={handleBlur} />} />
+      
           <form.Field name="status" validators={{
             onChange: ({value}) => !value ? "Status is required" : undefined
-          }}>
-            {({ state, handleChange, handleBlur }) => (
-              <FormControl fullWidth sx={{ mt: 3 }}>
-                <InputLabel id="statusLabel" required>Status</InputLabel>
-                <Select
-                  labelId="statusLabel"
-                  value={state.value ? state.value : ""}
-                  label="Status"
-                  onChange={(e) => handleChange(e.target.value)}
-                  onBlur={handleBlur}
-                >
-                  {Object.values(EventStatus).map(s => <MenuItem key={s} value={s}>{eventStatusToShortDescription(s)}</MenuItem>)}
-                </Select>
-              </FormControl>
-            )}
-          </form.Field>
-
+          }} children={({ state, handleChange, handleBlur }) => (
+            <FormControl fullWidth sx={{ mt: 3 }}>
+            <InputLabel id="statusLabel" required>Status</InputLabel>
+            <Select
+              labelId="statusLabel"
+              value={state.value ? state.value : ""}
+              label="Status"
+              onChange={(e) => handleChange(e.target.value)}
+              onBlur={handleBlur}
+            >
+              {Object.values(EventStatus).map(s => <MenuItem key={s} value={s}>{eventStatusToShortDescription(s)}</MenuItem>)}
+            </Select>
+          </FormControl>
+          )} />
+      
           <Box sx={{ display: 'flex', gap: 2, mt: 3, flexWrap: 'wrap' }}>
             <form.Field name="startTime" validators={{
               onChange: ({value}) => !value ? "Start time is required" : undefined
-            }}>
-              {({ state, handleChange, handleBlur }) => (
-                <DateTimePicker
-                  sx={{ flex: 1, minWidth: '15rem' }}
-                  label="Start"
-                  value={state.value}
-                  onChange={(val) => handleChange(val)}
-                  slotProps={{textField: {
+            }} children= {({ state, handleChange, handleBlur }) => (
+              <DateTimePicker
+                sx={{ flex: 1, minWidth: '15rem' }}
+                label="Start"
+                value={state.value}
+                onChange={(val) => handleChange(val)}
+                slotProps={{textField: {
                     required: true,
                     error: state.meta.errors.length > 0,
                     helperText: state.meta.errors.join(', '),
                     onBlur: handleBlur
                   }}} />
-              )}
-            </form.Field>
+            )} />
             <form.Field name="endTime" validators={{
               onChange: ({value}) => !value ? "End time is required" : undefined
-            }}>
-              {({ state, handleChange, handleBlur }) => (
+            }} children={({ state, handleChange, handleBlur }) => (
                 <DateTimePicker
                   sx={{ flex: 1, minWidth: '15rem' }}
                   label="End"
@@ -175,14 +147,12 @@ function EventsManageEventInfo() {
                     helperText: state.meta.errors.join(', '),
                     onBlur: handleBlur
                   }}} />
-              )}
-            </form.Field>
+              )} />
           </Box>
-
+      
           <form.Field name="timezone" validators={{
             onChange: ({value}) => !value ? "Timezone is required" : undefined
-          }}>
-            {({ state, handleChange, handleBlur }) => (
+          }} children={({ state, handleChange, handleBlur }) => (
               <TextField
                 fullWidth
                 sx={{ mt: 3 }}
@@ -197,12 +167,10 @@ function EventsManageEventInfo() {
                 value={state.value ?? ""}
                 onChange={(e) => handleChange(e.target.value)}
                 onBlur={handleBlur} />
-            )}
-          </form.Field>
-
+            )} />
+      
           {truckRoutesQuery.isPending ? <Loading justifyContent="left" text="Loading routes..." /> : 
-            <form.Field name="truckRouteId">
-              {({ state, handleChange, handleBlur }) => (
+            <form.Field name="truckRouteId" children={({ state, handleChange, handleBlur }) => (
                 <FormControl fullWidth sx={{ mt: 3 }}>
                   <InputLabel id="truckRouteLabel">Truck Route</InputLabel>
                   <Select
@@ -216,21 +184,19 @@ function EventsManageEventInfo() {
                     {(truckRoutesQuery.data ?? []).map(s => <MenuItem key={s.id} value={s.id}>{s.name}</MenuItem>)}
                   </Select>
                 </FormControl>
-              )}
-            </form.Field>
+              )} />
           }
 
           <Box sx={{ mt: 2 }}>
             <form.Subscribe selector={(state) => ([ state.canSubmit, state.isSubmitting, state.isDirty ])}>
               {([ canSubmit, isSubmitting, isDirty ]) => (
-                isSubmitting
-                  ? <LoadingButton loading />
-                  : <Button
-                      variant="contained"
-                      type="submit" 
-                      disabled={!canSubmit || !isDirty}>
-                        Save
-                    </Button>
+                  <Button
+                    loading={isSubmitting}
+                    variant="contained"
+                    type="submit" 
+                    disabled={!canSubmit || !isDirty}>
+                      Save
+                  </Button>
               )}
             </form.Subscribe>
           </Box>

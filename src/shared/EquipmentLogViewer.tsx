@@ -27,7 +27,7 @@ import {
   FormControl,
   InputLabel,
   OutlinedInput,
-  Grid2,
+  Grid,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import {
@@ -209,7 +209,7 @@ const EquipmentLogViewer = ({
       <Card variant="outlined" sx={{ mb: 2 }}>
         <CardHeader title="Filter" />
         <CardContent>
-          <Grid2
+          <Grid
             container
             direction={"row"}
             spacing={2}
@@ -217,7 +217,7 @@ const EquipmentLogViewer = ({
             flexGrow={1}
           >
             {/* Category Selector */}
-            <Grid2 size={{ sm: 12, md: showDevice ? 4 : 6 }}>
+            <Grid size={{ sm: 12, md: showDevice ? 4 : 6 }}>
               <FormControl fullWidth>
                 <InputLabel id="category-label">Category</InputLabel>
                 <Select
@@ -245,10 +245,10 @@ const EquipmentLogViewer = ({
                   ))}
                 </Select>
               </FormControl>
-            </Grid2>
+            </Grid>
 
             {/* Severity Selector */}
-            <Grid2 size={{ sm: 12, md: showDevice ? 4 : 6 }}>
+            <Grid size={{ sm: 12, md: showDevice ? 4 : 6 }}>
               <FormControl fullWidth>
                 <InputLabel id="severity-label">Severity</InputLabel>
                 <Select
@@ -274,11 +274,11 @@ const EquipmentLogViewer = ({
                   ))}
                 </Select>
               </FormControl>
-            </Grid2>
+            </Grid>
 
             {/* Equipment Selector */}
             {showDevice && (
-              <Grid2 size={{ sm: 12, md: 4 }}>
+              <Grid size={{ sm: 12, md: 4 }}>
                 <FormControl fullWidth>
                   <InputLabel id="equipment-label">Equipment</InputLabel>
                   <Select
@@ -309,9 +309,9 @@ const EquipmentLogViewer = ({
                     ))}
                   </Select>
                 </FormControl>
-              </Grid2>
+              </Grid>
             )}
-          </Grid2>
+          </Grid>
         </CardContent>
       </Card>
 

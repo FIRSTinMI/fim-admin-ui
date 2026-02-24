@@ -1,10 +1,9 @@
-import parseISO from "date-fns/parseISO";
 import { FimSupabaseClient } from "../../supabaseContext";
 import { useSupaQuery } from "src/hooks/useSupaQuery";
 import { EventStatus } from "../eventStatus";
 import { DataSource } from "src/data/admin-api/events.ts";
 import { StreamingConfig } from "./truckRoutes";
-import { formatISO } from "date-fns";
+import { formatISO, parseISO } from "date-fns";
 
 export type EventSlimmer = {
   id: string,
