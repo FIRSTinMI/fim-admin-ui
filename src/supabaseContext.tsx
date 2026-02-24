@@ -13,7 +13,7 @@ export interface Database {
   }
 }
 
-export type FimSupabaseClient = SupabaseClient<Database, "public", never>;
+export type FimSupabaseClient = SupabaseClient<Database, "public", "public", never, any>;
 
 export const SupabaseContext = createContext<FimSupabaseClient>(undefined as unknown as FimSupabaseClient);
 
