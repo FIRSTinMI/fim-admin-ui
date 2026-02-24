@@ -170,6 +170,7 @@ const EventsManageMatches = () => {
         rows={ matches.data }
         slots={{ toolbar: tableToolbar }}
         hideFooter={true}
+        showToolbar
         initialState={{
           sorting: {
             sortModel: [{

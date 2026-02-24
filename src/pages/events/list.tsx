@@ -203,6 +203,7 @@ function EventsList() {
             apiRef={grid}
             columns={tableColumns}
             rows={getEventsQuery.data}
+            showToolbar
             slots={{
               toolbar: tableToolbar,
               noRowsOverlay: () => (

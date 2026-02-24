@@ -184,6 +184,7 @@ const EventsManageTeams = () => {
         slots={{ toolbar: tableToolbar }}
         hideFooter={true}
         rowModesModel={rowModesModel}
+        showToolbar
         onRowModesModelChange={handleRowModesModelChange}
         editMode={"row"}
         processRowUpdate={async (newRow, _row, {rowId}) => {
