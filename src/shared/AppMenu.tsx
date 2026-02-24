@@ -131,7 +131,7 @@ function AppMenu({ isOpen, menuWidth, toggleMenu }: AppMenuProps) {
       {
         title: 'Events',
         url: '/events',
-        requiredRole: [GlobalPermission.Events_View],
+        requiredRole: [], // [GlobalPermission.Events_View],
         icon: <EventIcon/>,
         subMenu: (currentEvents.data ?? []).map(e => ({
           title: e.name,

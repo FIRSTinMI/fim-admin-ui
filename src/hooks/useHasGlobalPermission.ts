@@ -1,23 +1,23 @@
 import { useContext, useEffect, useState } from "react";
-import { SupabaseContext } from "../supabaseContext";
+import { AuthContext } from "../supabaseContext";
 import { GlobalPermission } from "src/data/globalPermission";
 
 export default function useHasGlobalPermission(permissions: GlobalPermission[]) {
   const [hasPermission, setHasPermission] = useState(false);
-  const supabase = useContext(SupabaseContext);
+  const auth = useContext(AuthContext);
   useEffect(() => {
-    if (!supabase.globalPermissions) setHasPermission(false);
-    else if (supabase.globalPermissions.includes(GlobalPermission.Superuser)) setHasPermission(true);
+    if (!auth.globalPermissions) setHasPermission(false);
+    else if (auth.globalPermissions.includes(GlobalPermission.Superuser)) setHasPermission(true);
     else if (permissions.length === 0) setHasPermission(true);
     else {
       for (const permission of permissions) {
-        if (supabase.globalPermissions.includes(permission)) {
+        if (auth.globalPermissions.includes(permission)) {
           setHasPermission(true);
           break;
         }
       }
     }
-  }, [supabase.globalPermissions, permissions]);
+  }, [auth.globalPermissions, permissions]);
 
   return hasPermission;
 }

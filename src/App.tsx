@@ -18,7 +18,7 @@ import AppBar from "./shared/AppBar";
 import AppMenu from "./shared/AppMenu";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import Auth from "./pages/auth";
-import { SupabaseContextProvider } from "./supabaseContext";
+import { AuthContextProvider, SupabaseContextProvider } from "./supabaseContext";
 import NotFound from "./pages/not-found";
 import React from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -50,7 +50,7 @@ const Lazy = ({ component }: { component: ReactElement }) => {
 const routes = (
   <Routes>
     <Route index path="/" element={<RootPage />} />
-    <Route index path="/auth" element={<Auth />} />
+    <Route path="/auth/*" element={<Auth />} />
     <Route path="/events/*" element={<Lazy component={<EventsRoutes />} />}/>
     <Route path="/users/*" element={<Lazy component={<UsersRoutes />} />} />
     <Route path="/alerts/*" element={<Lazy component={<AlertsRoutes />} />} />
@@ -66,7 +66,7 @@ function RootPage() {
 
   if (isAuthed === null) return <Loading />;
   if (isAuthed) return <Navigate to="/events" />;
-  else return <Navigate to="/auth" />;
+  else return <Navigate to="/auth/login" />;
 }
 
 function App() {
@@ -108,32 +108,33 @@ function App() {
             <Box sx={{ display: "flex" }}>
               <CssBaseline />
               <SupabaseContextProvider>
-                <QueryClientProvider client={queryClient}>
-                  <AppBar isOpen={menuOpen} toggleMenu={toggleMenu} />
-                  <AppMenu
-                    isOpen={menuOpen}
-                    menuWidth={menuWidth}
-                    toggleMenu={toggleMenu}
-                  />
-                  <Box
-                    component="main"
-                    sx={{
-                      backgroundColor: (theme) =>
-                        theme.palette.mode === "light"
-                          ? theme.palette.grey[100]
-                          : theme.palette.grey[900],
-                      flexGrow: 1,
-                      minHeight: "100vh",
-                      pt: 2,
-                      px: 1,
-                    }}
-                  >
-                    <Toolbar />
-                    {/* <Button variant="contained">Test Button</Button> */}
-                    <ErrorBoundary>{routes}</ErrorBoundary>
-                  </Box>
-                  <ReactQueryDevtools />
-                </QueryClientProvider>
+                <AuthContextProvider>
+                  <QueryClientProvider client={queryClient}>
+                      <AppBar isOpen={menuOpen} toggleMenu={toggleMenu} />
+                      <AppMenu
+                        isOpen={menuOpen}
+                        menuWidth={menuWidth}
+                        toggleMenu={toggleMenu}
+                      />
+                      <Box
+                        component="main"
+                        sx={{
+                          backgroundColor: (theme) =>
+                            theme.palette.mode === "light"
+                              ? theme.palette.grey[100]
+                              : theme.palette.grey[900],
+                          flexGrow: 1,
+                          minHeight: "100vh",
+                          pt: 2,
+                          px: 1,
+                        }}
+                      >
+                        <Toolbar />
+                        <ErrorBoundary>{routes}</ErrorBoundary>
+                      </Box>
+                      <ReactQueryDevtools />
+                  </QueryClientProvider>
+                </AuthContextProvider>
               </SupabaseContextProvider>
             </Box>
           </BrowserRouter>

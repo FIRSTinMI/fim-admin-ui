@@ -16,7 +16,10 @@ export function useRouteMatch(patterns: readonly string[]) {
   return null;
 }
 
-export const formatEventDate = (date: Date) => format(date, "PP");
+export const formatEventDate = (date: Date) => {
+  if (!date) return "";
+  return format(date, "PP");
+};
 
 export const getRelativeTime = (value: string | null): string | null => {
   if (!value) {
