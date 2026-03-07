@@ -219,6 +219,7 @@ export const mapDbToEventSlimmer = (db: EventSlimmer): EventSlimmer => {
     id: db.id,
     name: db.name
       .replace(/presented by .*$/i, "")
+      .trim()
       .replace(/^FIM District (.+) Event$/, (_, m) => m)
       .replace(/^FIRST in Michigan State Championship - (.+) Division$/, (_, m) => `MSC - ${m}`),
   } as EventSlimmer;
