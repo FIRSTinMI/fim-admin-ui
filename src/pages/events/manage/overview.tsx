@@ -92,6 +92,12 @@ function EventsManageOverview() {
   const eventQuery = useGetEvent(id);
   const canAddNote = useHasEventPermission(id!, [GlobalPermission.Events_Note], [EventPermission.Event_Note]);
   
+  const fimUrl = useMemo(() => {
+    if (!eventQuery.data?.code) return null;
+    
+    return `https://fimav.us/${eventQuery.data.code}`;
+  }, [eventQuery.data]);
+  
   const frcEventsUrl = useMemo(() => {
     if (!eventQuery.data?.code || eventQuery.data?.seasons.levels.name !== 'FRC') return null;
     const normalizedCode = eventQuery.data.code.match(/\d*(\w*)/);
@@ -130,9 +136,10 @@ function EventsManageOverview() {
     if (tbaUrl) ret.push({name: 'The Blue Alliance', url: tbaUrl});
     if (ftcEventsUrl) ret.push({name: 'FTC Events', url: ftcEventsUrl});
     if (toaUrl) ret.push({name: 'The Orange Alliance', url: toaUrl});
+    if (fimUrl) ret.push({name: 'FIRST in Michigan', url: fimUrl});
     
     return ret;
-  }, [frcEventsUrl, tbaUrl, ftcEventsUrl, toaUrl]);
+  }, [frcEventsUrl, tbaUrl, ftcEventsUrl, toaUrl, fimUrl]);
 
   return (<Paper sx={{ width: '100%', p: 2 }}>
     {eventQuery.isPending && <Loading />}
