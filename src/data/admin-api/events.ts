@@ -149,9 +149,10 @@ export const getMissingMatchVideos = async (client: FimSupabaseClient, eventId: 
 }
 
 /// Check all data sources for missing videos
-export const useGetMissingVideos = (eventId: string) => {
+export const useGetMissingVideos = (eventId: string, isEnabled: boolean) => {
   return useSupaQuery({
     queryFn: (client: FimSupabaseClient) => getMissingMatchVideos(client, eventId),
-    queryKey: ["eventMissingVideos", eventId]
+    queryKey: ["eventMissingVideos", eventId],
+    enabled: isEnabled
   });
 };

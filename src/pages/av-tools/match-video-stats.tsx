@@ -34,13 +34,12 @@ function RefreshMatchesButton({eventId}: {eventId: string}) {
 }
 
 const CheckDataSourcesModal = NiceModal.create(({eventId}: {eventId: string}) => {
-  const checkQuery = useGetMissingVideos(eventId);
   const modal = useModal();
-  
+  const checkQuery = useGetMissingVideos(eventId, modal.visible);
+
   const close = useCallback(() => {
     modal.hide();
-    checkQuery.isEnabled = false;
-  }, [modal, checkQuery]);
+  }, [modal]);
   
   return (<Dialog open={modal.visible} onClose={close}>
     <DialogTitle>Missing Videos</DialogTitle>
