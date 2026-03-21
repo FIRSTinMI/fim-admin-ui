@@ -2,6 +2,8 @@ import { FimSupabaseClient } from "src/supabaseContext";
 import { EventTeamStatus } from "src/data/supabase/events.ts";
 import { useSupaMutation } from "src/hooks/useSupaMutation.ts";
 import { useQueryClient } from "@tanstack/react-query";
+import { useSupaQuery } from "src/hooks/useSupaQuery.ts";
+import { TournamentLevel } from "src/data/supabase/matches.ts";
 
 export type CreateEventNoteRequest = {
   eventId: string,
@@ -121,5 +123,34 @@ export const useRefreshMatchResults = () => {
         })
       ])
     }
+  });
+};
+
+export type MissingMatchVideoDetail = {
+  level: TournamentLevel,
+  matchNumber: number,
+  postResultTime: Date,
+  missingSources: DataSource[]
+};
+
+export const getMissingMatchVideos = async (client: FimSupabaseClient, eventId: string): Promise<MissingMatchVideoDetail[]> => {
+  return await fetch(`${import.meta.env.PUBLIC_ADMIN_API_URL}/api/v1/events/${encodeURIComponent(eventId)}/missing-match-videos`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${(await client.auth.getSession()).data.session?.access_token}`
+    }
+  }).then(async resp => {
+    if (resp.status === 401 || resp.status === 403) throw new Error("You do not have permission to perform this action.");
+    if (!resp.ok) throw new Error(`An error occurred while saving the event: ${resp.statusText}`);
+    return await resp.json() as Promise<MissingMatchVideoDetail[]>;
+  });
+}
+
+/// Check all data sources for missing videos
+export const useGetMissingVideos = (eventId: string) => {
+  return useSupaQuery({
+    queryFn: (client: FimSupabaseClient) => getMissingMatchVideos(client, eventId),
+    queryKey: ["eventMissingVideos", eventId]
   });
 };

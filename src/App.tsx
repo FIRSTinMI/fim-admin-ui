@@ -28,6 +28,7 @@ import { Loading } from "./shared/Loading";
 import ErrorBoundary from "./shared/ErrorBoundary";
 import { SnackbarProvider } from "notistack";
 import NiceModal from '@ebay/nice-modal-react';
+import SponsorsRoutes from "src/pages/sponsors";
 
 const menuWidth: number = 240; //px
 const queryClient = new QueryClient();
@@ -57,6 +58,7 @@ const routes = (
     <Route path="/av-tools/*" element={<Lazy component={<AvToolsRoutes />} />} />
     <Route path="/routes/*" element={<Lazy component={<RoutesRoutes />} />} />
     <Route path="/equipment/*" element={<Lazy component={<EquipmentRoutes />} />} />
+    <Route path="/sponsors/*" element={<Lazy component={<SponsorsRoutes />} />} />
     <Route path="*" element={<NotFound />} />
   </Routes>
 );
@@ -102,7 +104,6 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <NiceModal.Provider>
         <SnackbarProvider>
           <BrowserRouter>
             <Box sx={{ display: "flex" }}>
@@ -110,6 +111,7 @@ function App() {
               <SupabaseContextProvider>
                 <AuthContextProvider>
                   <QueryClientProvider client={queryClient}>
+                    <NiceModal.Provider>
                       <AppBar isOpen={menuOpen} toggleMenu={toggleMenu} />
                       <AppMenu
                         isOpen={menuOpen}
@@ -133,13 +135,13 @@ function App() {
                         <ErrorBoundary>{routes}</ErrorBoundary>
                       </Box>
                       <ReactQueryDevtools />
+                    </NiceModal.Provider>
                   </QueryClientProvider>
                 </AuthContextProvider>
               </SupabaseContextProvider>
             </Box>
           </BrowserRouter>
         </SnackbarProvider>
-      </NiceModal.Provider>
     </ThemeProvider>
   );
 }

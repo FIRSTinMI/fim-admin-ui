@@ -5,7 +5,7 @@ import EventsCreate from "./create";
 import { Typography } from "@mui/material";
 import { useTitle } from "src/hooks/useTitle.ts";
 
-function Events() {
+function EventsRoutes() {
   useTitle("Events");
   return (
     <>
@@ -23,4 +23,4 @@ function Events() {
   )
 }
 
-export default Events;
+export default EventsRoutes;

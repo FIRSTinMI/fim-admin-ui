@@ -1,4 +1,5 @@
 import {
+  Button, Dialog, DialogActions, DialogContent, DialogTitle,
   FormControl,
   InputLabel,
   Link,
@@ -18,7 +19,8 @@ import { useState } from "react";
 import { useGetSeasons } from "src/data/supabase/seasons.ts";
 import { useGetEventsForSeason } from "src/data/supabase/events.ts";
 import MutationButton from "src/shared/MutationButton.tsx";
-import { useRefreshMatchResults } from "src/data/admin-api/events.ts";
+import { useGetMissingVideos, useRefreshMatchResults } from "src/data/admin-api/events.ts";
+import NiceModal, { useModal } from "@ebay/nice-modal-react";
 
 function RefreshMatchesButton({eventId}: {eventId: string}) {
   const refreshMatchesMutation = useRefreshMatchResults();
@@ -30,11 +32,37 @@ function RefreshMatchesButton({eventId}: {eventId: string}) {
   </MutationButton>)
 }
 
+const CheckDataSourcesModal = NiceModal.create(({eventId}: {eventId: string}) => {
+  const checkQuery = useGetMissingVideos(eventId);
+  const modal = useModal();
+  
+  return (<Dialog open={modal.visible} onClose={() => modal.hide()}>
+    <DialogTitle>Missing Videos</DialogTitle>
+    <DialogContent>
+      <div style={{minWidth: 400}}>
+        {checkQuery.isLoading && <Loading />}
+        {checkQuery.isSuccess && checkQuery.data && (
+          checkQuery.data.length === 0
+            ? <p>No matches are missing videos! 🎉</p>
+            : <ul>{checkQuery.data.map((match, idx) =>
+              <li key={idx}>{match.level} {match.matchNumber}: {match.missingSources.join(", ")}</li>
+            )}</ul>
+        )}
+      </div>
+    </DialogContent>
+    <DialogActions>
+      <Button onClick={() => modal.hide()}>Close</Button>
+    </DialogActions>
+  </Dialog>);
+});
+
 function EventMatchVideoStats() {
   const seasons = useGetSeasons();
   const [seasonId, setSeasonId] = useState<number | undefined>(undefined);
   const seasonEvents = useGetEventsForSeason(seasonId ?? null, !!seasonId);
   const stats = useGetEventMatchVideoStats(!seasonId, seasonEvents?.data?.map(e => e.id));
+  const checkDataSourcesModal = useModal(CheckDataSourcesModal);
+  
 
   if (stats.isPending) return <Loading />;
   
@@ -92,6 +120,9 @@ function EventMatchVideoStats() {
             </TableCell>
             <TableCell>
               <RefreshMatchesButton eventId={stat.id} />
+              <Button onClick={() => {
+                checkDataSourcesModal.show({ eventId: stat.id });
+              }}>Check Data Sources</Button>
             </TableCell>
           </TableRow>))}
         </TableBody>
