@@ -143,6 +143,7 @@ export const getMissingMatchVideos = async (client: FimSupabaseClient, eventId: 
   }).then(async resp => {
     if (resp.status === 401 || resp.status === 403) throw new Error("You do not have permission to perform this action.");
     if (!resp.ok) throw new Error(`An error occurred while saving the event: ${resp.statusText}`);
+    if (resp.status == 204) return Promise.resolve([]);
     return await resp.json() as Promise<MissingMatchVideoDetail[]>;
   });
 }
