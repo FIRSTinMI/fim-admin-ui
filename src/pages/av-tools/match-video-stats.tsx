@@ -1,4 +1,5 @@
 import {
+  Alert,
   Button, Dialog, DialogActions, DialogContent, DialogTitle,
   FormControl,
   InputLabel,
@@ -15,7 +16,7 @@ import {
 import { Link as RouterLink } from "react-router-dom";
 import { useGetEventMatchVideoStats } from "src/data/supabase/av-tools.ts";
 import { Loading } from "src/shared/Loading.tsx";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useGetSeasons } from "src/data/supabase/seasons.ts";
 import { useGetEventsForSeason } from "src/data/supabase/events.ts";
 import MutationButton from "src/shared/MutationButton.tsx";
@@ -36,11 +37,17 @@ const CheckDataSourcesModal = NiceModal.create(({eventId}: {eventId: string}) =>
   const checkQuery = useGetMissingVideos(eventId);
   const modal = useModal();
   
-  return (<Dialog open={modal.visible} onClose={() => modal.hide()}>
+  const close = useCallback(() => {
+    modal.hide();
+    checkQuery.isEnabled = false;
+  }, [modal, checkQuery]);
+  
+  return (<Dialog open={modal.visible} onClose={close}>
     <DialogTitle>Missing Videos</DialogTitle>
     <DialogContent>
       <div style={{minWidth: 400}}>
         {checkQuery.isLoading && <Loading />}
+        {checkQuery.isError && <Alert severity="error">{checkQuery.error!.toString()}</Alert> }
         {checkQuery.isSuccess && checkQuery.data && (
           checkQuery.data.length === 0
             ? <p>No matches are missing videos! 🎉</p>
@@ -51,7 +58,7 @@ const CheckDataSourcesModal = NiceModal.create(({eventId}: {eventId: string}) =>
       </div>
     </DialogContent>
     <DialogActions>
-      <Button onClick={() => modal.hide()}>Close</Button>
+      <Button onClick={close}>Close</Button>
     </DialogActions>
   </Dialog>);
 });
