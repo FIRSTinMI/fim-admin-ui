@@ -101,7 +101,7 @@ function EventsList() {
   const initialState = usePersistTableState(grid, "events-list", 1, {
     pagination: {
       paginationModel: {
-        pageSize: 100
+        pageSize: 1000
       }
     },
     sorting: {
