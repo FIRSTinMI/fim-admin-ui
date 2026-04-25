@@ -115,7 +115,7 @@ function EventsManageOverview() {
   const ftcEventsUrl = useMemo(() => {
     if (!eventQuery.data?.code || eventQuery.data?.seasons.levels.name !== 'FTC') return null;
     if (eventQuery.data.sync_source !== 'FtcEvents') return null;
-    return `https://ftc-events.firstinspires.org/${getYear(eventQuery.data.start_time)}/${eventQuery.data.code}`;
+    return `https://ftc-events.firstinspires.org/${getYear(eventQuery.data.seasons.start_time)}/${eventQuery.data.code}`;
   }, [eventQuery.data]);
   
   const toaUrl = useMemo(() => {
