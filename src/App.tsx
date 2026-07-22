@@ -29,6 +29,8 @@ import ErrorBoundary from "./shared/ErrorBoundary";
 import { SnackbarProvider } from "notistack";
 import NiceModal from '@ebay/nice-modal-react';
 import SponsorsRoutes from "src/pages/sponsors";
+import { AgGridProvider } from "ag-grid-react";
+import { AllEnterpriseModule } from "ag-grid-enterprise";
 
 const menuWidth: number = 240; //px
 const queryClient = new QueryClient();
@@ -106,35 +108,41 @@ function App() {
     <ThemeProvider theme={theme}>
         <SnackbarProvider>
           <BrowserRouter>
-            <Box sx={{ display: "flex" }}>
+            <Box
+              sx={{ display: "flex" }}
+              className="ag-theme-mode"
+              data-ag-theme-mode={prefersDarkMode ? "dark" : "light"}
+            >
               <CssBaseline />
               <SupabaseContextProvider>
                 <AuthContextProvider>
                   <QueryClientProvider client={queryClient}>
                     <NiceModal.Provider>
-                      <AppBar isOpen={menuOpen} toggleMenu={toggleMenu} />
-                      <AppMenu
-                        isOpen={menuOpen}
-                        menuWidth={menuWidth}
-                        toggleMenu={toggleMenu}
-                      />
-                      <Box
-                        component="main"
-                        sx={{
-                          backgroundColor: (theme) =>
-                            theme.palette.mode === "light"
-                              ? theme.palette.grey[100]
-                              : theme.palette.grey[900],
-                          flexGrow: 1,
-                          minHeight: "100vh",
-                          pt: 2,
-                          px: 1,
-                        }}
-                      >
-                        <Toolbar />
-                        <ErrorBoundary>{routes}</ErrorBoundary>
-                      </Box>
-                      <ReactQueryDevtools />
+                      <AgGridProvider modules={[AllEnterpriseModule]} licenseKey={import.meta.env.PUBLIC_AG_GRID_KEY}>
+                        <AppBar isOpen={menuOpen} toggleMenu={toggleMenu} />
+                        <AppMenu
+                          isOpen={menuOpen}
+                          menuWidth={menuWidth}
+                          toggleMenu={toggleMenu}
+                        />
+                        <Box
+                          component="main"
+                          sx={{
+                            backgroundColor: (theme) =>
+                              theme.palette.mode === "light"
+                                ? theme.palette.grey[100]
+                                : theme.palette.grey[900],
+                            flexGrow: 1,
+                            minHeight: "100vh",
+                            pt: 2,
+                            px: 1,
+                          }}
+                        >
+                          <Toolbar />
+                          <ErrorBoundary>{routes}</ErrorBoundary>
+                        </Box>
+                        <ReactQueryDevtools />
+                      </AgGridProvider>
                     </NiceModal.Provider>
                   </QueryClientProvider>
                 </AuthContextProvider>
